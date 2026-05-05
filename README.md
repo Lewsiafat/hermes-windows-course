@@ -9,7 +9,8 @@
 - `index.html` — 9 步教學精靈
 - `style.css` / `wizard.js` — 樣式與導覽邏輯
 - `assets/screenshots/` — 各步截圖（每次驗證後可能更新）
-- `pre-class-checklist.md` — **每次教學前必跑**的 smoke test 流程
+- `pre-class-checklist.md` — **每次教學前必跑**的 smoke test 流程（人類版，簡潔）
+- `ai-runbook.md` — AI 工具版的 runbook（含 Full Capture Run + Quick Smoke Test，明確檔名與構圖要求）
 - `docs/superpowers/specs/` — 課程設計文件
 - `docs/superpowers/plans/` — 實作計畫
 

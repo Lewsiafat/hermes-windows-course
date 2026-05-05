@@ -1,0 +1,103 @@
+:root {
+  --pico-spacing: 1rem;
+  --pico-typography-spacing-vertical: 1.25rem;
+}
+
+body > header,
+body > main,
+body > footer {
+  max-width: 760px;
+}
+
+body > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+body > header hgroup {
+  margin-bottom: 0;
+}
+
+#progress {
+  font-size: 0.9rem;
+  color: var(--pico-muted-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.step {
+  padding-block: 1rem;
+}
+
+.step header h2 {
+  margin-bottom: 0.25rem;
+}
+
+.step pre {
+  position: relative;
+  padding-right: 4.5rem;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  margin: 0;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  width: auto;
+  background: var(--pico-secondary);
+  border: none;
+  cursor: pointer;
+}
+
+.step details {
+  margin-block: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--pico-card-background-color);
+  border-radius: var(--pico-border-radius);
+  border: 1px solid var(--pico-muted-border-color);
+}
+
+.step details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.step details > *:not(summary) {
+  margin-top: 0.75rem;
+}
+
+#step-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.5rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+}
+
+#step-nav button {
+  flex: 1;
+  max-width: 200px;
+}
+
+body > footer {
+  padding-block: 1rem;
+  border-top: 1px solid var(--pico-muted-border-color);
+  color: var(--pico-muted-color);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  body > header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  #step-nav button {
+    max-width: none;
+  }
+}

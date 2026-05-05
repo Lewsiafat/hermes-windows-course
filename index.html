@@ -154,6 +154,55 @@
         <p>這個教學頁會自動記得你看到第幾步。重啟完回來、重新打開這個網址，會自動跳回 Step 4，按下一步繼續。</p>
       </details>
     </section>
+
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 9 · Ubuntu 首次啟動</h2>
+          <p>~7 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>重啟後第一次啟動 Ubuntu 會做幾項初始化：建立你的 Linux 帳號、設密碼。這個帳號跟 Windows 帳號完全分開。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>開始功能表搜尋「<strong>Ubuntu</strong>」→ 開啟它</li>
+        <li>等待「<code>Installing, this may take a few minutes</code>」訊息消失</li>
+        <li>看到 <code>Enter new UNIX username:</code> → 打一個小寫、無空白的名字（例：<code>lewsi</code>）按 Enter</li>
+        <li>看到 <code>New password:</code> → 打密碼。<strong>螢幕不會顯示任何字元（連點點都沒有），這是正常的</strong>。打完按 Enter</li>
+        <li>再打一次密碼確認 → 看到 <code>$</code> 提示符就完成了</li>
+        <li>試打三個指令熟悉一下</li>
+      </ol>
+
+      <h3>練習指令</h3>
+      <pre data-copy><code>pwd
+ls
+cd ~</code></pre>
+
+      <details>
+        <summary>Linux 終端機三招</summary>
+        <ul>
+          <li><code>pwd</code> = print working directory，告訴你現在在哪個資料夾</li>
+          <li><code>ls</code> = list，列出當前資料夾內容</li>
+          <li><code>cd ~</code> = change directory，<code>~</code> 是你的家目錄（home）</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>Linux 密碼為什麼不顯示</summary>
+        <p>Unix 傳統。打字時不顯示任何字元（不像 Windows 顯示星號），是為了讓旁邊的人連密碼長度都看不到。新手第一次都以為鍵盤壞了。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>Username 顯示 invalid</strong> → 不能有大寫、空白、底線開頭。改成全小寫純字母</li>
+          <li><strong>兩次密碼不一樣</strong> → 它會要你重來，沒事</li>
+          <li><strong>Ubuntu app 一直顯示 Installing</strong> → 等到 5 分鐘以上沒動 → 關掉重開（資料不會丟）</li>
+        </ul>
+      </details>
+    </section>
   </main>
 
   <footer class="container">

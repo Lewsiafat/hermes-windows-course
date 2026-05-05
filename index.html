@@ -50,6 +50,49 @@
 
       <p><em>右下角「下一步」按鈕在頁面底部，本頁不需要做任何事，準備好就往下走。</em></p>
     </section>
+
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 9 · 啟動 WSL2 安裝</h2>
+          <p>~4 分鐘觸發、之後 5–10 分鐘背景下載</p>
+        </hgroup>
+      </header>
+
+      <p>WSL = Windows Subsystem for Linux，微軟官方的 Linux 子系統。安裝這條指令會自動下載 WSL 核心 + Ubuntu。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>開始功能表搜尋「<strong>PowerShell</strong>」</li>
+        <li>右鍵 → 「<strong>以系統管理員身分執行</strong>」（藍底白標題會出現）</li>
+        <li>把下面這行貼進去，按 Enter</li>
+        <li>看到下載進度條後，<strong>不要關掉視窗</strong>，繼續往下讀</li>
+      </ol>
+
+      <h3>指令</h3>
+      <pre data-copy><code>wsl --install</code></pre>
+
+      <details>
+        <summary>等下載時可以順便讀：殼層 / 終端機 / WSL 是什麼</summary>
+        <p><strong>殼層 (shell)</strong> 是讓你打字命令給作業系統的程式。Windows 的 PowerShell、cmd 都是殼層；Linux 上常見的是 bash、zsh。</p>
+        <p><strong>終端機 (terminal)</strong> 是顯示殼層的視窗。你看到的黑底白字就是終端機。</p>
+        <p><strong>WSL</strong> 把一個完整 Linux 跑在你 Windows 裡（不是虛擬機，效能接近原生）。Hermes 在 Linux 跑，所以我們要它。</p>
+      </details>
+
+      <details>
+        <summary>等下載時可以順便做：把下一步要的 OpenRouter 開起來</summary>
+        <p>下載 5–10 分鐘是死時間，可以順手開另一個瀏覽器分頁跑下一步：<a href="#step-3">Step 3 · 申請 OpenRouter API Key</a></p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>Windows 太舊</strong>（1903 以下）→ 先跑 Windows Update 再回來</li>
+          <li><strong>跳「WSL not enabled」</strong>→ 跑 <code>wsl --install --no-distribution</code> 重啟、再跑 <code>wsl --install -d Ubuntu</code></li>
+          <li><strong>沒有管理員權限</strong>（公司電腦常見）→ 這台機器無法繼續，請改個人電腦</li>
+        </ul>
+      </details>
+    </section>
   </main>
 
   <footer class="container">

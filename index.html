@@ -93,6 +93,44 @@
         </ul>
       </details>
     </section>
+
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 9 · 申請 OpenRouter API Key</h2>
+          <p>~5 分鐘，純瀏覽器操作</p>
+        </hgroup>
+      </header>
+
+      <p>OpenRouter 是一個 LLM API 的整合入口：一支 API key 可以呼叫 200+ 模型，包含好幾個免費模型。我們會用免費的 <em>deepseek 系列</em>，學員不用刷卡。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>新分頁開啟 <a href="https://openrouter.ai" target="_blank" rel="noopener">https://openrouter.ai</a></li>
+        <li>右上角「Sign In」→ 用 email 註冊（Google 登入也可以）</li>
+        <li>登入後進入 <strong>Dashboard</strong> → 左側 <strong>Keys</strong></li>
+        <li>點「<strong>Create Key</strong>」→ 名稱隨便（例：<code>hermes-course</code>）→ 建立</li>
+        <li>⚠️ Key 只會顯示一次，<strong>立刻複製</strong>，貼到 Windows 的「記事本」暫存</li>
+      </ol>
+
+      <details>
+        <summary>為什麼需要 API key</summary>
+        <p>API key 等於 hermes 對 OpenRouter 講話的密碼。每次發一句話，OpenRouter 用這把 key 認得是你、扣你帳號的額度。Key 外洩等於別人可以拿來用、花你的錢（雖然這次是免費 model，但養成好習慣不要外流）。</p>
+      </details>
+
+      <details>
+        <summary>免費 model 是什麼意思</summary>
+        <p>OpenRouter 上一些 model（例如 deepseek/deepseek-chat、qwen 系列等）標註 <code>:free</code>，背後由提供方贊助、對使用者免費。可能有速率限制（例如每分鐘 N 次），但用來學夠了。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>驗證信沒收到</strong> → 等 2–3 分鐘、檢查垃圾信。還是沒有 → 改用 OpenAI 或 Anthropic（要刷卡）</li>
+          <li><strong>不小心關掉 Create Key 視窗，key 沒抄到</strong> → 沒救，回 Keys 頁面砍掉重建一支</li>
+        </ul>
+      </details>
+    </section>
   </main>
 
   <footer class="container">

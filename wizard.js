@@ -45,4 +45,22 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('hashchange', () => {
     showStep(getCurrentStep());
   });
+
+  document.querySelectorAll('pre[data-copy]').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', async () => {
+      const text = pre.querySelector('code').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = '✓ Copied';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+      } catch (err) {
+        btn.textContent = 'Copy failed';
+      }
+    });
+    pre.appendChild(btn);
+  });
 });

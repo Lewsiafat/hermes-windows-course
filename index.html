@@ -315,6 +315,61 @@ cd ~</code></pre>
         </ul>
       </details>
     </section>
+
+    <section class="step" data-step="8" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 8 / 9 · 第一次對話</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>所有設定完成。打 <code>hermes</code> 啟動 TUI（文字介面），然後跟它講話。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>啟動 hermes</li>
+      </ol>
+
+      <pre data-copy><code>hermes</code></pre>
+
+      <ol start="2">
+        <li>看到 hermes 的 ASCII art 標題 + 輸入框</li>
+        <li>打第一句話試試看，例如：</li>
+      </ol>
+
+      <pre data-copy><code>介紹一下你自己</code></pre>
+
+      <ol start="4">
+        <li>按 Enter，你會看到回應 <strong>一個字一個字浮出來</strong>（streaming）</li>
+        <li>多聊幾句也行</li>
+        <li>結束對話 → 打 <code>/exit</code> 按 Enter，或按 Ctrl+D</li>
+      </ol>
+
+      <details>
+        <summary>什麼是 streaming</summary>
+        <p>LLM 一次產生一個 token（大約一個字或半個詞），生一個吐一個給你看，不用等整段話算完。這就是你看到的「打字機效果」。技術上這是 Server-Sent Events 的 chunked response。</p>
+      </details>
+
+      <details>
+        <summary>常用 hermes 指令</summary>
+        <ul>
+          <li><code>/new</code> 或 <code>/reset</code> — 開新對話（清空當前 context）</li>
+          <li><code>/model</code> — 切換 model</li>
+          <li><code>/exit</code> — 結束</li>
+          <li><code>Ctrl+C</code> — 中斷當前回應（不離開 hermes）</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>送出後沒回應、卡很久</strong> → 免費模型的速率限制。Ctrl+C 中斷，跑 <code>/model</code> 換另一個 free model</li>
+          <li><strong>顯示亂碼或方框</strong> → Windows Terminal 字型問題。設定 → Profile → Ubuntu → 字型改 <code>Cascadia Code</code> 或 <code>Consolas</code></li>
+          <li><strong>所有設定看起來都對但跑 hermes 出 error</strong> → 跑 <code>hermes doctor</code>，它會告訴你哪邊配置有問題</li>
+        </ul>
+      </details>
+    </section>
   </main>
 
   <footer class="container">

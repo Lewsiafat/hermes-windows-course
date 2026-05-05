@@ -203,6 +203,54 @@ cd ~</code></pre>
         </ul>
       </details>
     </section>
+
+    <section class="step" data-step="6" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 6 / 9 · 安裝 hermes</h2>
+          <p>~15 分鐘（多半在等下載）</p>
+        </hgroup>
+      </header>
+
+      <p>這是整堂課最久的一段。一行 curl 指令會下載官方安裝腳本並立刻執行：裝 uv、建 Python 虛擬環境、把 hermes 裝進去、把 <code>hermes</code> 指令連結到你的 PATH。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>確認你還在 Ubuntu 視窗、看到 <code>$</code> 提示符</li>
+        <li>把下面整行貼進去（在 Ubuntu 終端機是 <strong>Ctrl+Shift+V</strong> 貼上）</li>
+        <li>按 Enter，看著它跑</li>
+        <li>看到 <strong><code>Hermes installed!</code></strong> 訊息就完成（5–10 分鐘）</li>
+      </ol>
+
+      <h3>指令</h3>
+      <pre data-copy><code>curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</code></pre>
+
+      <details>
+        <summary><code>curl | bash</code> 在做什麼？這安全嗎？</summary>
+        <p><code>curl</code> 是「從網路抓檔」的指令；<code>| bash</code> 是「把抓到的內容直接餵給 bash 執行」。</p>
+        <p>等於：<strong>下載一個腳本立刻跑它</strong>。一般情況下這有風險（中間人攻擊或來源不可信），這次因為來源是 hermes 官方 GitHub repo、走 HTTPS、是業界廣泛使用的 quick-install 模式，所以可接受。</p>
+      </details>
+
+      <details>
+        <summary>等下載時可以順便讀：下一步 hermes setup 會問你 4 件事</summary>
+        <ol>
+          <li><strong>Provider</strong>（供應商）→ 選 OpenRouter</li>
+          <li><strong>Model</strong>（模型）→ 選一個有「<code>:free</code>」標籤的 deepseek 模型</li>
+          <li><strong>API Key</strong> → 貼你 Step 3 拿到的 key</li>
+          <li><strong>Tools / Terminal</strong>（工具與終端後端）→ 全部用預設按 Enter 跳過</li>
+        </ol>
+        <p>先看一遍，下一步會比較不慌。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>下載卡 5 分鐘以上沒動</strong> → 正常，繼續等。網速差可能要 10 分鐘</li>
+          <li><strong>SSL certificate problem</strong>（極少）→ 跑 <code>sudo apt update &amp;&amp; sudo apt install -y ca-certificates</code> 後重試</li>
+          <li><strong>結束後跑 <code>hermes</code> 顯示 command not found</strong> → 跑 <code>source ~/.bashrc</code></li>
+        </ul>
+      </details>
+    </section>
   </main>
 
   <footer class="container">

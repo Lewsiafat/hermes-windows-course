@@ -7,8 +7,14 @@ function getCurrentStep() {
     const n = parseInt(hashMatch[1], 10);
     if (n >= 1 && n <= TOTAL_STEPS) return n;
   }
-  const saved = parseInt(localStorage.getItem(STORAGE_KEY) || '1', 10);
-  return (saved >= 1 && saved <= TOTAL_STEPS) ? saved : 1;
+  let saved = '1';
+  try {
+    saved = localStorage.getItem(STORAGE_KEY) || '1';
+  } catch (err) {
+    // localStorage unavailable (private mode, disabled, etc.) — fall through to default
+  }
+  const savedNum = parseInt(saved, 10);
+  return (savedNum >= 1 && savedNum <= TOTAL_STEPS) ? savedNum : 1;
 }
 
 function showStep(n) {
@@ -19,7 +25,11 @@ function showStep(n) {
   document.getElementById('progress-text').textContent = `Step ${n} / ${TOTAL_STEPS}`;
   document.getElementById('prev-btn').disabled = (n === 1);
   document.getElementById('next-btn').disabled = (n === TOTAL_STEPS);
-  localStorage.setItem(STORAGE_KEY, String(n));
+  try {
+    localStorage.setItem(STORAGE_KEY, String(n));
+  } catch (err) {
+    // localStorage unavailable — wizard still works for this session
+  }
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -59,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
       } catch (err) {
         btn.textContent = 'Copy failed';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
       }
     });
     pre.appendChild(btn);

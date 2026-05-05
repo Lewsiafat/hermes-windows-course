@@ -370,6 +370,57 @@ cd ~</code></pre>
         </ul>
       </details>
     </section>
+
+    <section class="step" data-step="9" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 9 / 9 · 你做到了 + 下一步</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>恭喜，4 個 checkpoints 都完成：</p>
+      <ol>
+        <li>✓ WSL2 + Ubuntu 安裝</li>
+        <li>✓ OpenRouter API key</li>
+        <li>✓ hermes-agent 安裝</li>
+        <li>✓ 第一次對話</li>
+      </ol>
+
+      <h3>建議下一步</h3>
+      <ul>
+        <li>把這個頁面 <strong>加書籤</strong>，未來想複習可以隨時回來</li>
+        <li>跑 <code>hermes doctor</code> 做一次體檢，確認所有元件都健康</li>
+        <li>下次課程：把 hermes 接到 LINE 或 Telegram，這樣可以從手機跟它講話</li>
+      </ul>
+
+      <details>
+        <summary>加碼 A：申請 LINE Messaging API channel</summary>
+        <p>下一堂課要用，現在拿 token 之後可以直接接通。</p>
+        <ol>
+          <li>開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">https://developers.line.biz/console/</a></li>
+          <li>用你的 LINE 帳號登入</li>
+          <li>「Create new provider」→ 隨便取名（例：<code>my-hermes</code>）</li>
+          <li>進入 provider → 「Create a Messaging API channel」→ 填 channel 名稱、icon、類別</li>
+          <li>建立後進入 channel → 「Messaging API」分頁</li>
+          <li>找到 <strong>Channel access token (long-lived)</strong> → Issue → 複製到記事本</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary>加碼 B：申請 Telegram bot</summary>
+        <p>比 LINE 更快，2 分鐘。</p>
+        <ol>
+          <li>在你手機/電腦的 Telegram 開 <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a></li>
+          <li>送 <code>/newbot</code></li>
+          <li>依提示填 bot 顯示名稱、username（必須 <code>_bot</code> 結尾）</li>
+          <li>BotFather 會回一段話，裡面有 <strong>HTTP API token</strong>（一串長字元）</li>
+          <li>複製到記事本</li>
+        </ol>
+      </details>
+
+      <p><em>到這邊就是今天的全部內容。下次見。</em></p>
+    </section>
   </main>
 
   <footer class="container">

@@ -251,6 +251,70 @@ cd ~</code></pre>
         </ul>
       </details>
     </section>
+
+    <section class="step" data-step="7" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 7 / 9 · <code>hermes setup</code> 設定精靈</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p><code>hermes setup</code> 是 hermes 官方的設定精靈，會依序問你 provider、model、API key、tools、terminal。我們會選 OpenRouter + 免費 deepseek 模型，其他全部預設。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>先 reload bash 環境，讓系統認得新的 <code>hermes</code> 指令</li>
+      </ol>
+
+      <pre data-copy><code>source ~/.bashrc</code></pre>
+
+      <ol start="2">
+        <li>啟動精靈</li>
+      </ol>
+
+      <pre data-copy><code>hermes setup</code></pre>
+
+      <ol start="3">
+        <li>依下面 5 個提示一個一個填</li>
+      </ol>
+
+      <h3>5 個提示怎麼答</h3>
+      <table>
+        <thead>
+          <tr><th>提示</th><th>選 / 填</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Choose your provider</strong></td><td>用方向鍵選 <code>openrouter</code>，Enter</td></tr>
+          <tr><td><strong>Choose a model</strong></td><td>挑一個名稱含 <code>deepseek</code> 且標 <code>:free</code> 的，Enter</td></tr>
+          <tr><td><strong>Enter your API key</strong></td><td>貼 Step 3 暫存的 key（Ctrl+Shift+V），Enter</td></tr>
+          <tr><td><strong>Configure tools?</strong></td><td>直接 Enter（預設）</td></tr>
+          <tr><td><strong>Configure terminal backend?</strong></td><td>直接 Enter（預設 = local）</td></tr>
+        </tbody>
+      </table>
+
+      <p>看到 <strong><code>Setup complete!</code></strong> 就成功。</p>
+
+      <details>
+        <summary>每個提示在做什麼</summary>
+        <ul>
+          <li><strong>Provider</strong> = 你要呼叫哪家 LLM API（OpenAI、Anthropic、OpenRouter 等）</li>
+          <li><strong>Model</strong> = 那家底下的哪個模型</li>
+          <li><strong>API key</strong> = 拿來證明「這個請求是我發的」的密碼</li>
+          <li><strong>Tools</strong> = hermes 可以用哪些工具（讀檔、寫檔、執行指令等），先用預設安全</li>
+          <li><strong>Terminal backend</strong> = hermes 開新終端的方式（local = 直接在你 Ubuntu 跑）</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>不小心 Ctrl+C 中斷</strong> → 重跑 <code>hermes setup</code></li>
+          <li><strong>API key 貼進去變空白</strong> → 把 key 重新從記事本複製、再 Ctrl+Shift+V（Ubuntu 終端機要 Shift）</li>
+          <li><strong>看不到 <code>:free</code> 模型</strong> → OpenRouter 偶爾會調整 free 列表，挑名字最像的，下一步試了就知道</li>
+        </ul>
+      </details>
+    </section>
   </main>
 
   <footer class="container">

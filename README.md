@@ -6,7 +6,7 @@
 
 ## 結構
 
-- `index.html` — 9 步教學精靈
+- `index.html` — 前言頁（為什麼選 hermes）+ 9 步教學精靈
 - `style.css` / `wizard.js` — 樣式與導覽邏輯
 - `assets/screenshots/` — 各步截圖（每次驗證後可能更新）
 - `pre-class-checklist.md` — **每次教學前必跑**的 smoke test 流程（人類版，簡潔）

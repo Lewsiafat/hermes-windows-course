@@ -5,16 +5,16 @@ function getCurrentStep() {
   const hashMatch = window.location.hash.match(/^#step-(\d+)$/);
   if (hashMatch) {
     const n = parseInt(hashMatch[1], 10);
-    if (n >= 1 && n <= TOTAL_STEPS) return n;
+    if (n >= 0 && n <= TOTAL_STEPS) return n;
   }
-  let saved = '1';
+  let saved = '0';
   try {
-    saved = localStorage.getItem(STORAGE_KEY) || '1';
+    saved = localStorage.getItem(STORAGE_KEY) || '0';
   } catch (err) {
     // localStorage unavailable (private mode, disabled, etc.) — fall through to default
   }
   const savedNum = parseInt(saved, 10);
-  return (savedNum >= 1 && savedNum <= TOTAL_STEPS) ? savedNum : 1;
+  return (savedNum >= 0 && savedNum <= TOTAL_STEPS) ? savedNum : 0;
 }
 
 function showStep(n) {
@@ -22,8 +22,8 @@ function showStep(n) {
     const stepNum = parseInt(el.dataset.step, 10);
     el.hidden = (stepNum !== n);
   });
-  document.getElementById('progress-text').textContent = `Step ${n} / ${TOTAL_STEPS}`;
-  document.getElementById('prev-btn').disabled = (n === 1);
+  document.getElementById('progress-text').textContent = (n === 0) ? '前言' : `Step ${n} / ${TOTAL_STEPS}`;
+  document.getElementById('prev-btn').disabled = (n === 0);
   document.getElementById('next-btn').disabled = (n === TOTAL_STEPS);
   try {
     localStorage.setItem(STORAGE_KEY, String(n));
@@ -34,7 +34,7 @@ function showStep(n) {
 }
 
 function navigate(n) {
-  if (n < 1 || n > TOTAL_STEPS) return;
+  if (n < 0 || n > TOTAL_STEPS) return;
   window.location.hash = `step-${n}`;
 }
 

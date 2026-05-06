@@ -19,7 +19,57 @@
   </header>
 
   <main class="container">
-    <section class="step" data-step="1">
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼選 Hermes Agent</h2>
+          <p>1 分鐘讀完，再決定要不要花 60 分鐘裝它</p>
+        </hgroup>
+      </header>
+
+      <p>這是一份專為「非開發者」撰寫的 AI 助理框架分析。如果您沒有深厚的程式碼背景，主要看重「好不好用」、「功能是否齊全」以及「維護起來會不會很痛苦」，以下是選擇 Hermes Agent 相較於另外三款（OpenClaw、NanoClaw、nanobot）的深度比較與優勢分析。</p>
+
+      <h3>對非開發者最友善的 4 個亮點</h3>
+      <ul>
+        <li><strong>會自我學習與成長</strong>：少數內建「學習迴圈」的助理。從對話中記住您的偏好、建立長期記憶，甚至在完成複雜任務後自動學會新的「技能」（Skills），下次會做得更好。</li>
+        <li><strong>不綁死單一 AI 模型</strong>：可隨時切換 AI 大腦（OpenAI、Claude、Google Gemini，甚至免費的開源模型），完全不需要改程式碼，不會被單一廠商綁架。</li>
+        <li><strong>無縫接軌您的生活</strong>：支援 17 種以上通訊軟體，包含 Telegram、WhatsApp、Discord、Slack、Email。架設在雲端後可直接用手機 Telegram 傳訊息或語音請它幫忙做事。</li>
+        <li><strong>自動化排程</strong>：內建定時任務，可用自然語言請它「每天早上發送新聞摘要給我」或「每週備份資料」，自動執行。</li>
+      </ul>
+
+      <details>
+        <summary>vs. OpenClaw — 「適中好用」對決「過度複雜」</summary>
+        <p><strong>OpenClaw 的問題</strong>：極度龐大（270 萬行程式碼），功能多到不可思議，但安裝門檻極高，需要 Node.js、Docker、甚至編譯底層環境。對非開發者是噩夢，「大砲打蚊子」。</p>
+        <p><strong>Hermes 的優勢</strong>：相對輕量，官方甚至內建「從 OpenClaw 搬家（Migrate）」功能，可自動把設定、記憶和 API 密鑰無縫轉移過來。</p>
+      </details>
+
+      <details>
+        <summary>vs. NanoClaw — 「模型自由」對決「深度綁定」</summary>
+        <p><strong>NanoClaw 的問題</strong>：為解決 OpenClaw 太複雜而誕生的「輕量安全版」，把每個 AI 關在獨立 Docker 容器中以確保安全。但深度綁定 Anthropic（Claude）模型，每次對話可能需支付 Claude API 費用，成本較高且缺乏彈性。安裝也強烈依賴 Docker 容器技術，對新手仍有門檻。</p>
+        <p><strong>Hermes 的優勢</strong>：模型選擇自由（支援 200+ 模型），運作方式更符合一般人對軟體的理解，不需要搞懂容器隔離技術也能享受強大功能。</p>
+      </details>
+
+      <details>
+        <summary>vs. nanobot — 「成熟產品」對決「學術專案」</summary>
+        <p><strong>nanobot 的問題</strong>：在亞洲市場（微信、釘釘）支援度極高，但本質是一個大學（香港大學）的「學術專案」，還是 Alpha（測試）版本，可能有很多 Bug，且未來若學生或研究員畢業，專案可能面臨無人維護的風險。</p>
+        <p><strong>Hermes 的優勢</strong>：由活躍的商業/社群團隊（Nous Research）開發，每天都有大量更新，版本迭代快，有專門社群維護除錯，長期穩定性與支援度比學術專案更有保障。</p>
+      </details>
+
+      <h3>⚠️ 非開發者的「現實提醒」</h3>
+      <p>雖然 Hermes 在比較中勝出，作為非開發者，您仍需有以下心理準備：</p>
+      <ul>
+        <li><strong>不是「下載就能用」的手機 App</strong>：本課程帶您在自己的 Windows 筆電上裝（透過微軟官方的 Linux 子系統 WSL2）。整個過程約 60 分鐘，需要連續不被打斷的時間。</li>
+        <li><strong>會用到終端機（Terminal），但全程有指令可複製</strong>：您會在 PowerShell 和 Ubuntu 終端機裡貼幾行指令，不需要看懂指令的內容。每個步驟旁都有「Copy」按鈕。</li>
+        <li><strong>需要自己申請一個 API Key</strong>：用 email 註冊 OpenRouter（免費，不用刷卡），拿到一串密碼貼到 hermes 設定裡。Step 3 會帶您做。</li>
+      </ul>
+
+      <h3>總結</h3>
+      <p>如果您希望擁有一個聰明、能記憶、能串接各種通訊軟體，且未來不會被單一公司綁架的專屬 AI 助理，Hermes Agent 是這四者中最平衡、生態最完整且最友好的選擇。</p>
+
+      <p><em>準備好了？按下「下一步」開始 60 分鐘安裝流程。</em></p>
+    </section>
+
+    <section class="step" data-step="1" hidden>
       <header>
         <hgroup>
           <h2>Step 1 / 9 · 開始之前</h2>

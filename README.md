@@ -6,8 +6,9 @@
 
 ## 結構
 
-- `index.html` — 前言頁（為什麼選 hermes）+ 9 步教學精靈
-- `style.css` / `wizard.js` — 樣式與導覽邏輯
+- `index.html` — **Lesson 1**：前言頁（為什麼選 hermes）+ 9 步安裝精靈
+- `lesson-2.html` — **Lesson 2**：把 hermes 接到 Telegram（Step 0 + 7 步，30–45 分鐘）
+- `style.css` / `wizard.js` — 共用樣式與導覽邏輯（`wizard.js` 從 `<body data-*>` 讀步數與 storage key）
 - `assets/screenshots/` — 各步截圖（每次驗證後可能更新）
 - `pre-class-checklist.md` — **每次教學前必跑**的 smoke test 流程（人類版，簡潔）
 - `ai-runbook.md` — AI 工具版的 runbook（含 Full Capture Run + Quick Smoke Test，明確檔名與構圖要求）

@@ -65,3 +65,10 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 - **不要加上 build tooling**（webpack / vite / 任何 bundler）— 「零 build、雙擊 index.html 就能改」是核心設計目標。
 - **`<details>` block 是教學節奏的一部分**：用來放「等下載時可以順便讀」「🚨 我卡住了」這類 optional content，不要把它們扁平化成普通段落。
 - 修改完 smoke test 確認的條目（hermes 版本、Windows 版本、最後驗證日期）後，要更新 README.md 的「上次驗證」區塊。
+
+## 跨步驟引用（不可任意刪除）
+
+某些步驟之間有 cross-reference，重構時請維持引用關係：
+
+- **Step 7「補救：直接改 hermes 的 .env」section（Variant A / B 兩個 sed 腳本）** ← 被 Step 8「我卡住了」的 400 error 條目直接引用。改寫或搬位置時必須同步更新 Step 8 的指路文字。
+- 該 sed 腳本（含 `export` 前綴的替換寫法）是 hermes 上游官方暫未修正 paste 問題的**繞行解**，**寫法原樣引用、不可擅自簡化**（例如不要拿掉 `export`、不要改 sed delimiter）。

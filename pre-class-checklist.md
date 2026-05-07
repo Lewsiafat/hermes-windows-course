@@ -8,7 +8,7 @@
 - [ ] 網路通暢
 - [ ] OpenRouter 帳號（測試用，可重用）
 
-## 必檢三項（最容易壞）
+## 必檢四項（最容易壞）
 
 ### 1. install.sh URL 還活著
 
@@ -33,8 +33,20 @@ curl -I https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts
 
 - [ ] Dashboard 左側仍有 "Keys" 入口
 - [ ] Create Key 仍是「點按鈕 → 顯示一次 → 不再顯示」流程
+- [ ] 左側仍有 "Credits" 入口（或 `openrouter.ai/credits` 仍可用）；儲值流程仍是「選金額 → 信用卡 → 餘額即時更新」
+- [ ] 推薦付費 model 仍存在：搜 `deepseek/deepseek-v4-pro`、`minimax/minimax-m2.7` 兩個 ID 都還能找到。**任一個下架時必須改 Step 3 與 Step 7 的對應字串。**
 
-若 UI 變了：補 Step 3 的 4 張截圖。
+若 UI 變了：補 Step 3 的截圖。
+
+### 4. 補救 sed script 仍能正確改 .env
+
+確認 hermes 安裝後 `~/.hermes/.env` 真的存在、裡面真的有 `OPENROUTER_API_KEY=` 這行：
+
+```bash
+ls ~/.hermes/.env && grep '^OPENROUTER_API_KEY=' ~/.hermes/.env
+```
+
+若 hermes 改了 config 路徑或變數名 → Step 7 補救 section 的 sed 與 Step 8 的 400 troubleshooting 都要重抓。
 
 ## 截圖檢查
 

@@ -506,19 +506,41 @@ curl -fsI https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scrip
 **ACTION:**
 1. 開瀏覽器到 `https://openrouter.ai`
 2. 登入測試帳號
-3. 進入 Dashboard，確認三件事：
+3. 進入 Dashboard，確認五件事：
    - 左側 nav 仍有「Keys」入口
    - Keys 頁仍是獨立路由（URL 含 `/keys`）
    - 點 Create Key 仍是「點按鈕 → 跳對話框 → 顯示 key 一次 → 不再顯示」流程
-4. **不要實際建新 key**（測試帳號避免累積廢 key）
+   - 左側 nav 仍有「Credits」入口（或 `openrouter.ai/credits` 仍可達）；儲值流程仍是「選金額 → 信用卡 → 餘額即時更新」
+   - 推薦付費 model 仍存在：在 `openrouter.ai/models` 搜 `deepseek/deepseek-v4-pro` 與 `minimax/minimax-m2.7`，兩者都能搜到
+4. **不要實際建新 key、不要實際儲值**（測試帳號避免累積廢 key 與小額花費）
 
-**EXPECTED:** 三項與本檔 Stage 3 截圖描述一致。
+**EXPECTED:** 五項與本檔 Stage 3 截圖描述一致。
 
 **SCREENSHOT:** 不需要（除非 UI 變了）
 
 **FAIL 處理:**
-- UI 重大改版 → 重跑 Part 1 Stage 3，覆蓋 step-3-*.png 4 張
+- UI 重大改版 → 重跑 Part 1 Stage 3，覆蓋 step-3-*.png
 - Keys 改名 / 路由變 → 對應更新 `index.html` Step 3 動作清單
+- Credits 入口變 → 更新 Step 3 第 6 個動作（儲值）的指路文字
+- 推薦付費 model 任一下架 → **必須**改 `index.html` 中 Step 3 與 Step 7 兩處的 model ID 字串
+
+---
+
+## Check 4 · 補救 sed script 仍能正確改 .env
+
+確認 hermes 安裝後 `~/.hermes/.env` 真的存在、且裡面真的有 `OPENROUTER_API_KEY=` 這行（Step 7 補救 section 與 Step 8 的 400 troubleshooting 都依賴此 invariant）。
+
+**ACTION:**
+```bash
+ls ~/.hermes/.env && grep '^OPENROUTER_API_KEY=' ~/.hermes/.env
+```
+
+**EXPECTED:** 檔案存在、grep 命中 1 行。
+
+**FAIL 處理:**
+- 檔案路徑變了 → 改 `index.html` Step 7 補救 section 的兩段 sed（Variant A / B）的 `cd ~/.hermes` 與 Step 8 的 cross-ref 文字。
+- 變數名變了（例如改成 `OPENROUTER_KEY=`）→ 改兩段 sed 的 pattern。
+- 整個 .env 不見了（hermes 改成別的儲存方式）→ 補救 section 整個重寫。
 
 ---
 

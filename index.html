@@ -139,6 +139,12 @@
         <ul>
           <li><strong>Windows 太舊</strong>（1903 以下）→ 先跑 Windows Update 再回來</li>
           <li><strong>跳「WSL not enabled」</strong>→ 跑 <code>wsl --install --no-distribution</code> 重啟、再跑 <code>wsl --install -d Ubuntu</code></li>
+          <li><strong>跳「具有所提供名稱的發佈已經存在」</strong>（英文版：<em>A distribution with the supplied name already exists</em>，錯誤碼 <code>Wsl/InstallDistro/ERROR_ALREADY_EXISTS</code>）→ 表示這台機器之前裝過 Ubuntu。
+            <ul>
+              <li>想沿用既有環境：跑 <code>wsl -d Ubuntu</code> 直接啟動，跳到 Step 5。</li>
+              <li>想砍掉重來：<code>wsl --unregister Ubuntu</code> 再 <code>wsl --install -d Ubuntu</code>。<strong>注意：unregister 會清掉舊 Ubuntu 裡的所有檔案，無法還原。</strong></li>
+            </ul>
+          </li>
           <li><strong>沒有管理員權限</strong>（公司電腦常見）→ 這台機器無法繼續，請改個人電腦</li>
         </ul>
       </details>
@@ -152,7 +158,7 @@
         </hgroup>
       </header>
 
-      <p>OpenRouter 是一個 LLM API 的整合入口：一支 API key 可以呼叫 200+ 模型，包含好幾個免費模型。我們會用免費的 <em>deepseek 系列</em>，學員不用刷卡。</p>
+      <p>OpenRouter 是一個 LLM API 的整合入口：一支 API key 可以呼叫 200+ 模型，包含好幾個免費模型。課堂上我們會用免費的 <em>deepseek 系列</em>讓你不用刷卡就能跑通；課後若要重度使用，建議儲值 Credits 解鎖更穩定的付費 model。</p>
 
       <h3>動作</h3>
       <ol>
@@ -161,7 +167,15 @@
         <li>登入後進入 <strong>Dashboard</strong> → 左側 <strong>Keys</strong></li>
         <li>點「<strong>Create Key</strong>」→ 名稱隨便（例：<code>hermes-course</code>）→ 建立</li>
         <li>⚠️ Key 只會顯示一次，<strong>立刻複製</strong>，貼到 Windows 的「記事本」暫存</li>
+        <li>（建議）回 Dashboard 左側點 <strong>Credits</strong>（或直接訪 <a href="https://openrouter.ai/credits" target="_blank" rel="noopener">openrouter.ai/credits</a>）→ 選 <code>$5</code>（新手建議起跳金額）→ 信用卡付款 → 餘額立即更新</li>
       </ol>
+
+      <h3>建議試用的 model</h3>
+      <p>免費路徑（課堂示範用）跟付費路徑都可以，看你手上有沒有 Credits：</p>
+      <ul>
+        <li><strong>免費</strong>：挑名稱含 <code>deepseek</code> 且標 <code>:free</code> 的（例：<code>deepseek/deepseek-chat:free</code>）</li>
+        <li><strong>付費（推薦）</strong>：<code>deepseek/deepseek-v4-pro</code> 或 <code>minimax/minimax-m2.7</code>——速度與穩定度都明顯比免費 model 好</li>
+      </ul>
 
       <details>
         <summary>為什麼需要 API key</summary>
@@ -169,8 +183,14 @@
       </details>
 
       <details>
-        <summary>免費 model 是什麼意思</summary>
-        <p>OpenRouter 上一些 model（例如 deepseek/deepseek-chat、qwen 系列等）標註 <code>:free</code>，背後由提供方贊助、對使用者免費。可能有速率限制（例如每分鐘 N 次），但用來學夠了。</p>
+        <summary>免費 model 是什麼意思（以及為什麼建議課後儲值）</summary>
+        <p>OpenRouter 上一些 model（例如 <code>deepseek/deepseek-chat:free</code>、qwen 系列等）標註 <code>:free</code>，背後由提供方贊助、對使用者免費。</p>
+        <p><strong>但有兩個現實限制：</strong></p>
+        <ul>
+          <li><strong>速率限制</strong>：每分鐘只能打幾次，課堂中段可能會被擋</li>
+          <li><strong>回應較不穩定</strong>：偶爾延遲很高、偶爾跳 error，不適合你想真的拿它做事</li>
+        </ul>
+        <p>學會夠用，但**課後想日常使用 hermes 的話，建議儲值 $5 起跳**。OpenRouter 採按量計費（用多少付多少），$5 通常可以撐很久。儲值後就能用 <code>deepseek/deepseek-v4-pro</code>、<code>minimax/minimax-m2.7</code>，或 GPT/Claude/Gemini 等主流付費 model。</p>
       </details>
 
       <details>
@@ -336,8 +356,8 @@ cd ~</code></pre>
         </thead>
         <tbody>
           <tr><td><strong>Choose your provider</strong></td><td>用方向鍵選 <code>openrouter</code>，Enter</td></tr>
-          <tr><td><strong>Choose a model</strong></td><td>挑一個名稱含 <code>deepseek</code> 且標 <code>:free</code> 的，Enter</td></tr>
-          <tr><td><strong>Enter your API key</strong></td><td>貼 Step 3 暫存的 key（Ctrl+Shift+V），Enter</td></tr>
+          <tr><td><strong>Choose a model</strong></td><td>免費：挑名稱含 <code>deepseek</code> 且標 <code>:free</code> 的；付費（推薦）：<code>deepseek/deepseek-v4-pro</code> 或 <code>minimax/minimax-m2.7</code>。Enter</td></tr>
+          <tr><td><strong>Enter your API key</strong></td><td>⚠️ <strong>建議手動 key in</strong>（Ubuntu 終端機 paste 偶爾會把 key 截斷或變空白），或先看下面「補救」section 用 script 把 key 寫進 .env。若還是要 paste：Ctrl+Shift+V，Enter</td></tr>
           <tr><td><strong>Configure tools?</strong></td><td>直接 Enter（預設）</td></tr>
           <tr><td><strong>Configure terminal backend?</strong></td><td>直接 Enter（預設 = local）</td></tr>
         </tbody>
@@ -360,10 +380,24 @@ cd ~</code></pre>
         <summary>🚨 我卡住了</summary>
         <ul>
           <li><strong>不小心 Ctrl+C 中斷</strong> → 重跑 <code>hermes setup</code></li>
-          <li><strong>API key 貼進去變空白</strong> → 把 key 重新從記事本複製、再 Ctrl+Shift+V（Ubuntu 終端機要 Shift）</li>
+          <li><strong>API key 貼進去變空白 / 跑 hermes 出 400 error</strong> → 用下面的補救 script 直接改 <code>~/.hermes/.env</code></li>
           <li><strong>看不到 <code>:free</code> 模型</strong> → OpenRouter 偶爾會調整 free 列表，挑名字最像的，下一步試了就知道</li>
         </ul>
       </details>
+
+      <h3>補救：直接改 hermes 的 .env</h3>
+      <p>hermes 的 API key 存在 <code>~/.hermes/.env</code>。如果 <code>hermes setup</code> 在 TUI 裡 paste 出問題（截斷、變空白），最快的修法是直接 sed 改這支檔案——<strong>不必重跑整個 setup 精靈</strong>。</p>
+      <p><em>此為 hermes 上游官方暫未完全修正 paste 問題的繞行解。下面兩個版本擇一用：</em></p>
+
+      <h4>Variant A · 互動腳本（推薦）</h4>
+      <p>貼 key 進去後自動寫入 .env，避免在 TUI 裡 paste：</p>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your OpenRouter API key: " KEY &amp;&amp; echo &amp;&amp; sed -i "s/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=$KEY/" .env &amp;&amp; unset KEY</code></pre>
+
+      <h4>Variant B · 手動範本</h4>
+      <p>把 <code>YOUR_API_KEY</code> 替換成你的實際 key 再貼進終端機：</p>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; sed -i 's/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=YOUR_API_KEY/' .env</code></pre>
+
+      <p>跑完任一個之後，下一步直接 <code>hermes</code> 就能對話。</p>
     </section>
 
     <section class="step" data-step="8" hidden>
@@ -414,6 +448,7 @@ cd ~</code></pre>
       <details>
         <summary>🚨 我卡住了</summary>
         <ul>
+          <li><strong>跑 <code>hermes</code> 收到 400 / Unauthorized</strong> → API key 沒寫對。最常見原因是 Step 7 在 TUI 裡 paste 時被截斷。回 Step 7 結尾的「補救：直接改 hermes 的 .env」section，跑 Variant A 或 B 任一個，再執行 <code>hermes</code> 即可。<strong>不必重跑 <code>hermes setup</code>。</strong></li>
           <li><strong>送出後沒回應、卡很久</strong> → 免費模型的速率限制。Ctrl+C 中斷，跑 <code>/model</code> 換另一個 free model</li>
           <li><strong>顯示亂碼或方框</strong> → Windows Terminal 字型問題。設定 → Profile → Ubuntu → 字型改 <code>Cascadia Code</code> 或 <code>Consolas</code></li>
           <li><strong>所有設定看起來都對但跑 hermes 出 error</strong> → 跑 <code>hermes doctor</code>，它會告訴你哪邊配置有問題</li>

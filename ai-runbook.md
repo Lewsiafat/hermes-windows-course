@@ -444,6 +444,101 @@ git push origin main
 
 ---
 
+## Lesson 2 · Stage 11–17（Telegram 整合）
+
+> Lesson 2 對應 `lesson-2.html`，預期 30–45 分鐘。**截圖留給下次 Full Capture Run**，本批次以動作驗證為主，不要求拍圖。
+
+## Stage 11 · 開啟 lesson-2.html、走 Step 0–1
+
+### Action Block
+1. 瀏覽器開 `lesson-2.html`，停在 Step 0
+2. 確認進度文字顯示「前言」
+3. 點「下一步 →」進 Step 1
+4. 確認進度文字顯示「Step 1 / 7」、3 條前置 checklist 顯示
+
+### 失敗處理
+- 進度文字沒變 → wizard.js 沒讀到 `<body data-total-steps>`，回 Lesson 1 Step 1（人類）/ Stage 0（AI）核對 body 標籤。
+
+## Stage 12 · 申請 Telegram bot（Step 2）
+
+### Action Block
+1. 在 lesson-2.html Step 2 點主連結 `https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html`
+2. 在另一分頁完成 BotFather 流程：`/newbot` → 名稱 → username → 拿 token
+3. token 存到記事本（含冒號前後）
+4. 回 lesson-2.html，點「下一步 →」進 Step 3
+
+### 失敗處理
+- 主連結 4xx/5xx → 展開「🚨 主連結打不開」`<details>`，照 inline 5 步走。
+- BotFather username 撞名 → 加亂數或日期再試。
+
+## Stage 13 · 拿 user_id（Step 3）
+
+### Action Block
+1. 手機 / 桌面 Telegram 開 https://t.me/userinfobot
+2. 按 Start
+3. 抄回應裡 `Id:` 後的純數字到記事本
+4. 點「下一步 →」進 Step 4
+
+### 失敗處理
+- @userinfobot 不存在 → 用 @username_to_id_bot 或在桌面 Telegram 「設定 → 進階 → ID」找。
+
+## Stage 14 · `hermes gateway setup`（Step 4）
+
+### Action Block
+1. WSL 開新終端
+2. 跑 `hermes gateway setup`
+3. 選 `telegram` → Enter
+4. 貼 token（手動 key in 或先按 Ctrl+Shift+V）→ Enter
+5. 貼 user_id → Enter
+6. 確認看到 `Setup complete!`
+7. 跑 `grep -E '^(export )?TELEGRAM_' ~/.hermes/.env` 確認兩行都寫入
+
+### 失敗處理
+- token / user_id 寫錯（log 出 401 / unauthorized）→ 用 lesson-2.html Step 4 補救 section 的 Variant A 或 B sed 改 .env。
+- Ctrl+C 中斷 → 重跑 `hermes gateway setup`。
+
+## Stage 15 · 啟動 gateway 背景（Step 5）
+
+### Action Block
+1. 跑 `hermes gateway run`（前景）試啟動，確認啟動 banner 出現、無 401，按 Ctrl+C
+2. 跑 `nohup hermes gateway run > /dev/null 2>&1 &`
+3. 按 Enter 把 prompt 推下一行
+4. 跑 `hermes gateway status`，預期 `✓ Gateway is running (PID: ...)` 且 `(Running manually, not as a system service)`
+5. 跑 `tail -n 30 ~/.hermes/logs/gateway.log`，確認無 fatal / 401 / 409
+
+### 失敗處理
+- log 401 → token 寫錯，回 Stage 14 sed 補救。
+- 看到 `Gateway already running (PID ...)` → 之前跑過沒清，`hermes gateway restart`。
+- log network error → `ping 8.8.8.8` 確認 WSL 對外。
+
+## Stage 16 · 第一次手機 ↔ hermes（Step 6）
+
+### Action Block
+1. 手機 Telegram 搜你 bot 的 username
+2. 按 Start
+3. 傳 `hello, you there?`
+4. 等 1–5 秒，確認 bot 有回
+5. 傳 `what was my first message?`，確認回應提到 hello（context 連動）
+6. 在另一個 WSL 分頁 `tail -f ~/.hermes/logs/gateway.log`，確認傳訊時 log 即時跑出 `Received message from user <id>`
+
+### 失敗處理
+- log 出 unauthorized → user_id 寫錯，回 Stage 14 sed 改 `TELEGRAM_ALLOWED_USERS=` + `hermes gateway restart`。
+- log 完全沒新訊息 → bot username 找錯。
+- bot 找不到 → BotFather `/mybots` 對 username。
+
+## Stage 17 · 收尾（Step 7）
+
+### Action Block
+1. lesson-2.html 點「下一步 →」進 Step 7
+2. 確認 4 個 ✓ checkpoints 都對得上實際完成項
+3. 展開 5 個加碼 `<details>` 至少瀏覽一次（不必實作）
+4. 跑 `hermes gateway stop` 結束本次驗證
+
+### 失敗處理
+- 任何一條 ✓ 對不上 → 回對應 Stage 重做。
+
+---
+
 # Part 2: Quick Smoke Test
 
 每次教學前 10–15 分鐘做完。**不重新捕捉截圖**（除非發現 UI 已改），只驗證 3 個最容易壞的地方。
@@ -541,6 +636,52 @@ ls ~/.hermes/.env && grep '^OPENROUTER_API_KEY=' ~/.hermes/.env
 - 檔案路徑變了 → 改 `index.html` Step 7 補救 section 的兩段 sed（Variant A / B）的 `cd ~/.hermes` 與 Step 8 的 cross-ref 文字。
 - 變數名變了（例如改成 `OPENROUTER_KEY=`）→ 改兩段 sed 的 pattern。
 - 整個 .env 不見了（hermes 改成別的儲存方式）→ 補救 section 整個重寫。
+
+---
+
+## Check 5 · BotFather 教材連結還活著
+
+```bash
+curl -I https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html
+```
+
+預期：`HTTP/2 200`。失聯時學員可用 lesson-2.html Step 2 的 inline `<details>` 備援。
+
+## Check 6 · `hermes gateway setup` 流程不變
+
+```bash
+hermes gateway setup
+```
+
+走到選 telegram 那頁就 Ctrl+C。確認：仍可選 telegram、提示仍是 token + allowed users 兩個欄位。
+
+若改了：lesson-2.html Step 4「3 個提示怎麼答」表格與 ai-runbook.md Stage 14 動作要對應改。
+
+## Check 7 · .env 變數名仍是 TELEGRAM_BOT_TOKEN / TELEGRAM_ALLOWED_USERS
+
+```bash
+grep -E '^(export )?TELEGRAM_(BOT_TOKEN|ALLOWED_USERS)=' ~/.hermes/.env
+```
+
+預期：兩行都在。若變數名變了：lesson-2.html Step 4 的兩段 sed 補救（Variant A / B）+ ai-runbook.md Stage 14 失敗處理一起改。
+
+## Check 8 · `hermes gateway` 原生 lifecycle 沒變、log 路徑沒變
+
+```bash
+hermes gateway --help | grep -E '\b(run|status|stop|restart)\b'
+nohup hermes gateway run > /dev/null 2>&1 &
+sleep 3
+hermes gateway status
+test -f ~/.hermes/logs/gateway.log && echo "log path ok" || echo "LOG PATH CHANGED"
+tail -n 20 ~/.hermes/logs/gateway.log
+hermes gateway stop
+```
+
+預期：
+- [ ] 4 個 subcommand 都還在
+- [ ] `status` 報 running、識別 manual mode
+- [ ] log 路徑仍是 `~/.hermes/logs/gateway.log`
+- [ ] log 無 401 / 409 / fatal、polling 仍是預設
 
 ---
 

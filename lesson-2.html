@@ -142,11 +142,33 @@
     <section class="step" data-step="3" hidden>
       <header>
         <hgroup>
-          <h2>Step 3 / 7 · 拿你的 Telegram user_id（placeholder，Task 6 補內容）</h2>
+          <h2>Step 3 / 7 · 拿你的 Telegram user_id</h2>
           <p>~2 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p>hermes gateway 設定時會問你「哪些 Telegram 使用者可以跟這支 bot 講話」——這個白名單填的是 <strong>數字 user_id</strong>，不是 @username。下面 30 秒拿到。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>手機/電腦 Telegram 開 <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a></li>
+        <li>按下方「Start」（或送 <code>/start</code>）</li>
+        <li>它會立刻回一段話，裡面有 <strong>Id: 123456789</strong>（純數字，9–10 位數）</li>
+        <li>把那串純數字複製到記事本，跟 Step 2 的 token 放一起</li>
+      </ol>
+
+      <details>
+        <summary>user_id 是什麼？為什麼要它？</summary>
+        <p>每個 Telegram 帳號都有一個唯一的數字 ID，跟 @username 不同——username 你可以隨時改、刪，但 user_id 跟著帳號一輩子。</p>
+        <p>hermes gateway 啟動後，每收到一則訊息會檢查 <strong>這個 user_id 在不在 allowlist 裡</strong>，不在就拒絕回覆。所以這個欄位填的是「哪個 Telegram 人類帳號允許用這支 bot」，<strong>不是</strong> bot 自己的 ID。</p>
+      </details>
+
+      <details>
+        <summary>Id 跟 Bot ID 怎麼分？</summary>
+        <p>@userinfobot 回的訊息有時會列好幾項（Id、First Name、Last Name、Username、Language）。<strong>取最上面那個 <code>Id</code></strong>，那是你（人類）的 ID。Bot 自己的 ID 不會出現在這裡。</p>
+      </details>
+
+      <p>✓ user_id 抄好了？接著 Step 4 把 token 跟 user_id 一起餵給 hermes。</p>
     </section>
 
     <section class="step" data-step="4" hidden>

@@ -54,11 +54,39 @@
     <section class="step" data-step="1" hidden>
       <header>
         <hgroup>
-          <h2>Step 1 / 7 · 開始之前（placeholder，Task 4 補內容）</h2>
+          <h2>Step 1 / 7 · 開始之前</h2>
           <p>~2 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p>動工前先確認 3 件事都到位：</p>
+
+      <h3>前置 checklist</h3>
+      <ul>
+        <li>✓ <strong>Lesson 1 已完成</strong>。打開 Ubuntu 終端機，跑 <code>hermes</code> 應該會進到 hermes TUI（按 <code>/exit</code> 退出）。沒做過？先去 <a href="index.html">Lesson 1</a>。</li>
+        <li>✓ <strong>手機 / 電腦上有 Telegram 帳號</strong>。沒裝？App Store / Google Play / <a href="https://telegram.org/apps" target="_blank" rel="noopener">桌面版</a> 隨便挑一個。</li>
+        <li>✓ <strong>記事本開著</strong>（任何純文字編輯器都行）。等下要暫存 token 跟 user_id 兩個東西。</li>
+      </ul>
+
+      <h3>這 7 步在做什麼</h3>
+      <ol>
+        <li><strong>Step 2</strong>：跟 Telegram 申請一支 bot，拿到 token</li>
+        <li><strong>Step 3</strong>：拿你自己的 Telegram user_id（讓 bot 只回你）</li>
+        <li><strong>Step 4</strong>：跑 <code>hermes gateway setup</code>，把 token 跟 user_id 寫進設定檔</li>
+        <li><strong>Step 5</strong>：把 gateway 跑成背景程式</li>
+        <li><strong>Step 6</strong>：從手機傳訊息給 bot，確認 hermes 有回</li>
+        <li><strong>Step 7</strong>：收尾、加碼玩法、下一堂預告</li>
+      </ol>
+
+      <details>
+        <summary>加碼預告</summary>
+        <ul>
+          <li><strong>群組使用</strong>（把 bot 加到 Telegram 群組）</li>
+          <li><strong>語音訊息</strong>（直接傳語音，hermes 會自動轉字）</li>
+          <li><code>/topic</code>（多開幾個對話 thread）、<code>/model</code>（中途切模型）</li>
+        </ul>
+        <p>都會在 Step 7 用 <code>&lt;details&gt;</code> 展開介紹。</p>
+      </details>
     </section>
 
     <section class="step" data-step="2" hidden>

@@ -406,7 +406,13 @@
         <p>不想每次 Windows 重啟都重跑 nohup？hermes 自己有：</p>
         <pre data-copy><code>hermes gateway install</code></pre>
         <p>會在你的 user 帳號下裝 systemd 服務（前提是 WSL2 啟用了 systemd）。裝完用 <code>hermes gateway start</code> / <code>stop</code> / <code>restart</code> 管理。</p>
-        <p>但 systemd 在 WSL 上要先啟用（編輯 <code>/etc/wsl.conf</code> 加 <code>[boot]\nsystemd=true</code> 後 PowerShell 跑 <code>wsl --shutdown</code>），且 24/7 跑著有資源、安全、啟動順序的 trade-off。<strong>本堂不展開</strong>，留給後續「hermes 24/7 部署」專題。</p>
+        <p>但 systemd 在 WSL 上要先啟用：</p>
+<pre><code>編輯 /etc/wsl.conf 加上兩行：
+[boot]
+systemd=true
+
+之後在 PowerShell 跑 wsl --shutdown 重啟 WSL</code></pre>
+        <p>且 24/7 跑著有資源、安全、啟動順序的 trade-off。<strong>本堂不展開</strong>，留給後續「hermes 24/7 部署」專題。</p>
       </details>
 
       <h3>下次預告</h3>

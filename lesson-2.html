@@ -174,11 +174,64 @@
     <section class="step" data-step="4" hidden>
       <header>
         <hgroup>
-          <h2>Step 4 / 7 · <code>hermes gateway setup</code>（placeholder，Task 7 補內容）</h2>
+          <h2>Step 4 / 7 · <code>hermes gateway setup</code></h2>
           <p>~8 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p><code>hermes gateway setup</code> 是 hermes 把外部聊天平台接進來的設定精靈。我們要選 <code>telegram</code>、貼 Step 2 的 token、貼 Step 3 的 user_id。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>打開 Ubuntu 終端機，啟動精靈</li>
+      </ol>
+
+      <pre data-copy><code>hermes gateway setup</code></pre>
+
+      <ol start="2">
+        <li>依下面 3 個提示一個一個填</li>
+      </ol>
+
+      <h3>3 個提示怎麼答</h3>
+      <table>
+        <thead>
+          <tr><th>提示</th><th>選 / 填</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Choose gateway</strong></td><td>用方向鍵選 <code>telegram</code>，Enter</td></tr>
+          <tr><td><strong>Telegram bot token</strong></td><td>⚠️ <strong>建議手動 key in</strong>（同 Lesson 1 Step 7 的 paste 雷），或先看下面「補救」section 用 sed 寫進 .env。若還是要 paste：Ctrl+Shift+V，Enter</td></tr>
+          <tr><td><strong>Allowed users</strong></td><td>貼 Step 3 的純數字 user_id，多人用逗號分隔（本教材只填你自己）。Enter</td></tr>
+        </tbody>
+      </table>
+
+      <p>看到 <strong><code>Setup complete!</code></strong> 就成功，<code>~/.hermes/.env</code> 裡會多兩行 <code>TELEGRAM_BOT_TOKEN=</code> 與 <code>TELEGRAM_ALLOWED_USERS=</code>。</p>
+
+      <details>
+        <summary>Allowed users 是什麼？為什麼要填？</summary>
+        <p>沒這個欄位的話，bot 是公開的——任何陌生人 Telegram 搜到你 bot 就能丟訊息進來，你的 OpenRouter 帳號就會被陌生人花錢。Allowed users 只放你自己（或團隊夥伴）的 user_id，其他訊息會被 gateway 直接 ignore。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>Ctrl+C 中斷</strong> → 重跑 <code>hermes gateway setup</code></li>
+          <li><strong>token 貼進去變空白 / Step 5 跑 gateway 立刻 401</strong> → 用下面的補救 sed 直接改 <code>~/.hermes/.env</code></li>
+          <li><strong>user_id 貼進去多了空白</strong> → 同上，用 sed 補救改 <code>TELEGRAM_ALLOWED_USERS=</code></li>
+        </ul>
+      </details>
+
+      <h3>補救：直接改 hermes 的 .env</h3>
+      <p>跟 <a href="index.html#step-7">Lesson 1 Step 7</a> 同根因（hermes 上游 paste 雷）、同模式。下面兩個版本擇一用：</p>
+
+      <h4>Variant A · 互動腳本（推薦）</h4>
+      <p>輸入時 token 不會回顯（避免肩膀後面被看到）、user_id 會回顯（純數字無妨）：</p>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your Telegram bot token: " TOKEN &amp;&amp; echo &amp;&amp; read -p "Paste your Telegram user_id: " UID &amp;&amp; sed -i "s/^TELEGRAM_BOT_TOKEN=.*/export TELEGRAM_BOT_TOKEN=$TOKEN/" .env &amp;&amp; sed -i "s/^TELEGRAM_ALLOWED_USERS=.*/export TELEGRAM_ALLOWED_USERS=$UID/" .env &amp;&amp; unset TOKEN UID</code></pre>
+
+      <h4>Variant B · 手動範本</h4>
+      <p>把 <code>YOUR_BOT_TOKEN</code> 與 <code>YOUR_USER_ID</code> 替換成實際值再貼進終端機：</p>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; sed -i 's/^TELEGRAM_BOT_TOKEN=.*/export TELEGRAM_BOT_TOKEN=YOUR_BOT_TOKEN/' .env &amp;&amp; sed -i 's/^TELEGRAM_ALLOWED_USERS=.*/export TELEGRAM_ALLOWED_USERS=YOUR_USER_ID/' .env</code></pre>
+
+      <p>跑完任一個之後，下一步直接進 Step 5 啟動 gateway。</p>
     </section>
 
     <section class="step" data-step="5" hidden>

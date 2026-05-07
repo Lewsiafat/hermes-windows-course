@@ -302,11 +302,49 @@
     <section class="step" data-step="6" hidden>
       <header>
         <hgroup>
-          <h2>Step 6 / 7 · 第一次手機 ↔ hermes（placeholder，Task 9 補內容）</h2>
+          <h2>Step 6 / 7 · 第一次手機 ↔ hermes</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p>Gateway 跑著、token 跟 user_id 都對，現在用手機驗證整條鏈路通了。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>打開手機 Telegram，<strong>搜尋你 Step 2 設的 bot username</strong>（一般是 <code>@xxx_bot</code>）</li>
+        <li>進到對話畫面，按下方「Start」（或送 <code>/start</code>）</li>
+        <li>傳第一句話，例如：<code>hello, you there?</code></li>
+        <li>等 1–5 秒（看模型 response 速度），bot 應該會回</li>
+        <li>再傳一句相關的，例如：<code>what was my first message?</code>，確認 context 連動（hermes 應該記得你問過什麼）</li>
+      </ol>
+
+      <details>
+        <summary>看 gateway log 確認訊息有進來</summary>
+        <p>另開一個 Ubuntu 終端機分頁、跑：</p>
+        <pre data-copy><code>tail -f ~/.hermes/logs/gateway.log</code></pre>
+        <p>傳訊時 log 應該會即時跑出新行，類似「Received message from user 12345」之類。</p>
+      </details>
+
+      <details>
+        <summary>🚨 傳了訊息但 bot 沒回</summary>
+        <p>看 <code>~/.hermes/logs/gateway.log</code>，三類最常見：</p>
+        <ul>
+          <li><strong>log 顯示 unauthorized user</strong> → user_id 寫錯。回 <a href="#step-4">Step 4</a> 用 sed 補救改 <code>TELEGRAM_ALLOWED_USERS=</code>，<code>hermes gateway restart</code>。</li>
+          <li><strong>log 完全沒新訊息</strong> → bot username 找錯了（你連到的是別人的 bot）。回 BotFather 用 <code>/mybots</code> 確認你 bot 的 username 跟你 Telegram 對話畫面的 @ 一致。</li>
+          <li><strong>log 有訊息進來、但回應 timeout / API error</strong> → OpenRouter 那邊的問題，看 log 有沒有 401（key 過期 / 額度不足）或 5xx（暫時故障）。</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>🚨 Telegram 完全找不到我的 bot</summary>
+        <ul>
+          <li>確認 bot username 沒打錯（含 <code>@</code>）</li>
+          <li>用瀏覽器開 <code>https://t.me/&lt;your_bot_username&gt;</code> 直接連</li>
+          <li>還不行 → 回 BotFather <code>/mybots</code>，看你 bot 是不是被 BotFather 自動 disable 了（極少見）</li>
+        </ul>
+      </details>
+
+      <p>✓ 傳訊有回 + context 對得上 → 4 個 checkpoints 完成，進 Step 7 收尾。</p>
     </section>
 
     <section class="step" data-step="7" hidden>

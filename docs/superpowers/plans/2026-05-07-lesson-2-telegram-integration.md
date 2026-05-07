@@ -782,13 +782,13 @@ Native log path '~/.hermes/logs/gateway.log' replaces the old redirect."
       <details>
         <summary>看 gateway log 確認訊息有進來</summary>
         <p>另開一個 Ubuntu 終端機分頁、跑：</p>
-        <pre data-copy><code>tail -f ~/.hermes/gateway.log</code></pre>
+        <pre data-copy><code>tail -f ~/.hermes/logs/gateway.log</code></pre>
         <p>傳訊時 log 應該會即時跑出新行，類似「Received message from user 12345」之類。</p>
       </details>
 
       <details>
         <summary>🚨 傳了訊息但 bot 沒回</summary>
-        <p>看 <code>~/.hermes/gateway.log</code>，三類最常見：</p>
+        <p>看 <code>~/.hermes/logs/gateway.log</code>，三類最常見：</p>
         <ul>
           <li><strong>log 顯示 unauthorized user</strong> → user_id 寫錯。回 <a href="#step-4">Step 4</a> 用 sed 補救改 <code>TELEGRAM_ALLOWED_USERS=</code>，<code>pkill -f "hermes gateway"</code> + 重啟 gateway。</li>
           <li><strong>log 完全沒新訊息</strong> → bot username 找錯了（你連到的是別人的 bot）。回 BotFather 用 <code>/mybots</code> 確認你 bot 的 username 跟你 Telegram 對話畫面的 @ 一致。</li>
@@ -861,7 +861,7 @@ hermes 2>/dev/null  # 進 TUI 試 /topic 跟 /model 看真實語法（看完 /ex
 
       <h3>建議下一步</h3>
       <ul>
-        <li>把 <code>nohup hermes gateway &gt; ~/.hermes/gateway.log 2&gt;&amp;1 &amp;</code> 這行也存到記事本——Windows 重啟後要重跑</li>
+        <li>把 <code>nohup hermes gateway run &gt; /dev/null 2&gt;&amp;1 &amp;</code> 這行也存到記事本——Windows 重啟後要重跑</li>
         <li>把這個頁面加書籤，下次想複習隨時回來</li>
       </ul>
 
@@ -1214,7 +1214,7 @@ grep -n "Stage 10\|^## Part 1 預期截圖列表\|^## Check 4" /home/lewsi/Docum
 3. 傳 `hello, you there?`
 4. 等 1–5 秒，確認 bot 有回
 5. 傳 `what was my first message?`，確認回應提到 hello（context 連動）
-6. 在另一個 WSL 分頁 `tail -f ~/.hermes/gateway.log`，確認傳訊時 log 即時跑出 `Received message from user <id>`
+6. 在另一個 WSL 分頁 `tail -f ~/.hermes/logs/gateway.log`，確認傳訊時 log 即時跑出 `Received message from user <id>`
 
 ### 失敗處理
 - log 出 unauthorized → user_id 寫錯，回 Stage 14 sed 改 `TELEGRAM_ALLOWED_USERS=` + 重啟 gateway。

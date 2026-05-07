@@ -625,7 +625,7 @@ git commit -m "feat(lesson-2): add Step 3 (拿你的 Telegram user_id) — @user
 
       <h4>Variant A · 互動腳本（推薦）</h4>
       <p>輸入時 token 不會回顯（避免肩膀後面被看到）、user_id 會回顯（純數字無妨）：</p>
-      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your Telegram bot token: " TOKEN &amp;&amp; echo &amp;&amp; read -p "Paste your Telegram user_id: " UID &amp;&amp; sed -i "s/^TELEGRAM_BOT_TOKEN=.*/export TELEGRAM_BOT_TOKEN=$TOKEN/" .env &amp;&amp; sed -i "s/^TELEGRAM_ALLOWED_USERS=.*/export TELEGRAM_ALLOWED_USERS=$UID/" .env &amp;&amp; unset TOKEN UID</code></pre>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your Telegram bot token: " TOKEN &amp;&amp; echo &amp;&amp; read -p "Paste your Telegram user_id: " USER_ID &amp;&amp; sed -i "s/^TELEGRAM_BOT_TOKEN=.*/export TELEGRAM_BOT_TOKEN=$TOKEN/" .env &amp;&amp; sed -i "s/^TELEGRAM_ALLOWED_USERS=.*/export TELEGRAM_ALLOWED_USERS=$USER_ID/" .env &amp;&amp; unset TOKEN USER_ID</code></pre>
 
       <h4>Variant B · 手動範本</h4>
       <p>把 <code>YOUR_BOT_TOKEN</code> 與 <code>YOUR_USER_ID</code> 替換成實際值再貼進終端機：</p>

@@ -259,14 +259,10 @@
       </ul>
       <p>用方向鍵選第二項「System service」，按 Enter 確認。</p>
 
-      <div class="notice">
-        ⚠️ <strong>注意：</strong>以下指令的 <code>{username}</code> 要換成你在 Step 5 (Lesson 1) 設定的 Ubuntu 使用者名稱（例如 <code>lewsi</code>）。
-      </div>
-
-      <pre data-copy><code>sudo hermes gateway install --system --run-as-user {username}</code></pre>
+      <pre data-copy><code>sudo $(which hermes) gateway install --system --run-as-user</code></pre>
 
       <p>安裝完成後，啟動服務：</p>
-      <pre data-copy><code>sudo hermes gateway start --system</code></pre>
+      <pre data-copy><code>sudo $(which hermes) gateway start --system</code></pre>
 
       <h3>確認跑著</h3>
       <pre data-copy><code>hermes gateway status</code></pre>
@@ -289,10 +285,9 @@
       <details>
         <summary>🚨 我卡住了</summary>
         <ul>
-          <li><strong>install 後 log 出 401 / Unauthorized</strong> → token 寫錯。<code>sudo hermes gateway stop --system</code> 砍掉，回 Step 4 用 sed 補救改 <code>TELEGRAM_BOT_TOKEN=</code>，再 <code>sudo hermes gateway start --system</code>。</li>
-          <li><strong>看到 <code>Gateway already running</code></strong> → <code>sudo hermes gateway restart --system</code> 直接重啟。</li>
+          <li><strong>install 後 log 出 401 / Unauthorized</strong> → token 寫錯。<code>sudo $(which hermes) gateway stop --system</code> 砍掉，回 Step 4 用 sed 補救改 <code>TELEGRAM_BOT_TOKEN=</code>，再 <code>sudo $(which hermes) gateway start --system</code>。</li>
+          <li><strong>看到 <code>Gateway already running</code></strong> → <code>sudo $(which hermes) gateway restart --system</code> 直接重啟。</li>
           <li><strong>log 出現 network error</strong> → WSL 網路問題，<code>ping 8.8.8.8</code> 確認連得到外網。</li>
-          <li><strong>{username} 要填什麼？</strong> → 在 Ubuntu 終端機跑 <code>whoami</code>，把輸出的名字貼進去。</li>
         </ul>
       </details>
 

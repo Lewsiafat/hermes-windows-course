@@ -244,26 +244,29 @@
         </hgroup>
       </header>
 
-      <p>Token 跟 user_id 都進 .env 了，現在把 gateway 跑起來——要跑成<strong>背景程式</strong>，這樣你關掉 Ubuntu 視窗也不會把它砍掉。</p>
+      <p>Token 跟 user_id 都進 .env 了，現在把 gateway 安裝成系統服務，這樣開機就自動跑、不需要每次手動啟動。</p>
 
-      <h3>先試前景版（看它長什麼樣）</h3>
+      <h3>先試前景版（確認設定沒問題）</h3>
       <pre data-copy><code>hermes gateway run</code></pre>
-      <p>會看到一段啟動 banner（含「Press Ctrl+C to stop」）。確認沒有 401 / fatal 錯誤後，按 <kbd>Ctrl+C</kbd> 停掉。<code>run</code> 是 hermes 官方對 WSL/Docker/Termux 推薦的子命令。</p>
+      <p>會看到一段啟動 banner（含「Press Ctrl+C to stop」）。確認沒有 401 / fatal 錯誤後，按 <kbd>Ctrl+C</kbd> 停掉，再進行下方的服務安裝。</p>
 
-      <h3>背景啟動（關 Ubuntu 視窗也不死）</h3>
-      <pre data-copy><code>nohup hermes gateway run &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
-      <p>跑完按一次 Enter 把 prompt 推到下一行。沒看到任何錯誤訊息就成功。</p>
+      <h3>安裝為系統服務</h3>
+      <p>執行安裝指令。過程中會看到三個選項：</p>
+      <ul>
+        <li>User service（不需 sudo，但關閉登入可能停止）</li>
+        <li><strong>System service</strong>（開機自動啟動，以你的帳號身分執行）← 選這個</li>
+        <li>Skip service install for now</li>
+      </ul>
+      <p>用方向鍵選第二項「System service」，按 Enter 確認。</p>
 
-      <details>
-        <summary>這行指令在做什麼？</summary>
-        <ul>
-          <li><code>nohup</code>：no-hangup，告訴 OS「這個程序在我關 terminal 後也別殺掉」</li>
-          <li><code>hermes gateway run</code>：實際要跑的東西</li>
-          <li><code>&gt; /dev/null</code>：把標準輸出（stdout）丟掉——hermes 已經把詳細 log 寫到 <code>~/.hermes/logs/gateway.log</code>，不必重複留</li>
-          <li><code>2&gt;&amp;1</code>：把錯誤輸出（stderr）也導到同個地方（也丟掉）</li>
-          <li><code>&amp;</code>（最末）：丟到背景跑，terminal 馬上把控制權還給你</li>
-        </ul>
-      </details>
+      <div class="notice">
+        ⚠️ <strong>注意：</strong>以下指令的 <code>{username}</code> 要換成你在 Step 5 (Lesson 1) 設定的 Ubuntu 使用者名稱（例如 <code>lewsi</code>）。
+      </div>
+
+      <pre data-copy><code>sudo hermes gateway install --system --run-as-user {username}</code></pre>
+
+      <p>安裝完成後，啟動服務：</p>
+      <pre data-copy><code>sudo hermes gateway start --system</code></pre>
 
       <h3>確認跑著</h3>
       <pre data-copy><code>hermes gateway status</code></pre>
@@ -284,17 +287,12 @@
       <pre data-copy><code>pkill -f "hermes gateway"</code></pre>
 
       <details>
-        <summary>🚨 Windows 重啟後 bot 沒回應了？</summary>
-        <p>正常。背景程序在 WSL 重啟後會被砍掉。<strong>重新登入 Ubuntu 後再跑一次同一行 <code>nohup hermes gateway run &gt; /dev/null 2&gt;&amp;1 &amp;</code> 即可</strong>。</p>
-        <p>「開機自動啟動」hermes 內建有指令——<code>hermes gateway install</code>（user 級）或 <code>sudo hermes gateway install --system</code>（系統級、重開機自動）——但 systemd 服務的資源、安全、啟動順序 trade-off 值得整堂課展開，<strong>本堂不教</strong>，留給後續課程。</p>
-      </details>
-
-      <details>
         <summary>🚨 我卡住了</summary>
         <ul>
-          <li><strong>跑 nohup 後 log 出 401 / Unauthorized</strong> → token 寫錯。<code>hermes gateway stop</code> 砍掉，回 Step 4 用 sed 補救改 <code>TELEGRAM_BOT_TOKEN=</code>，再背景跑一次。</li>
-          <li><strong>看到 <code>Gateway already running (PID ...)</code></strong> → 之前跑過沒清，<code>hermes gateway restart</code> 直接重啟，或 <code>hermes gateway stop</code> 後再背景跑一次。</li>
+          <li><strong>install 後 log 出 401 / Unauthorized</strong> → token 寫錯。<code>sudo hermes gateway stop --system</code> 砍掉，回 Step 4 用 sed 補救改 <code>TELEGRAM_BOT_TOKEN=</code>，再 <code>sudo hermes gateway start --system</code>。</li>
+          <li><strong>看到 <code>Gateway already running</code></strong> → <code>sudo hermes gateway restart --system</code> 直接重啟。</li>
           <li><strong>log 出現 network error</strong> → WSL 網路問題，<code>ping 8.8.8.8</code> 確認連得到外網。</li>
+          <li><strong>{username} 要填什麼？</strong> → 在 Ubuntu 終端機跑 <code>whoami</code>，把輸出的名字貼進去。</li>
         </ul>
       </details>
 
@@ -367,7 +365,7 @@
 
       <h3>建議下一步</h3>
       <ul>
-        <li>把 <code>nohup hermes gateway run &gt; /dev/null 2&gt;&amp;1 &amp;</code> 這行也存到記事本——Windows 重啟後要重跑</li>
+        <li>Gateway 已裝成 System service，Windows 重啟後會自動跑，不需要手動重啟</li>
         <li>把這個頁面加書籤，下次想複習隨時回來</li>
       </ul>
 
@@ -402,17 +400,10 @@
       </details>
 
       <details>
-        <summary>加碼 5：把 gateway 變成 24/7 服務（hermes 內建）</summary>
-        <p>不想每次 Windows 重啟都重跑 nohup？hermes 自己有：</p>
-        <pre data-copy><code>hermes gateway install</code></pre>
-        <p>會在你的 user 帳號下裝 systemd 服務（前提是 WSL2 啟用了 systemd）。裝完用 <code>hermes gateway start</code> / <code>stop</code> / <code>restart</code> 管理。</p>
-        <p>但 systemd 在 WSL 上要先啟用：</p>
-<pre><code>編輯 /etc/wsl.conf 加上兩行：
-[boot]
-systemd=true
-
-之後在 PowerShell 跑 wsl --shutdown 重啟 WSL</code></pre>
-        <p>且 24/7 跑著有資源、安全、啟動順序的 trade-off。<strong>本堂不展開</strong>，留給後續「hermes 24/7 部署」專題。</p>
+        <summary>管理 gateway 服務的指令</summary>
+        <pre data-copy><code>sudo hermes gateway status --system</code></pre>
+        <pre data-copy><code>sudo hermes gateway restart --system</code></pre>
+        <pre data-copy><code>sudo hermes gateway stop --system</code></pre>
       </details>
 
       <h3>下次預告</h3>

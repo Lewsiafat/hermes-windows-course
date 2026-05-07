@@ -22,11 +22,33 @@
     <section class="step" data-step="0">
       <header>
         <hgroup>
-          <h2>前言（placeholder，Task 3 補內容）</h2>
-          <p>placeholder</p>
+          <h2>前言 · 為什麼把 hermes 接到 Telegram</h2>
+          <p>1 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p>Lesson 1 你已經在 WSL 裡裝好 hermes、做過第一次對話。但你只能坐在電腦前面跟它講話——這堂 30–45 分鐘的延伸課要把這個限制拿掉：<strong>把 hermes 接到 Telegram，從手機就能跟它對話</strong>。</p>
+
+      <h3>結束時你會有</h3>
+      <ol>
+        <li>✓ 一支自己的 Telegram bot（透過 BotFather 申請）</li>
+        <li>✓ 你自己的 Telegram user_id（讓 bot 只回你一個人）</li>
+        <li>✓ <code>hermes gateway</code> 在 WSL 背景跑著</li>
+        <li>✓ 至少一次「手機傳訊 → bot → hermes 回覆」的完整來回</li>
+      </ol>
+
+      <h3>限制：機器要開著</h3>
+      <p>本堂用的是 <strong>polling 模式</strong>（hermes 每隔幾秒主動問 Telegram「有新訊息嗎」），所以你的 Windows + WSL 必須開著、gateway 必須跑著，bot 才有回應。Windows 重啟後 gateway 會掛掉、要手動重跑。<strong>「24/7 不間斷服務 / 自動啟動 / 雲端部署」不在本堂範圍</strong>，留給後續課程。</p>
+
+      <details>
+        <summary>已經在 Lesson 1 Step 9 加碼 B 申請過 token？</summary>
+        <p>很好——Step 2 你可以直接跳到「貼到 Notes 暫存」那段，不必重做 BotFather 流程。沒做過也沒關係，Step 2 會帶你完整走一次。</p>
+      </details>
+
+      <details>
+        <summary>沒做過 Lesson 1？</summary>
+        <p>本堂預設你已完成 Lesson 1（hermes 在 WSL 裝好、可對話）。沒做過請先去 <a href="index.html">Lesson 1</a>，再回來。</p>
+      </details>
     </section>
 
     <section class="step" data-step="1" hidden>

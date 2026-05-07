@@ -33,7 +33,7 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 
 1. `index.html` 用 `<section class="step" data-step="N">` 切出區塊：`data-step="0"` 是前言（為什麼選 hermes），`data-step="1"` 到 `data-step="9"` 是安裝流程。**只有當前步驟 visible，其他 `hidden`。**
 2. `wizard.js` 用 URL hash (`#step-N`) 當 source of truth，配合 `localStorage['hermes-course-step']` 記住進度（學員重啟 Windows 後回來會自動跳回正確步驟）。預設首頁是 Step 0；範圍檢查為 `n >= 0 && n <= TOTAL_STEPS`。
-3. **`TOTAL_STEPS = 9` 在 `wizard.js` 是硬編碼**：它代表「安裝步驟數」，不含 Step 0。新增/刪除安裝步驟時必須同步改這個常數，並對應改 index.html 裡每個 step 標題的 `Step N / 9` 文字。
+3. **`TOTAL_STEPS` 與 `STORAGE_KEY` 從 `<body>` data-attributes 讀**：`wizard.js` 不再硬編碼，每支 lesson HTML 用 `<body data-total-steps="N" data-storage-key="...">` 自己宣告。新增 / 刪除 lesson 步驟時改 `<body>` attribute + 同步改該頁所有 `Step N / X` 文字。**不要在 wizard.js 寫 fallback**：fail loud 是設計，attribute 漏寫應該讓 console 噴錯而不是降級。
 4. 進度文字 (`#progress-text`)：Step 0 顯示「前言」，Step 1–9 顯示 `Step N / 9`。
 5. 任何 `<pre data-copy>` 區塊會被 `wizard.js` 自動注入「Copy」按鈕。新增可複製指令時用這個 attribute，不要自行加按鈕 markup。
 
@@ -72,3 +72,12 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 
 - **Step 7「補救：直接改 hermes 的 .env」section（Variant A / B 兩個 sed 腳本）** ← 被 Step 8「我卡住了」的 400 error 條目直接引用。改寫或搬位置時必須同步更新 Step 8 的指路文字。
 - 該 sed 腳本（含 `export` 前綴的替換寫法）是 hermes 上游官方暫未修正 paste 問題的**繞行解**，**寫法原樣引用、不可擅自簡化**（例如不要拿掉 `export`、不要改 sed delimiter）。
+
+### Lesson 之間（index.html ↔ lesson-2.html）
+
+- **Lesson 1 `index.html` Step 9 加碼 B 末段** → 連到 `lesson-2.html`。改寫加碼 B 時必須保留這個出口。
+- **Lesson 2 `lesson-2.html` Step 0 / Step 1** → 提到沒做過 Lesson 1 請先去 `index.html`。改 Step 0 / Step 1 文案時保留這個 fallback 連結。
+- **Lesson 2 Step 4 補救 section** → cross-ref `index.html#step-7`，提示是同根因（hermes 上游 paste 雷）。Lesson 1 Step 7 搬位置或 anchor 改名時，Lesson 2 Step 4 的連結要對應改。
+- Lesson 2 Step 4 的兩段 sed 補救（Variant A 互動 + Variant B 手動範本）跟 Lesson 1 Step 7 同模式但操作不同變數（`TELEGRAM_BOT_TOKEN` / `TELEGRAM_ALLOWED_USERS`，含 `export`）—— **寫法原樣引用、不可擅自簡化**。
+- **Lesson 2 Step 5 用 hermes 原生 lifecycle**（`hermes gateway run` / `status` / `stop` / `restart`，log 路徑 `~/.hermes/logs/gateway.log`），`pkill` 只當 fallback。`hermes gateway install`（systemd 24/7 服務）是「out of scope, 留給後續課程」——加碼 5 提及但不展開。
+- **Lesson 2 Variant A sed 用 `USER_ID` 變數名**（不是 `UID`，因為 `UID` 是 bash readonly built-in，會靜默賦值失敗導致 .env 寫入學員的系統 UID 數字）。修補救腳本時切勿改回 `UID`。

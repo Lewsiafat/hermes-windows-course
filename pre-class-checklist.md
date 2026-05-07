@@ -48,6 +48,74 @@ ls ~/.hermes/.env && grep '^OPENROUTER_API_KEY=' ~/.hermes/.env
 
 若 hermes 改了 config 路徑或變數名 → Step 7 補救 section 的 sed 與 Step 8 的 400 troubleshooting 都要重抓。
 
+## Lesson 2 必檢項（Telegram 整合）
+
+每次教學前若會教到 Lesson 2，這幾條一起跑：
+
+### 1. BotFather 主教材連結還活著
+
+```bash
+curl -I https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。
+若 4xx/5xx：lesson-2.html Step 2 的 `<details>` 備援文案就是 fallback；告訴學員直接看那個。
+若主機完全打不到（`Could not resolve host`）：考慮是否要把 Step 2 主流程改用 inline 備援。
+
+### 2. @userinfobot 仍可用
+
+手機 Telegram 開 https://t.me/userinfobot → `/start`。
+預期：回一段含 `Id: 數字` 的訊息。
+若 bot 不在了：找替代品（如 @username_to_id_bot）並更新 lesson-2.html Step 3。
+
+### 3. `hermes gateway setup` 互動精靈順序
+
+```bash
+hermes gateway setup
+```
+
+走到「選 telegram」那一頁就好（**不必填完**，按 Ctrl+C 中斷）。確認：
+- [ ] 仍可選 `telegram`
+- [ ] 提示順序仍是：選 gateway → 貼 token → 貼 allowed users
+- [ ] 無多出/少了欄位
+
+若改了：lesson-2.html Step 4 的「3 個提示怎麼答」表格要對應改。
+
+### 4. .env 變數名仍是 TELEGRAM_BOT_TOKEN / TELEGRAM_ALLOWED_USERS
+
+跑完一次 setup 後：
+
+```bash
+grep -E '^(export )?TELEGRAM_(BOT_TOKEN|ALLOWED_USERS)=' ~/.hermes/.env
+```
+
+預期：兩行都在。
+若變數名變了：lesson-2.html Step 4 的兩段 sed 補救（Variant A / B）一起改。
+
+### 5. `hermes gateway` 原生 lifecycle 仍在、polling 預設沒變
+
+```bash
+hermes gateway --help | grep -E '\b(run|status|stop|restart)\b'
+```
+
+預期：四個 subcommand 都列出。
+
+實際跑一次：
+
+```bash
+nohup hermes gateway run > /dev/null 2>&1 &
+sleep 3
+hermes gateway status
+tail -n 30 ~/.hermes/logs/gateway.log
+hermes gateway stop
+```
+
+預期：
+- [ ] `status` 報 `✓ Gateway is running (PID: ...)`、註明 `(Running manually, not as a system service)`
+- [ ] log 在 `~/.hermes/logs/gateway.log` 有新行、無 401 / 409 / fatal
+- [ ] log 顯示在 polling 模式（而非 webhook 之類）
+- [ ] `hermes gateway stop` 後再 `hermes gateway status` 應該報 stopped
+
 ## 截圖檢查
 
 依 spec §8.1 走過 `assets/screenshots/`：

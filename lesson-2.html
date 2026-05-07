@@ -350,11 +350,70 @@
     <section class="step" data-step="7" hidden>
       <header>
         <hgroup>
-          <h2>Step 7 / 7 · 完成 + 加碼 + 下一步（placeholder，Task 10 補內容）</h2>
+          <h2>Step 7 / 7 · 完成 + 加碼 + 下一步</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p>恭喜，4 個 checkpoints 都完成：</p>
+      <ol>
+        <li>✓ Telegram bot 已申請、token 在手</li>
+        <li>✓ user_id 已寫進 hermes allowlist</li>
+        <li>✓ <code>hermes gateway</code> 在背景跑著</li>
+        <li>✓ 至少一次「手機 → bot → hermes 回覆」完成</li>
+      </ol>
+
+      <h3>建議下一步</h3>
+      <ul>
+        <li>把 <code>nohup hermes gateway run &gt; /dev/null 2&gt;&amp;1 &amp;</code> 這行也存到記事本——Windows 重啟後要重跑</li>
+        <li>把這個頁面加書籤，下次想複習隨時回來</li>
+      </ul>
+
+      <details>
+        <summary>加碼 1：把 bot 加到 Telegram 群組</summary>
+        <p>讓多人都能跟同一支 hermes 講話：</p>
+        <ol>
+          <li>Telegram 開群組 → 加成員 → 搜你 bot 的 username → 加入</li>
+          <li>BotFather <code>/mybots</code> → 選你的 bot → <code>Bot Settings</code> → <code>Group Privacy</code> → <code>Disable</code>（這樣 bot 才看得到群組裡所有訊息，而不是只 @ 它的）</li>
+          <li>群組裡每個要用 bot 的人都要把自己 user_id 加進 <code>TELEGRAM_ALLOWED_USERS=</code>，逗號分隔。改完 <code>hermes gateway restart</code>。</li>
+        </ol>
+      </details>
+
+      <details>
+        <summary>加碼 2：傳語音訊息</summary>
+        <p>hermes gateway 預設會把語音訊息自動轉文字再丟給模型——直接按 Telegram 對話框右下角的麥克風講就好，不用 <code>/voice</code> 之類指令。</p>
+        <p>轉字準確度看你 OpenRouter 帳號用什麼底層 ASR 模型。中文識別偶爾會不準，講慢一點會比較穩。</p>
+      </details>
+
+      <details>
+        <summary>加碼 3：<code>/new</code> + <code>/title</code> 管理對話</summary>
+        <p>傳 <code>/new</code> → 清掉目前 context，開全新對話（適合切話題、避免歷史污染）。</p>
+        <p>傳 <code>/title 旅遊</code> → 給目前 session 一個名字；之後用 <code>/resume 旅遊</code> 找回。</p>
+        <p>傳 <code>/usage</code> → 看本次 session 用了多少 token、估算花了多少錢。</p>
+      </details>
+
+      <details>
+        <summary>加碼 4：<code>/model</code> 中途切模型</summary>
+        <p>傳 <code>/model</code>（不帶參數）→ 看目前模型。傳 <code>/model openrouter:deepseek/deepseek-r1-distill-llama-70b:free</code> 或 <code>/model anthropic:claude-sonnet-4</code> → 切到那個模型。語法是 <code>/model provider:model</code>。</p>
+        <p>費用敏感的話，預設用 OpenRouter free model、特定問題切貴的。</p>
+        <p><strong>注意：</strong>只能切已經設定過的 provider。要新增 provider 請退出 chat、在 terminal 跑 <code>hermes model</code> 設定。</p>
+      </details>
+
+      <details>
+        <summary>加碼 5：把 gateway 變成 24/7 服務（hermes 內建）</summary>
+        <p>不想每次 Windows 重啟都重跑 nohup？hermes 自己有：</p>
+        <pre data-copy><code>hermes gateway install</code></pre>
+        <p>會在你的 user 帳號下裝 systemd 服務（前提是 WSL2 啟用了 systemd）。裝完用 <code>hermes gateway start</code> / <code>stop</code> / <code>restart</code> 管理。</p>
+        <p>但 systemd 在 WSL 上要先啟用（編輯 <code>/etc/wsl.conf</code> 加 <code>[boot]\nsystemd=true</code> 後 PowerShell 跑 <code>wsl --shutdown</code>），且 24/7 跑著有資源、安全、啟動順序的 trade-off。<strong>本堂不展開</strong>，留給後續「hermes 24/7 部署」專題。</p>
+      </details>
+
+      <h3>下次預告</h3>
+      <ul>
+        <li><strong>Lesson 3 · hermes 日常使用入門</strong>：context 管理、skills、cron、background sessions 完整介紹</li>
+        <li><strong>Lesson 4 · LINE gateway 設定</strong>：把同一支 hermes 也接到 LINE，讓 LINE 朋友也能用</li>
+      </ul>
+
+      <p><em>到這邊就是 Lesson 2 的全部內容。下次見。</em></p>
     </section>
 
     <nav id="step-nav" class="container">

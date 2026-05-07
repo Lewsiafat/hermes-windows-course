@@ -1,5 +1,5 @@
-const TOTAL_STEPS = 9;
-const STORAGE_KEY = 'hermes-course-step';
+const TOTAL_STEPS = parseInt(document.body.dataset.totalSteps, 10);
+const STORAGE_KEY = document.body.dataset.storageKey;
 
 function getCurrentStep() {
   const hashMatch = window.location.hash.match(/^#step-(\d+)$/);

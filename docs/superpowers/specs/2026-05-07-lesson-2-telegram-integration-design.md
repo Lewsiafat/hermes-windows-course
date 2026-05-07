@@ -76,7 +76,7 @@
 | **2** | 申請 Telegram bot | 5 min | BotFather → `/newbot` → 拿 token。**主流程外連**舊教材 `https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html`，這頁只放 2–3 句速覽 + 提醒暫存 token |
 | **3** | 拿你的 Telegram user_id | 2 min | 找 [@userinfobot](https://t.me/userinfobot) → `/start` → 抄純數字。`<details>` 解釋 user_id 是什麼、為什麼要它（allowlist） |
 | **4** | `hermes gateway setup` | 8 min | 跑 `hermes gateway setup` → 選 telegram → 貼 token → 貼 user_id → Setup complete!。Paste 失敗有雷（同 Lesson 1 Step 7），補救方案：sed 改 `~/.hermes/.env` 的 `TELEGRAM_BOT_TOKEN=` / `TELEGRAM_ALLOWED_USERS=` 兩行（**Variant A 互動 + Variant B 手動範本** 兩個版本，跟 Lesson 1 Step 7 同模式） |
-| **5** | 啟動 `hermes gateway`（背景） | 5 min | `nohup hermes gateway > ~/.hermes/gateway.log 2>&1 &`。確認跑著 `pgrep -af gateway`；看 log `tail -f ~/.hermes/gateway.log`；停掉 `pkill -f "hermes gateway"`。**`<details>` 解釋 nohup / & / > file 2>&1**。**`<details>` 誠實說 Windows 重啟會掛 gateway、要重跑；自動啟動留給後續課程**。 |
+| **5** | 啟動 `hermes gateway`（背景） | 5 min | 先前景試跑 `hermes gateway run`（看啟動 banner、Ctrl+C 停）；再背景跑 `nohup hermes gateway run > /dev/null 2>&1 &`（hermes 自己寫 log 到 `~/.hermes/logs/gateway.log`，所以 stdout/stderr 丟 `/dev/null`）。狀態 `hermes gateway status`；看 log `tail -f ~/.hermes/logs/gateway.log`；停掉 `hermes gateway stop`（萬一不行 fallback 用 `pkill -f "hermes gateway"`）。**`<details>` 解釋 `nohup` / `&` / `> /dev/null 2>&1`**。**`<details>` 誠實說 Windows 重啟會掛 gateway、要重跑；hermes 內建 `gateway install` 可裝 systemd 服務 24/7，但超出本堂範圍**。 |
 | **6** | 第一次手機 ↔ hermes | 5 min | Telegram 搜 bot username → `/start` → 傳訊。練習多輪對話確認 context 連動。我卡住了：沒回應 / Unauthorized / bot 找不到 |
 | **7** | 完成 + 加碼 + 下一步 | 5 min | ✓ 4 checkpoints。`<details>` 加碼：群組、語音、`/topic`、`/model`。下次預告：**Lesson 3 hermes 日常使用入門**、**Lesson 4 LINE gateway 設定** |
 
@@ -123,7 +123,8 @@ Step 0 仍是「前言頁」，不算進 TOTAL_STEPS、為各自精靈的預設�
 - **BotFather 申請流程**：Step 2 主動作外連 `https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html`，不重做截圖、不複製文字。這頁只放 2–3 句速覽提示「拿到 token 暫存到 Notes」。
 - **`<details>` UX 模式**：沿用 Lesson 1 既有的「等待時可順便讀」「🚨 我卡住了」風格，不新發明。
 - **`pre[data-copy]` Copy 按鈕**：`wizard.js` 既有功能直接適用，不必改。
-- **paste 失敗補救 sed**：跟 Lesson 1 Step 7 同模式（`cd ~/.hermes && sed ...`），但操作的兩行是 `TELEGRAM_BOT_TOKEN=` 與 `TELEGRAM_ALLOWED_USERS=`，不是 `OPENROUTER_API_KEY=`。Step 4 cross-ref Lesson 1 Step 7 給有興趣的學員看完整邏輯。
+- **paste 失敗補救 sed**：跟 Lesson 1 Step 7 同模式（`cd ~/.hermes && sed ...`），但操作的兩行是 `TELEGRAM_BOT_TOKEN=` 與 `TELEGRAM_ALLOWED_USERS=`，不是 `OPENROUTER_API_KEY=`。Step 4 cross-ref Lesson 1 Step 7 給有興趣的學員看完整邏輯。**保留 Lesson 1 既有的 `export` 前綴 convention**（CLAUDE.md 列為「原樣引用、不可擅自簡化」）——即使 hermes 預設寫的 .env 沒 `export`，加上去無害且維持兩堂一致。
+- **hermes 原生 gateway lifecycle**：`hermes gateway` 本身提供 `run` / `start` / `stop` / `restart` / `status` / `install` 子命令，且自己管 PID lock（`~/.hermes/gateway.pid` / `gateway.lock`）與 log（`~/.hermes/logs/gateway.log`）。Step 5 用 `nohup hermes gateway run > /dev/null 2>&1 &`（背景跑、關 terminal OK）+ `hermes gateway status` / `stop`，把「能用 hermes 原生指令就用」當 default、`pgrep` / `pkill` 當 fallback。
 
 ### 6.4 Lesson 1 ↔ Lesson 2 串接
 
@@ -138,14 +139,14 @@ Step 0 仍是「前言頁」，不算進 TOTAL_STEPS、為各自精靈的預設�
 ### Step 4 paste 失敗 → token 或 user_id 寫錯
 - 跟 Lesson 1 Step 7 同根因（hermes 上游 paste 雷）。Step 4 的補救 section 處理。
 
-### Step 5 跑 `hermes gateway` 立刻 401
-- token 寫錯。`pkill` 砍掉、回 Step 4 用 sed 補救改 `TELEGRAM_BOT_TOKEN=`、再背景跑一次。
+### Step 5 跑 `hermes gateway run` 立刻 401
+- token 寫錯。`hermes gateway stop`（或 fallback `pkill -f "hermes gateway"`）砍掉、回 Step 4 用 sed 補救改 `TELEGRAM_BOT_TOKEN=`、再背景跑一次。
 
-### Step 5 background 跑了兩次以上
-- log 會出現 token 衝突 / Telegram 409 conflict。`pgrep -af gateway` 看到多隻 → `pkill -f "hermes gateway"` 全砍、重背景跑一次。
+### Step 5 重複啟動
+- hermes 有 PID lock（`~/.hermes/gateway.pid` / `gateway.lock`），第二隻會被擋下、輸出 `Gateway already running (PID ...)`。看到這訊息：要嘛 `hermes gateway restart` 直接重啟、要嘛 `hermes gateway stop` 後再背景跑一次。
 
 ### Step 6 從手機傳訊沒回應
-- 最有效 debug：去看 `~/.hermes/gateway.log`。
+- 最有效 debug：去看 `~/.hermes/logs/gateway.log`（hermes 原生 log 路徑）。
 - 常見三類：
   - log 顯示 unauthorized user → user_id 寫錯，回 Step 4
   - log 沒新訊息 → bot 找錯了（username 不對）或 polling 卡住
@@ -155,7 +156,7 @@ Step 0 仍是「前言頁」，不算進 TOTAL_STEPS、為各自精靈的預設�
 - Step 0 / Step 1 已明示前置；學員若直接進 lesson-2.html 會看到提示連回 Lesson 1。
 
 ### Windows 重啟後 gateway 掛了
-- 在 Step 5 `<details>` 誠實說明，告知重新登入 Ubuntu 後跑同一行 `nohup ... &` 即可。**不教自動啟動**——保留給後續課程。
+- 在 Step 5 `<details>` 誠實說明，告知重新登入 Ubuntu 後跑同一行 `nohup hermes gateway run > /dev/null 2>&1 &` 即可。**不教自動啟動**——`hermes gateway install --system` 雖然 hermes 內建可裝 systemd，但 24/7 / 開機自動啟動的 trade-off（資源、安全、啟動順序）值得整堂課展開，留給後續課程。
 
 ---
 
@@ -166,11 +167,12 @@ Step 0 仍是「前言頁」，不算進 TOTAL_STEPS、為各自精靈的預設�
 - [ ] @userinfobot 仍可用、回應仍是純數字 user_id
 - [ ] `hermes gateway setup` 互動精靈仍存在、欄位仍是 token + allowed users
 - [ ] `~/.hermes/.env` 變數名仍是 `TELEGRAM_BOT_TOKEN` 與 `TELEGRAM_ALLOWED_USERS`（hermes 上游若改名要同步改 Step 4 補救 sed）
-- [ ] `hermes gateway` 預設仍是 polling、跑得起來
+- [ ] `hermes gateway run` / `status` / `stop` 三個 native 子命令都還在、`status` 仍能識別 manual mode
+- [ ] hermes 仍把 log 寫到 `~/.hermes/logs/gateway.log`、PID lock 仍在 `~/.hermes/gateway.pid`、polling 仍是預設
 
 ### 完整流程（教學前 / hermes 大改版後）
 - 從 Lesson 1 結尾接著走 Lesson 2 全 7 步、傳訊成功一次
-- 確認 `nohup ... &` 後關 Ubuntu 視窗、再開、gateway 還在跑
+- 確認 `nohup hermes gateway run > /dev/null 2>&1 &` 後關 Ubuntu 視窗、再開、`hermes gateway status` 仍報 running
 
 `pre-class-checklist.md` 與 `ai-runbook.md` 對應補項，由 implementation 階段處理（不在本 spec 詳列）。
 
@@ -188,5 +190,10 @@ Step 0 仍是「前言頁」，不算進 TOTAL_STEPS、為各自精靈的預設�
 
 ## 10. 開放問題（implementation 階段需確認）
 
-- **`~/.hermes/gateway.log` 是建議路徑**，hermes 是否預設就有 log 機制？若有原生 log，Step 5 改用原生方式；若無，沿用本 spec 的 redirect 寫法。Smoke test 時跑一次 `hermes gateway --help` 看有沒有 `--log` flag 確認。
-- **BotFather 舊教材若失聯**（`lewsi.ddns.net` 停機、CDN 改變等），Step 2 需要備援文案——implementation 階段補一段 fallback：在 `<details>` 內放精簡 inline 版本（5–6 句速覽 + BotFather 連結 `https://t.me/BotFather`），用作 last resort。
+> **2026-05-07 Smoke Check 結論（Task 0）：**
+> - hermes v0.12.0 (2026.4.30) 確認 `hermes gateway` 有完整原生 lifecycle（`run` / `start` / `stop` / `restart` / `status` / `install`），且自己寫 log 到 `~/.hermes/logs/gateway.log`、自己管 PID lock。spec §5 / §6.3 / §7 / §8 已對應更新成原生指令版，`pgrep` / `pkill` 降為 fallback。
+> - BotFather 舊教材主連結 `https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html` HTTP 200 仍存活。inline `<details>` 備援仍照寫（防失聯）。
+> - `.env` 變數名 `TELEGRAM_BOT_TOKEN` / `TELEGRAM_ALLOWED_USERS` 確認；hermes 預設寫的 .env **不**含 `export` 前綴，但 Lesson 2 Step 4 sed 補救沿用 Lesson 1 Step 7 的 `export` convention（CLAUDE.md 規定原樣引用、加上去無害）。
+> - `hermes gateway --log` flag 不存在——但因為 native log path 已固定，不需要。
+>
+> （原問題作為歷史紀錄留存：`~/.hermes/gateway.log` 路徑假設、`--log` flag 確認、BotFather 連結存活、`export` 前綴 convention）。

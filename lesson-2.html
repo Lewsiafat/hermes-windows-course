@@ -92,11 +92,51 @@
     <section class="step" data-step="2" hidden>
       <header>
         <hgroup>
-          <h2>Step 2 / 7 · 申請 Telegram bot（placeholder，Task 5 補內容）</h2>
+          <h2>Step 2 / 7 · 申請 Telegram bot</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
-      <p>placeholder</p>
+
+      <p>Telegram 的 bot 申請流程超簡單，2 分鐘搞定：跟 <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> 講話、回答幾個問題、拿到一段 token。</p>
+
+      <h3>跟著走</h3>
+      <p>已經有一份完整的中文教材，<strong>照著做就好</strong>：</p>
+
+      <p><a href="https://lewsi.ddns.net/clawfactory/guides/telegram_bot_tutorial_zh.html" target="_blank" rel="noopener"><strong>→ 開啟 Telegram Bot 申請教材</strong></a></p>
+
+      <p>跟完到「拿到 HTTP API token」那一步即可，<strong>token 暫存到記事本</strong>，等下 Step 4 要貼進去。</p>
+
+      <details>
+        <summary>token 長什麼樣？</summary>
+        <p>BotFather 回的 token 大概長這樣：</p>
+        <pre><code>1234567890:ABCdefGHIjklMNOpqrsTUVwxyz0123456789</code></pre>
+        <p>冒號前是 bot 的數字 ID，冒號後是 secret。<strong>整段都要</strong>。</p>
+      </details>
+
+      <details>
+        <summary>🚨 主連結打不開（lewsi.ddns.net 失聯）</summary>
+        <p>備援精簡版，5 句搞定：</p>
+        <ol>
+          <li>手機/電腦 Telegram 開 <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a></li>
+          <li>送 <code>/newbot</code></li>
+          <li>填 bot 顯示名稱（任意，例：<code>my-hermes</code>）</li>
+          <li>填 bot username（必須以 <code>_bot</code> 或 <code>bot</code> 結尾，且全網唯一，例：<code>my_hermes_xyz_bot</code>）</li>
+          <li>BotFather 回的訊息裡會有一段 <strong>HTTP API token</strong>，整段複製到記事本</li>
+        </ol>
+        <p>username 取太常見的會撞名，加亂數或日期通常就過了。</p>
+      </details>
+
+      <details>
+        <summary>BotFather 還能做什麼？（之後想玩再回來）</summary>
+        <ul>
+          <li><code>/setname</code>：改顯示名稱</li>
+          <li><code>/setdescription</code>：改 bot 自我介紹</li>
+          <li><code>/setuserpic</code>：換頭像</li>
+          <li><code>/mybots</code>：列出你所有 bot</li>
+        </ul>
+      </details>
+
+      <p>✓ token 在手了？接著 Step 3。</p>
     </section>
 
     <section class="step" data-step="3" hidden>

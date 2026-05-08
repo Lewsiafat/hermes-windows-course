@@ -371,6 +371,46 @@
         <li>✓ 至少一次「手機 → bot → hermes 回覆」完成</li>
       </ol>
 
+      <h3>日常常用指令速查</h3>
+
+      <h4>📱 Telegram 對話指令</h4>
+      <table>
+        <thead><tr><th>指令</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>/new</code></td><td>清掉目前 context，開全新對話（切話題必用）</td></tr>
+          <tr><td><code>/title 名稱</code></td><td>幫目前 session 取名，方便之後找回來</td></tr>
+          <tr><td><code>/resume 名稱</code></td><td>找回某個舊 session，繼續對話</td></tr>
+          <tr><td><code>/sessions</code></td><td>列出所有 session 名稱</td></tr>
+          <tr><td><code>/usage</code></td><td>查本次 session 的 token 用量與費用估算</td></tr>
+          <tr><td><code>/model</code></td><td>查目前使用的模型</td></tr>
+          <tr><td><code>/model provider:model</code></td><td>切換模型，例如 <code>/model openrouter:deepseek/deepseek-r1-distill-llama-70b:free</code></td></tr>
+          <tr><td><code>/help</code></td><td>列出所有可用指令</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🖥 Terminal：Gateway 管理</h4>
+      <table>
+        <thead><tr><th>指令</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>sudo $(which hermes) gateway status --system</code></td><td>查 gateway 是否在跑</td></tr>
+          <tr><td><code>sudo $(which hermes) gateway restart --system</code></td><td>重啟 gateway（改設定後必跑）</td></tr>
+          <tr><td><code>sudo $(which hermes) gateway stop --system</code></td><td>停掉 gateway</td></tr>
+          <tr><td><code>sudo $(which hermes) gateway start --system</code></td><td>啟動 gateway</td></tr>
+          <tr><td><code>tail -f ~/.hermes/logs/gateway.log</code></td><td>即時看 gateway log（Ctrl+C 退出）</td></tr>
+        </tbody>
+      </table>
+
+      <h4>🔧 Terminal：hermes CLI 常用</h4>
+      <table>
+        <thead><tr><th>指令</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>hermes model</code></td><td>新增 / 管理 AI provider 與 API key</td></tr>
+          <tr><td><code>hermes gateway setup</code></td><td>重新設定 gateway（換 token 或新增 channel）</td></tr>
+          <tr><td><code>hermes --version</code></td><td>查目前 hermes 版本</td></tr>
+          <tr><td><code>npm update -g @nousresearch/hermes</code></td><td>升級 hermes 到最新版</td></tr>
+        </tbody>
+      </table>
+
       <h3>建議下一步</h3>
       <ul>
         <li>Gateway 已裝成 System service，Windows 重啟後會自動跑，不需要手動重啟</li>
@@ -396,8 +436,9 @@
       <details>
         <summary>加碼 3：<code>/new</code> + <code>/title</code> 管理對話</summary>
         <p>傳 <code>/new</code> → 清掉目前 context，開全新對話（適合切話題、避免歷史污染）。</p>
-        <p>傳 <code>/title 旅遊</code> → 給目前 session 一個名字；之後用 <code>/resume 旅遊</code> 找回。</p>
+        <p>傳 <code>/title 旅遊</code> → 給目前 session 一個名字；之後用 <code>/resume 旅遊</code> 找回，<code>/sessions</code> 列出所有已命名的 session。</p>
         <p>傳 <code>/usage</code> → 看本次 session 用了多少 token、估算花了多少錢。</p>
+        <p>更多指令參考上方「日常常用指令速查」表。</p>
       </details>
 
       <details>
@@ -408,10 +449,11 @@
       </details>
 
       <details>
-        <summary>管理 gateway 服務的指令</summary>
-        <pre data-copy><code>sudo hermes gateway status --system</code></pre>
-        <pre data-copy><code>sudo hermes gateway restart --system</code></pre>
-        <pre data-copy><code>sudo hermes gateway stop --system</code></pre>
+        <summary>加碼 5：管理 gateway 服務</summary>
+        <p>更多指令請參考上方「日常常用指令速查」的 Terminal 區塊。快速複製用：</p>
+        <pre data-copy><code>sudo $(which hermes) gateway status --system</code></pre>
+        <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+        <pre data-copy><code>sudo $(which hermes) gateway stop --system</code></pre>
       </details>
 
       <h3>下次預告</h3>

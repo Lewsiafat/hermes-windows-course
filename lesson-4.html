@@ -349,7 +349,80 @@ LINE_ALLOW_ALL_USERS len=4</code></pre>
     </section>
 
     <section class="step" data-step="5" hidden>
-      <!-- Task 7 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 5 / 7 · 回 LINE Console 設 webhook + 5 toggles</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>外部教材 Step 6（Bot 回應方式）我們剛剛跳過了，現在 ngrok URL 在手，回去把它填完。</p>
+
+      <h3>1. 進 channel 的 Messaging API 分頁</h3>
+
+      <p>瀏覽器開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">https://developers.line.biz/console/</a> → 你的 Provider → 你的 channel → 點 <strong>Messaging API</strong> 分頁。</p>
+
+      <h3>2. 設 Webhook URL</h3>
+
+      <p>在 <strong>Webhook settings</strong> section：</p>
+      <ol>
+        <li>Webhook URL 欄填：<code>&lt;ngrok URL&gt;/line/webhook</code>
+          <ul>
+            <li>例：<code>https://abcd-12-34-56-78.ngrok-free.app/line/webhook</code></li>
+            <li><strong>結尾必須是 <code>/line/webhook</code>，不要漏 path</strong>。沒這個 path hermes 收不到（其他 path 是給別的 platform 用）。</li>
+          </ul>
+        </li>
+        <li>按 <strong>Update</strong>（或 <em>更新</em>）儲存</li>
+      </ol>
+
+      <div class="notice">
+        ⚠️ <strong>現在還不要按 Verify 按鈕</strong>！Verify 會打你 ngrok URL 看有沒有回應，但現在 hermes gateway 還沒起來，按了一定失敗。Step 6 起動 gateway 後再回來按。
+      </div>
+
+      <h3>3. 5 個 Toggles 對照表</h3>
+
+      <p>同樣在 Messaging API 分頁，下半部有 5 個 toggle，外部教材只教前 3 個；<strong>後 2 個是本課新增</strong>，學員容易漏。</p>
+
+      <table>
+        <thead>
+          <tr><th>Toggle</th><th>設定</th><th>為什麼</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Use webhook</strong></td>
+            <td>ON ✅</td>
+            <td>必開，不然 LINE 根本不會送 webhook 給你</td>
+          </tr>
+          <tr>
+            <td><strong>Auto-reply messages</strong></td>
+            <td>OFF ❌</td>
+            <td>預設 ON 會自動回 LINE 預設客服訊息，蓋掉 hermes 的回應</td>
+          </tr>
+          <tr>
+            <td><strong>Greeting messages</strong></td>
+            <td>OFF ❌</td>
+            <td>預設 ON 加好友時學員會收到 LINE 預設歡迎訊息（不是 hermes 講的），造成困擾</td>
+          </tr>
+          <tr>
+            <td><strong>Webhook redelivery</strong></td>
+            <td>OFF ❌</td>
+            <td>開的話 hermes crash 時 LINE 會重送同訊息 → log 難辨識、bug 會被放大</td>
+          </tr>
+          <tr>
+            <td><strong>Error statistics aggregation</strong></td>
+            <td>ON ✅（隨意）</td>
+            <td>純資料收集，無風險；之後 debug 時友善</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>每個 toggle 我去哪找？</summary>
+        <p>5 個 toggle 都在 Messaging API 分頁，從上往下排列；前 3 個（Webhook / Auto-reply / Greeting）通常在 <em>Response settings</em> 或 <em>Webhook settings</em> 卡片裡；後 2 個（Redelivery / Error statistics）在 <em>Webhook URL</em> 那塊的下方。</p>
+        <p>LINE Console UI 偶爾改版，toggle 排列可能調整；若位置變，找 <em>Webhook</em>、<em>Auto-reply</em>、<em>Greeting</em>、<em>Redelivery</em>、<em>Error</em> 五個關鍵字即可。</p>
+      </details>
+
+      <p>✓ webhook URL 已存、5 個 toggle 已設。Verify 按鈕<strong>下一步</strong>啟動 gateway 後再回來按。</p>
     </section>
 
     <section class="step" data-step="6" hidden>

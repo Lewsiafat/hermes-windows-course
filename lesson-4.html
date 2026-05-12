@@ -106,7 +106,61 @@
     </section>
 
     <section class="step" data-step="2" hidden>
-      <!-- Task 4 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 2 / 7 · 申請 LINE bot</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>LINE Developers Console 的 bot 申請流程已有完整中文外部教材，<strong>照著做就好</strong>：</p>
+
+      <p><a href="https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html" target="_blank" rel="noopener"><strong>→ 開啟 LINE Bot 申請教材</strong></a></p>
+
+      <div class="notice">
+        ⚠️ <strong>走到外部教材第 5 步「取得 Channel Access Token」結束就停下，回來 Step 3。</strong>外部教材的 step 6（設定 Bot 回應方式 — webhook + toggles）<strong>先不要做</strong>，因為現在還沒 ngrok URL 可填；Lesson 4 Step 5 才會回去處理。
+      </div>
+
+      <h3>結束時你應該有</h3>
+      <ul>
+        <li><strong>Channel Access Token</strong>（長 ~170 字元的 base64 字串）</li>
+        <li><strong>Channel Secret</strong>（32 hex 字元）</li>
+        <li><strong>Bot basic ID</strong>（@ 開頭，例：<code>@123abcde</code>）— 在 LINE Console → Messaging API 分頁的 <em>Bot information</em> 區塊可看到</li>
+      </ul>
+
+      <details>
+        <summary>token / secret 安全提醒（重要）</summary>
+        <ul>
+          <li>三樣都是 <strong>secret</strong>，<strong>不要截圖共享、不要 commit 進 git、不要貼進公開聊天</strong></li>
+          <li>Step 4 填進 <code>.env</code> 時用 <code>nano</code>，<strong>不要</strong> <code>echo</code> 或命令列 paste（避免進 shell history）</li>
+          <li>若不小心外洩：LINE Console → Channel settings → <em>Issue / reissue</em> 按鈕作廢舊 token、重發新的</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>🚨 主連結打不開（lewsi.ddns.net 失聯）</summary>
+        <p>備援精簡版，6 句搞定：</p>
+        <ol>
+          <li>瀏覽器開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">https://developers.line.biz/console/</a></li>
+          <li>用 LINE 帳號或 LINE Business ID 登入</li>
+          <li>建立 Provider（沒有就 <em>Create</em>，名字任意，例：<code>my-hermes</code>）</li>
+          <li>進 Provider → <em>Create a Messaging API channel</em>，填名稱、icon 隨意</li>
+          <li>進 channel → <strong>Basic settings</strong> 分頁，看到 <strong>Channel secret</strong>（32 hex），複製暫存</li>
+          <li>進 channel → <strong>Messaging API</strong> 分頁，底端 <em>Channel access token</em> 區塊按 <em>Issue</em>，複製產出的 ~170 字元 token 暫存</li>
+        </ol>
+        <p>進階設定（webhook 與 toggles）Step 5 才碰。</p>
+      </details>
+
+      <details>
+        <summary>Bot basic ID 跟 Channel ID 怎麼分？</summary>
+        <p>LINE Console 一個 channel 會有兩種 ID，很容易混：</p>
+        <ul>
+          <li><strong>Bot basic ID</strong>：以 <code>@</code> 開頭、6–9 字元（例：<code>@123abcde</code>），這是學員手機 LINE 搜尋 bot 用的對外 ID。看 Messaging API 分頁的 <em>Bot information</em>。</li>
+          <li><strong>Channel ID</strong>：純數字（10 位數），管理用，本堂用不到。</li>
+        </ul>
+      </details>
+
+      <p>✓ token 跟 secret 都暫存到記事本，接著 Step 3 裝 ngrok。</p>
     </section>
 
     <section class="step" data-step="3" hidden>

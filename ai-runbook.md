@@ -539,6 +539,102 @@ git push origin main
 
 ---
 
+## Lesson 4 · Stage 18–24（LINE 整合）
+
+對應 lesson-4.html 的 Step 0–7。本 Part 假設 Lesson 1 + Lesson 2 已驗證過、hermes / Telegram 都跑著。
+
+## Stage 18 · 開啟 lesson-4.html、走 Step 0–1
+
+1. 開 https://lewsiafat.github.io/hermes-windows-course/lesson-4.html
+2. Step 0：前言、結束時你會有
+3. Step 1：4 條前置 checklist 顯示、7 步預告、OpenRouter 警告
+
+截圖：`step-4-0-preface.png`、`step-4-1-checklist.png`
+
+## Stage 19 · 申請 LINE bot（Step 2）
+
+1. 開外部教材 `https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html`
+2. 走到 step 5「取得 Channel Access Token」
+3. 暫存：Channel Access Token (~170 字元)、Channel Secret (32 hex)、Bot basic ID (`@xxx`)
+
+截圖：`step-4-2-line-console-tokens.png`（兩段 token 已模糊 redact）
+
+## Stage 20 · 裝 ngrok + authtoken（Step 3）
+
+```
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrok
+ngrok version
+# 開 https://dashboard.ngrok.com → Your Authtoken → 複製
+ngrok config add-authtoken <token>
+```
+
+預期：`Authtoken saved to configuration file: ~/.config/ngrok/ngrok.yml`
+
+截圖：`step-4-3-ngrok-installed.png`、`step-4-3-authtoken-saved.png`
+
+## Stage 21 · 開 ngrok tunnel + 寫 .env（Step 4）
+
+Window B：
+
+```
+ngrok http 8646
+# 抄 Forwarding 那行 URL
+```
+
+Window A：
+
+```
+nano ~/.hermes/.env
+# 檔尾 append LINE block
+awk -F= '/^LINE_/{print $1, "len="length($2)}' ~/.hermes/.env
+```
+
+預期 5 行 LINE_* 都列出、token len ~170、secret len=32。
+
+截圖：`step-4-4-ngrok-panel.png`（URL redact）、`step-4-4-redacted-verify.png`
+
+## Stage 22 · LINE Console webhook + 5 toggles（Step 5）
+
+回 LINE Console → Messaging API → Webhook URL 填 `<ngrok>/line/webhook` → 5 toggles 對應設定。
+
+**先不要按 Verify**。
+
+截圖：`step-4-5-webhook-url.png`、`step-4-5-toggles.png`
+
+## Stage 23 · 啟動 gateway + 手機 smoke + UID 收緊（Step 6）
+
+Window C：
+
+```
+hermes gateway run
+```
+
+預期 log 含 `✓ line connected`。
+
+回 LINE Console 按 Verify → ✅ Success。
+
+手機掃 QR code 加 bot → 送「測試」→ Window C log 出現 inbound U-ID → 收下。
+
+Window A：
+
+```
+cd ~/.hermes && read -p "Paste your LINE User ID (U<32-hex>): " USER_ID && sed -i "s|^LINE_ALLOWED_USERS=.*|LINE_ALLOWED_USERS=$USER_ID|" .env && sed -i 's|^LINE_ALLOW_ALL_USERS=.*|LINE_ALLOW_ALL_USERS=false|' .env && grep -E '^LINE_(ALLOWED_USERS|ALLOW_ALL_USERS)' .env && unset USER_ID
+```
+
+預期：`LINE_ALLOWED_USERS=U...`、`LINE_ALLOW_ALL_USERS=false`。
+
+Window C 重啟 gateway，手機再送一句 → 仍收到回應。
+
+截圖：`step-4-6-gateway-banner.png`、`step-4-6-verify-success.png`、`step-4-6-phone-reply.png`（U-ID redact）
+
+## Stage 24 · 收尾（Step 7）
+
+確認學員看完 LINE quirks 表（4 條）、知道兩個加碼是 out of scope。
+
+截圖：`step-4-7-completion.png`
+
+---
+
 # Part 2: Quick Smoke Test
 
 每次教學前 10–15 分鐘做完。**不重新捕捉截圖**（除非發現 UI 已改），只驗證 3 個最容易壞的地方。
@@ -682,6 +778,40 @@ hermes gateway stop
 - [ ] `status` 報 running、識別 manual mode
 - [ ] log 路徑仍是 `~/.hermes/logs/gateway.log`
 - [ ] log 無 401 / 409 / fatal、polling 仍是預設
+
+---
+
+## Check 9 · LINE Bot 外部教材連結還活著
+
+```bash
+curl -I https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html
+```
+
+預期 200。失敗：lesson-4.html Step 2 fallback 升主文。
+
+## Check 10 · ngrok apt repo 仍可達
+
+```bash
+curl -I https://ngrok-agent.s3.amazonaws.com/ngrok.asc
+```
+
+預期 200。失敗：更新 lesson-4.html Step 3 安裝指令。
+
+## Check 11 · hermes 升級到最新 release
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+預期：升級成功、版本號顯示。`npm` 權限 / 網路問題 → 排除後再開課。
+
+## Check 12 · hermes gateway 認得 line 平台
+
+```bash
+hermes gateway --help 2>&1 | grep -i line || hermes gateway list-platforms 2>&1
+```
+
+預期：含 `line`。沒有 → 升級 hermes (`npm update -g @nousresearch/hermes`)，仍沒有 → 暫緩開課。
 
 ---
 

@@ -1,0 +1,1522 @@
+# Lesson 4 — LINE Integration Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** 新增 `lesson-4.html` 獨立精靈（Step 0 + 7 步），把已裝好 hermes 的 WSL 機器接到 LINE Messaging API（透過 ngrok 暴露 webhook）；附帶更新 README / pre-class-checklist / ai-runbook / lesson-2 出口連結。
+
+**Architecture:**
+- 純靜態，零 build。新檔 `lesson-4.html` 與 `index.html` / `lesson-2.html` 並列，共用 `style.css`、`wizard.js`（已參數化）、Pico CSS CDN。
+- `wizard.js` 與 `style.css` 完全不動 — 它們已從 `<body data-*>` 讀步數與 storage key。
+- LINE Developers Console 端的 bot 申請流程**外連** `https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html`，並在 `<details>` 內備 fallback 文案。
+- 主流程：3 個 shell window 並用（Window A = hermes CLI / nano、Window B = `ngrok http 8646`、Window C = `hermes gateway run`），手機 LINE 端到端通即達標。
+- systemd 24/7、ngrok URL 自動同步 watcher 全部 out of scope，僅 `<details>` 預告，連結到（尚不存在的）`docs/advanced/lesson-4-systemd.md`。
+
+**Tech Stack:** Vanilla HTML5 + CSS3 (Pico CSS 2.x via CDN) + 共用 `wizard.js` (ES2020)、GitHub Pages 部署。
+
+**Spec:** `docs/superpowers/specs/2026-05-12-lesson-4-line-integration-design.md`
+
+---
+
+## File Structure
+
+```
+hermes-windows-course/
+├── lesson-4.html               # 新建 — Lesson 4 精靈（Step 0 + 7 steps）
+├── lesson-2.html               # Modify — Step 7「下次預告」Lesson 4 條目加上 <a href=lesson-4.html>
+├── index.html                  # 不動（Lesson 1 加碼 B 末段已指向 lesson-2，不再連 lesson-4 避免噪音）
+├── wizard.js                   # 不動
+├── style.css                   # 不動
+├── README.md                   # 結構區補列 lesson-4.html
+├── pre-class-checklist.md      # 加「Lesson 4 必檢項」section
+├── ai-runbook.md               # 加 Stage 18–24 + Check 9–12（接續 Lesson 2 stages 11–17 / checks 5–8）
+└── docs/superpowers/plans/2026-05-12-lesson-4-line-integration.md   # 本檔
+```
+
+**Boundaries:**
+- `lesson-4.html` 擁有 Lesson 4 所有教材文字與結構（包含 ngrok / .env / LINE Console / sed 補救等所有指令字面）。
+- `wizard.js` 完全不動（已參數化，從 `<body data-*>` 讀步數）。
+- `style.css` 不動。
+- Cross-ref：`lesson-2.html` 末段 ↔ `lesson-4.html` 入口；`README.md`、`pre-class-checklist.md`、`ai-runbook.md` 各補一塊 Lesson 4 區。
+
+---
+
+## Spec-to-Plan 決議（spec self-review 整理）
+
+寫 plan 過程中對 spec 內三個輕度模糊處取定明確版本，列在這裡讓執行者照辦：
+
+1. **`data-storage-key` 命名** — Spec §Implementation hints 寫 `lesson-4-step`，但 `index.html` 用 `hermes-course-step`、`lesson-2.html` 用 `hermes-lesson2-step`。**本 plan 採 `hermes-lesson4-step` 沿用既有命名 convention**（`hermes-` 前綴 + lessonN）。
+
+2. **Step 6 收緊 `LINE_ALLOWED_USERS` 的 sed 寫法** — Spec 用 `<貼你的 32-hex user id>` 占位符直接內嵌指令；學員若漏改占位符就 `<>` 會被寫進 .env。**本 plan 改用 `read -p` 互動腳本（mirror lesson-2 Step 4 Variant A）**，且使用 `USER_ID` 變數名（CLAUDE.md 點名 `UID` 是 bash readonly built-in，絕對不可用）。
+
+3. **Step 2 Bot basic ID 取得位置** — Spec 寫「也可從 Messaging API 分頁的 QR code 直接掃」字面上混淆兩件事（QR code 是 Step 6 加好友用的、不是字串型 basic ID）。**本 plan 寫成：basic ID 從 LINE Console > Messaging API 分頁的 “Bot information / Bot basic ID” 欄看；QR code 留到 Step 6 加好友才用。**
+
+不重啟 spec 改寫 — 上述三點是執行細節層，spec 仍可讀。
+
+---
+
+## Pre-task: 建立 feature branch
+
+開工前在 main 上跑：
+
+```bash
+git checkout main && git pull && git checkout -b feat/lesson-4-line-integration
+```
+
+預期：切到 `feat/lesson-4-line-integration`，`git status` 乾淨。
+
+---
+
+## Tasks
+
+### Task 0: Pre-implementation Smoke Check（user-run, 不 commit）
+
+**目的：** 確認 spec §開課前驗證 SOP 提到的 5 條外部依賴仍存在；任何一條失敗都會影響教材的「照著做能跑通」承諾，需要先處置（修教材 / 暫緩開課）才動工。
+
+**Files:** 無修改。本任務是 WSL / 瀏覽器端確認，結果寫進本 plan 檔最末段「Smoke Check Results (YYYY-MM-DD)」。
+
+- [ ] **Step 1: 確認 LINE bot 外部教材主連結仍 200**
+
+Run:
+
+```bash
+curl -I https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html
+```
+
+Expected: `HTTP/2 200` 或 `HTTP/1.1 200 OK`。
+
+若 4xx / 5xx：仍照 plan 寫 `<details>` fallback；若 DNS 完全打不到（`Could not resolve host`）：Step 2 的主流程文案改成「直接看 inline 備援版」並把 `<details>` 內容升到主文。
+
+- [ ] **Step 2: 確認 ngrok apt repo 仍可達**
+
+Run:
+
+```bash
+curl -I https://ngrok-agent.s3.amazonaws.com/ngrok.asc
+```
+
+Expected: `HTTP/1.1 200 OK` 或 `HTTP/2 200`。
+
+若 4xx / 5xx 或 DNS 失敗：ngrok 換了 distribution 方法 → 查 `https://ngrok.com/download` 看新指令，回 Task 5（Step 3）對應改 apt 區塊。
+
+- [ ] **Step 3: 升級 hermes 到最新 release**
+
+Run:
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+Expected: 升級成功、版本號顯示。
+
+若 `npm` 權限 / 網路問題：排除後再開課。學員 Step 1 也會做一次（lesson-4.html 內），這裡是維運者先確認自己環境沒障礙。LINE plugin 必要 fix 已隨較新 release 收錄，課程**不綁定**特定 upstream PR 編號。
+
+- [ ] **Step 4: 確認 hermes gateway 認得 `line` 平台**
+
+Run（hermes 已裝好的 WSL 環境）：
+
+```bash
+hermes gateway --help 2>&1 | grep -i line || hermes gateway list-platforms 2>&1 || echo "fallback: inspect ~/.hermes/.env example block"
+```
+
+Expected: 任一行輸出含 `line` 字串，或 `~/.hermes/.env` example 區段允許 `LINE_*` keys。
+
+若完全沒看到 `line` 字眼：Step 3 升級可能沒生效（npm cache、權限問題）→ 強制重裝：
+
+```bash
+npm uninstall -g @nousresearch/hermes && npm install -g @nousresearch/hermes && hermes --version
+```
+
+仍沒有 → 暫緩開課，回報上游。
+
+- [ ] **Step 5: 確認 dogfood memo 仍在原位**
+
+Run:
+
+```bash
+ls -la docs/improvements/2026-05-11.md && wc -l docs/improvements/2026-05-11.md
+```
+
+Expected: 檔案存在，行數約 485 行。
+
+memo 是 spec 引用的 §B5.1-5.4 / §C2 / §F 等資料來源；若 memo 已刪或大改 → 先看當前內容對齊，再決定要不要改 plan。
+
+- [ ] **Step 6: 把以上 5 條結果寫進本檔最末「Smoke Check Results」section**
+
+在本 plan 檔最後新增 / 更新：
+
+```markdown
+## Smoke Check Results (YYYY-MM-DD)
+
+- 日期：YYYY-MM-DD
+- hermes version: $(hermes --version)
+- Step 1 (LINE 教材 URL): 200 / 4xx / DNS fail
+- Step 2 (ngrok apt repo): 200 / fail
+- Step 3 (hermes upgrade): success / 權限問題 / 網路問題（版本：x.y.z）
+- Step 4 (hermes line platform): YES / NO
+- Step 5 (dogfood memo): 在 / 不在
+- 動作：照計畫進行 / 暫緩 / 修以下 task: ...
+```
+
+本 step **不 commit**。這是任務追蹤，不是版本歷程。
+
+---
+
+### Task 1: 建立 lesson-4.html 骨架（8 個空 section）
+
+**目的：** 拉一份 lesson-2.html 同骨架的空 lesson-4.html，先讓 wizard 能在瀏覽器跑起來（Step 0 / 7 顯示、prev/next 按鈕能跳）。內容 task 2-9 才填。
+
+**Files:**
+- Create: `lesson-4.html`
+
+- [ ] **Step 1: 建立檔案 `lesson-4.html`**
+
+寫入以下內容：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Lesson 4 · LINE 整合</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-total-steps="7" data-storage-key="hermes-lesson4-step">
+  <header class="container">
+    <hgroup>
+      <h1>Lesson 4 · LINE 整合</h1>
+      <p>把 hermes 接到 LINE，60 分鐘</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="step" data-step="0">
+      <!-- Task 2 填這裡 -->
+    </section>
+
+    <section class="step" data-step="1" hidden>
+      <!-- Task 3 填這裡 -->
+    </section>
+
+    <section class="step" data-step="2" hidden>
+      <!-- Task 4 填這裡 -->
+    </section>
+
+    <section class="step" data-step="3" hidden>
+      <!-- Task 5 填這裡 -->
+    </section>
+
+    <section class="step" data-step="4" hidden>
+      <!-- Task 6 填這裡 -->
+    </section>
+
+    <section class="step" data-step="5" hidden>
+      <!-- Task 7 填這裡 -->
+    </section>
+
+    <section class="step" data-step="6" hidden>
+      <!-- Task 8 填這裡 -->
+    </section>
+
+    <section class="step" data-step="7" hidden>
+      <!-- Task 9 填這裡 -->
+    </section>
+
+    <nav id="step-nav" class="container">
+      <button id="prev-btn" type="button">← 上一步</button>
+      <button id="next-btn" type="button" class="primary">下一步 →</button>
+    </nav>
+  </main>
+
+  <footer class="container">
+    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="index.html">← 回 Lesson 1</a> · <a href="lesson-2.html">← 回 Lesson 2</a></small>
+  </footer>
+
+  <script src="wizard.js" defer></script>
+</body>
+</html>
+```
+
+- [ ] **Step 2: 瀏覽器開檔驗證 wizard 啟動**
+
+```bash
+xdg-open lesson-4.html
+```
+
+預期：
+- 標題 "Lesson 4 · LINE 整合" 顯示
+- Step 0 區塊雖空但 wizard 認得（progress text 顯示「前言」）
+- 「下一步 →」按鈕能跳到 Step 1（顯示 `Step 1 / 7`）
+- 按 prev/next 鍵盤鍵可導覽
+- DevTools console 無 error
+
+若有 error（特別是 `TOTAL_STEPS is not a number` 之類）：檢查 `<body data-total-steps="7" data-storage-key="hermes-lesson4-step">` 是否正確；wizard.js 不寫 fallback，attribute 漏寫就會 fail loud。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): scaffold lesson-4.html with empty sections"
+```
+
+---
+
+### Task 2: lesson-4.html Step 0（前言 · 為什麼把 hermes 接到 LINE）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="0">` 區塊
+
+- [ ] **Step 1: 把 Step 0 的 placeholder 換成以下內容**
+
+把：
+
+```html
+    <section class="step" data-step="0">
+      <!-- Task 2 填這裡 -->
+    </section>
+```
+
+換成：
+
+```html
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼把 hermes 接到 LINE</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Lesson 2 你已經把 hermes 接到 Telegram，從手機就能對話。為什麼還要再接 LINE？兩個理由：</p>
+      <ul>
+        <li>LINE 是台 / 港學員每天最常用的 messenger，<strong>比 Telegram 親民</strong>，朋友家人都已經在裡面；</li>
+        <li>接 LINE 後 hermes 真正變「隨身助手」——通勤、會議、走路時都能丟訊息給它處理。</li>
+      </ul>
+
+      <p>Lesson 2 跟本堂的差別：<strong>LINE 強制要求公開 webhook URL</strong>（不像 Telegram 可以長 polling），所以多一層 <code>ngrok</code> 概念——把本機 hermes 暴露給 LINE 雲端。學完本堂你會懂 ngrok 怎麼用，未來想接任何 webhook 平台都用得到。</p>
+
+      <h3>結束時你會有</h3>
+      <ol>
+        <li>✓ 一支自己的 LINE bot 已加為好友、能用手機送訊息給它</li>
+        <li>✓ <code>ngrok</code> tunnel 跑在背景（前景版；24/7 守護是加碼預告）</li>
+        <li>✓ <code>hermes gateway</code> 跑著，會即時把 LINE 訊息 dispatch 給 LLM</li>
+        <li>✓ 知道 LINE 三大 quirks（Markdown 不 render / 雙 send / reply token TTL），不會誤以為 bot 壞了</li>
+      </ol>
+
+      <details>
+        <summary>沒做過 Lesson 1 / 2？</summary>
+        <p>本堂預設你已完成 <a href="index.html">Lesson 1</a>（hermes 在 WSL 裝好、可對話）+ <a href="lesson-2.html">Lesson 2</a>（Telegram bot 端到端可用，已熟悉 <code>.env</code> 與 <code>hermes gateway</code> 概念）。沒做過請先按順序走一遍。</p>
+      </details>
+
+      <details>
+        <summary>為什麼是 ngrok？沒別的選擇嗎？</summary>
+        <p>LINE 雲端只接受公開 HTTPS URL；本機 <code>localhost</code>、內網 IP、HTTP 都不行。</p>
+        <p>選 ngrok 原因：免費、無需架站、一行指令就跑、Linux/WSL 都能用。缺點：免費 tier 的 URL 重啟會變、agent process 死了 tunnel 就斷。本堂教前景版讓你看到全貌；想 24/7 看 Step 7 加碼預告。</p>
+        <p>替代品有 Cloudflare Tunnel、localtunnel、Tailscale Funnel——能用，但本堂選 ngrok 因為註冊最快（GitHub OAuth 30 秒搞定）。</p>
+      </details>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload `lesson-4.html` 確認 Step 0 排版正確**
+
+預期：
+- 「前言 · 為什麼把 hermes 接到 LINE」標題顯示
+- 兩個 `<details>` 預設摺疊，點開能展開
+- 第一個 `<a href="index.html">` 跟 `<a href="lesson-2.html">` 跳轉正常
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 0 preface (why LINE, what you'll have)"
+```
+
+---
+
+### Task 3: lesson-4.html Step 1（開始之前）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="1" hidden>` 區塊
+
+- [ ] **Step 1: 把 Step 1 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 7 · 開始之前</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>動工前先確認 4 件事到位。</p>
+
+      <h3>前置 checklist</h3>
+      <ul>
+        <li>✓ <strong>Lesson 1 完成</strong>：<code>hermes</code> CLI 能對話。沒做過？先去 <a href="index.html">Lesson 1</a>。</li>
+        <li>✓ <strong>Lesson 2 完成</strong>：Telegram bot 端到端可用，已熟悉 <code>~/.hermes/.env</code> 與 <code>hermes gateway</code> 概念。沒做過？先去 <a href="lesson-2.html">Lesson 2</a>。</li>
+        <li>✓ <strong>手機 LINE app 已登入個人帳號</strong>（或一個還沒用過的測試帳號，避免跟個人 ID 撞）。</li>
+        <li>✓ <strong>WSL / Linux shell</strong> 同一個（跟 Lesson 1 / 2 用的）。</li>
+      </ul>
+
+      <h3>動工前升級 hermes 到最新版</h3>
+      <p>LINE plugin 的必要 fix 在較新 release 才完整收錄。動工前先升級到最新版：</p>
+      <pre data-copy><code>npm update -g @nousresearch/hermes &amp;&amp; hermes --version</code></pre>
+      <p>看到新版本號顯示就過了，繼續往下看。</p>
+
+      <h3>這 7 步在做什麼</h3>
+      <ol>
+        <li><strong>Step 2</strong>：到 LINE Developers Console 申請 bot，拿到 Channel Access Token + Channel Secret（外連既有教學）</li>
+        <li><strong>Step 3</strong>：裝 <code>ngrok</code> 並設 authtoken（讓 LINE webhook 能從 internet 打進本機 hermes）</li>
+        <li><strong>Step 4</strong>：開 ngrok tunnel、把 LINE 相關變數寫進 <code>~/.hermes/.env</code></li>
+        <li><strong>Step 5</strong>：回 LINE Console 填 webhook URL + 設 5 個 toggles</li>
+        <li><strong>Step 6</strong>：啟動 <code>hermes gateway</code>、手機送訊息驗證、抓自己 LINE User ID 收緊 allowlist</li>
+        <li><strong>Step 7</strong>：收尾 + LINE quirks 警告 + 進階預告</li>
+      </ol>
+
+      <div class="notice">
+        ⚠️ <strong>本堂會花 OpenRouter credits</strong>：每則手機送出去的訊息都會經 hermes → OpenRouter 扣費。課堂示範請控制在 &lt; 5 則訊息；想用免費 model 請確認 Lesson 1 Step 7 設的是 <code>:free</code> 結尾的 model。
+      </div>
+
+      <details>
+        <summary>會用到 3 個 shell window，先預告</summary>
+        <p>本堂後半段同時跑 3 個程式：</p>
+        <ul>
+          <li><strong>Window A</strong>：你現在這個（給 <code>nano</code>、<code>sed</code>、查 log 用）</li>
+          <li><strong>Window B</strong>：Step 4 開來跑 <code>ngrok http 8646</code>，保留到課程結束</li>
+          <li><strong>Window C</strong>：Step 6 開來跑 <code>hermes gateway run</code>，保留到課程結束</li>
+        </ul>
+        <p>WSL 用 Windows Terminal 開新分頁即可（<kbd>Ctrl+Shift+T</kbd>）。三個 window 不要關，關了就要全部重來。</p>
+      </details>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，按「下一步」進 Step 1，確認排版**
+
+預期：標題 `Step 1 / 7`、4 條 checklist 顯示、7 步預告列出、警告 box 顯示、`<details>` 摺疊正常。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 1 prerequisites checklist + 7-step preview"
+```
+
+---
+
+### Task 4: lesson-4.html Step 2（申請 LINE bot · 外連教學）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="2" hidden>` 區塊
+
+- [ ] **Step 1: 把 Step 2 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 7 · 申請 LINE bot</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>LINE Developers Console 的 bot 申請流程已有完整中文外部教材，<strong>照著做就好</strong>：</p>
+
+      <p><a href="https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html" target="_blank" rel="noopener"><strong>→ 開啟 LINE Bot 申請教材</strong></a></p>
+
+      <div class="notice">
+        ⚠️ <strong>走到外部教材第 5 步「取得 Channel Access Token」結束就停下，回來 Step 3。</strong>外部教材的 step 6（設定 Bot 回應方式 — webhook + toggles）<strong>先不要做</strong>，因為現在還沒 ngrok URL 可填；Lesson 4 Step 5 才會回去處理。
+      </div>
+
+      <h3>結束時你應該有</h3>
+      <ul>
+        <li><strong>Channel Access Token</strong>（長 ~170 字元的 base64 字串）</li>
+        <li><strong>Channel Secret</strong>（32 hex 字元）</li>
+        <li><strong>Bot basic ID</strong>（@ 開頭，例：<code>@123abcde</code>）— 在 LINE Console → Messaging API 分頁的 <em>Bot information</em> 區塊可看到</li>
+      </ul>
+
+      <details>
+        <summary>token / secret 安全提醒（重要）</summary>
+        <ul>
+          <li>三樣都是 <strong>secret</strong>，<strong>不要截圖共享、不要 commit 進 git、不要貼進公開聊天</strong></li>
+          <li>Step 4 填進 <code>.env</code> 時用 <code>nano</code>，<strong>不要</strong> <code>echo</code> 或命令列 paste（避免進 shell history）</li>
+          <li>若不小心外洩：LINE Console → Channel settings → <em>Issue / reissue</em> 按鈕作廢舊 token、重發新的</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>🚨 主連結打不開（lewsi.ddns.net 失聯）</summary>
+        <p>備援精簡版，6 句搞定：</p>
+        <ol>
+          <li>瀏覽器開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">https://developers.line.biz/console/</a></li>
+          <li>用 LINE 帳號或 LINE Business ID 登入</li>
+          <li>建立 Provider（沒有就 <em>Create</em>，名字任意，例：<code>my-hermes</code>）</li>
+          <li>進 Provider → <em>Create a Messaging API channel</em>，填名稱、icon 隨意</li>
+          <li>進 channel → <strong>Basic settings</strong> 分頁，看到 <strong>Channel secret</strong>（32 hex），複製暫存</li>
+          <li>進 channel → <strong>Messaging API</strong> 分頁，底端 <em>Channel access token</em> 區塊按 <em>Issue</em>，複製產出的 ~170 字元 token 暫存</li>
+        </ol>
+        <p>進階設定（webhook 與 toggles）Step 5 才碰。</p>
+      </details>
+
+      <details>
+        <summary>Bot basic ID 跟 Channel ID 怎麼分？</summary>
+        <p>LINE Console 一個 channel 會有兩種 ID，很容易混：</p>
+        <ul>
+          <li><strong>Bot basic ID</strong>：以 <code>@</code> 開頭、6–9 字元（例：<code>@123abcde</code>），這是學員手機 LINE 搜尋 bot 用的對外 ID。看 Messaging API 分頁的 <em>Bot information</em>。</li>
+          <li><strong>Channel ID</strong>：純數字（10 位數），管理用，本堂用不到。</li>
+        </ul>
+      </details>
+
+      <p>✓ token 跟 secret 都暫存到記事本，接著 Step 3 裝 ngrok。</p>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，跳到 Step 2，確認外部連結 / fallback 文案**
+
+預期：標題 `Step 2 / 7`、外部 link 點開新分頁、警告 box 強調「外部 step 5 結束就停」、3 個 `<details>` 各能展開。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 2 LINE bot application (external link + fallback)"
+```
+
+---
+
+### Task 5: lesson-4.html Step 3（裝 ngrok + 設 authtoken）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="3" hidden>` 區塊
+
+- [ ] **Step 1: 把 Step 3 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 7 · 裝 ngrok + 設 authtoken</h2>
+          <p>~7 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>ngrok 是把 LINE 雲端送來的 webhook 訊息轉發到你本機 hermes 的橋樑。LINE 不接受 <code>localhost</code> 或內網 IP，必須公開 HTTPS URL，ngrok free tier 適合學員入門。</p>
+
+      <h3>動作</h3>
+
+      <h4>1. 裝 ngrok（aarch64 / amd64 都用同一個 apt repo）</h4>
+
+      <pre data-copy><code>curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc &gt;/dev/null \
+  &amp;&amp; echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/ngrok.list \
+  &amp;&amp; sudo apt update &amp;&amp; sudo apt install ngrok</code></pre>
+
+      <p>裝完驗證：</p>
+
+      <pre data-copy><code>ngrok version</code></pre>
+
+      <p>預期：<code>ngrok version 3.x.x</code></p>
+
+      <h4>2. 註冊 ngrok 帳號</h4>
+
+      <p>瀏覽器開 <a href="https://dashboard.ngrok.com/signup" target="_blank" rel="noopener">https://dashboard.ngrok.com/signup</a> → 用 GitHub 或 Google OAuth 註冊（最快）→ 進 Dashboard。</p>
+
+      <h4>3. 取 authtoken</h4>
+
+      <p>Dashboard sidebar → <strong>Your Authtoken</strong> → 複製顯示的字串。</p>
+
+      <div class="notice">
+        ⚠️ authtoken 也是 <strong>secret</strong>，<strong>不要截圖、不要 commit、不要貼進公開聊天</strong>。
+      </div>
+
+      <h4>4. 設定 authtoken</h4>
+
+      <p>把剛複製的 authtoken 貼到下面命令的 <code>&lt;your-authtoken&gt;</code> 位置（含 <code>&lt;&gt;</code> 一起換掉），執行：</p>
+
+      <pre data-copy><code>ngrok config add-authtoken &lt;your-authtoken&gt;</code></pre>
+
+      <p>預期輸出：</p>
+
+      <pre><code>Authtoken saved to configuration file: ~/.config/ngrok/ngrok.yml</code></pre>
+
+      <details>
+        <summary>為什麼這步是核心？</summary>
+        <p>ngrok free tier <strong>沒設 authtoken 時 session 撐不過半小時就會斷</strong>；設了之後 session 不會主動 timeout，<strong>agent process 不死就不斷</strong>。</p>
+        <p>學員若把 ngrok 當「打開 tunnel 就好」、忽略 authtoken，下午 bot 就會莫名其妙不回，多半找半天才發現是這個原因。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>apt install 報 GPG key 錯</strong> → 上面 curl 那行的 GPG key 沒下載成功，確認網路後重跑 curl 那段</li>
+          <li><strong>ngrok config add-authtoken 報「invalid authtoken」</strong> → 多半 paste 帶到換行 / 空白；回 Dashboard 重抄一次，paste 時注意去除前後空白</li>
+          <li><strong>ngrok.yml 存到別處</strong> → 預設路徑是 <code>~/.config/ngrok/ngrok.yml</code>；用 <code>cat ~/.config/ngrok/ngrok.yml</code> 看是否存在</li>
+        </ul>
+      </details>
+
+      <p>✓ <code>ngrok version</code> 報 3.x、<code>~/.config/ngrok/ngrok.yml</code> 已存。接著 Step 4 開 tunnel。</p>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，跳到 Step 3，逐一確認 `<pre data-copy>` 都有 Copy 按鈕**
+
+預期：
+- 標題 `Step 3 / 7`
+- 4 個 `<pre data-copy>` 區塊各自有「Copy」按鈕（由 `wizard.js` 自動注入）
+- 點 Copy 能複製對應命令到剪貼簿（瀏覽器可能彈權限提示，按允許）
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 3 ngrok install + authtoken setup"
+```
+
+---
+
+### Task 6: lesson-4.html Step 4（開 ngrok tunnel + 寫 `.env` LINE block + redacted verify）
+
+**目的：** 這是 Lesson 4 最容易踩雷的一步（token paste、ngrok URL 漏抄、變數名拼錯），所以包含 redacted-verify 與 sed 補救 section。
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="4" hidden>` 區塊
+
+- [ ] **Step 1: 把 Step 4 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 7 · 開 ngrok tunnel + 寫 <code>.env</code> LINE block</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>三件事：(1) 第二個 shell 跑 <code>ngrok</code> 抓 public URL、(2) 編輯 <code>~/.hermes/.env</code> 加 LINE 區塊、(3) <strong>redacted verify</strong> 確認都填對沒漏字元（不直接 <code>cat .env</code>，避免 secret 暴露）。</p>
+
+      <h3>1. 第二個 shell（Window B）跑 ngrok</h3>
+
+      <p>開新的 Windows Terminal 分頁（<kbd>Ctrl+Shift+T</kbd>）進 WSL，跑：</p>
+
+      <pre data-copy><code>ngrok http 8646</code></pre>
+
+      <p>ngrok 終端機 panel 出現後，看 <strong>Forwarding</strong> 那行的 URL（類似 <code>https://abcd-12-34-56-78.ngrok-free.app</code>），<strong>完整含 <code>https://</code> 一起抄</strong>，下一步要用。</p>
+
+      <div class="notice">
+        ⚠️ <strong>Window B 不要關</strong>。關了 ngrok agent process 就死、tunnel 斷、LINE 收不到訊息。整堂課保留到 Step 7。
+      </div>
+
+      <details>
+        <summary>看不懂 ngrok panel？</summary>
+        <p>panel 大概長這樣：</p>
+        <pre><code>Session Status                online
+Account                       your-email@example.com (Plan: Free)
+Version                       3.x.x
+Region                        Asia Pacific (ap)
+Forwarding                    https://abcd-12-34-56-78.ngrok-free.app -&gt; http://localhost:8646
+Connections                   ttl     opn     rt1     rt5     p50     p90
+                              0       0       0.00    0.00    0.00    0.00</code></pre>
+        <p>抄 <strong>Forwarding</strong> 那行 <code>-&gt;</code> 左邊的 URL。<strong>不是</strong> <code>http://localhost:8646</code>（那是內網位址）。</p>
+      </details>
+
+      <h3>2. 回 Window A 編輯 <code>.env</code></h3>
+
+      <p>回到 Lesson 1/2 用的 shell（Window A），打開 <code>~/.hermes/.env</code>：</p>
+
+      <pre data-copy><code>nano ~/.hermes/.env</code></pre>
+
+      <p>nano 編輯器開啟後，<strong>捲到檔尾</strong>（<kbd>Ctrl+End</kbd> 或一直按 <kbd>↓</kbd>），手動 append 以下區塊。注意 hermes <code>.env</code> 預設<strong>沒有</strong> LINE 區塊，要自己加：</p>
+
+      <pre><code># =============================================================================
+# LINE INTEGRATION
+# =============================================================================
+LINE_CHANNEL_ACCESS_TOKEN=&lt;貼 Step 2 拿到的 token&gt;
+LINE_CHANNEL_SECRET=&lt;貼 Step 2 拿到的 secret&gt;
+LINE_PUBLIC_URL=&lt;貼上面 ngrok 那條 URL&gt;
+LINE_ALLOWED_USERS=
+LINE_ALLOW_ALL_USERS=true</code></pre>
+
+      <p>三個 <code>&lt;占位符&gt;</code> 都要連 <code>&lt;&gt;</code> 一起換掉。完成後 <kbd>Ctrl+O</kbd> 存檔 → <kbd>Enter</kbd> 確認 → <kbd>Ctrl+X</kbd> 退出。</p>
+
+      <details>
+        <summary>為什麼 <code>LINE_ALLOWED_USERS=</code> 留空 + <code>LINE_ALLOW_ALL_USERS=true</code>？</summary>
+        <p>我們現在還不知道學員自己的 LINE User ID（<code>U</code> 開頭 32 字元 hex），Step 6 從 gateway log 抓到後再回頭收緊。先放寬讓你能傳第一則訊息驗證鏈路。</p>
+        <p>放寬期間 <strong>不要把 bot basic ID 公開到任何地方</strong>（聊天群、社群），免得別人加你 bot、用你 OpenRouter 額度。</p>
+      </details>
+
+      <h3>3. Redacted verify（不要 <code>cat .env</code>）</h3>
+
+      <p>直接 <code>cat</code> 會把 token 噴到螢幕。改用下面這條 awk 只看「變數名 + 值的長度」：</p>
+
+      <pre data-copy><code>awk -F= '/^LINE_/{print $1, "len="length($2)}' ~/.hermes/.env</code></pre>
+
+      <p>預期輸出（長度可能略有出入，重點是 ratio 對得上）：</p>
+
+      <pre><code>LINE_CHANNEL_ACCESS_TOKEN len=170
+LINE_CHANNEL_SECRET len=32
+LINE_PUBLIC_URL len=40
+LINE_ALLOWED_USERS len=0
+LINE_ALLOW_ALL_USERS len=4</code></pre>
+
+      <p>判讀：</p>
+      <ul>
+        <li><code>LINE_CHANNEL_ACCESS_TOKEN len=170</code>（或 <code>~160-180</code>）→ token 對 ✓</li>
+        <li><code>LINE_CHANNEL_SECRET len=32</code> → secret 對 ✓（hex 32 字元 = 16 bytes）</li>
+        <li><code>LINE_PUBLIC_URL len=40</code>（前後可能差 5-10）→ ngrok URL 對 ✓</li>
+        <li><code>LINE_ALLOWED_USERS len=0</code> → 空字串，Step 6 收緊 ✓</li>
+        <li><code>LINE_ALLOW_ALL_USERS len=4</code> → 字面 "true" ✓</li>
+      </ul>
+
+      <div class="notice">
+        🚨 <strong>token 長度 &lt; 100 或 secret 長度不是 32</strong> → 多半 paste 帶到換行 / 空白 / 漏字元。回 <code>nano ~/.hermes/.env</code> 重貼。
+      </div>
+
+      <details>
+        <summary>🚨 變數完全沒列出來（awk 沒輸出 LINE_ 任何行）</summary>
+        <p>多半是貼到檔頭的 secret 預留區、或變數名拼錯。檢查：</p>
+        <ul>
+          <li>變數名必須是 <code>LINE_CHANNEL_ACCESS_TOKEN</code>、<code>LINE_CHANNEL_SECRET</code>、<code>LINE_PUBLIC_URL</code>、<code>LINE_ALLOWED_USERS</code>、<code>LINE_ALLOW_ALL_USERS</code>（一字不差，全大寫）</li>
+          <li>等號 <code>=</code> 前後不要空格</li>
+          <li>值不要加引號（<code>LINE_PUBLIC_URL=https://...</code>，不是 <code>LINE_PUBLIC_URL="https://..."</code>）</li>
+        </ul>
+        <p>若仍對不上，看 Step 4 末段的 sed 補救。</p>
+      </details>
+
+      <h3>補救：用 sed 直接改 .env（同 Lesson 1 / 2 paste 雷的解法）</h3>
+
+      <p>跟 <a href="index.html#step-7">Lesson 1 Step 7</a> 同根因（hermes <code>.env</code> 編輯 paste 雷），<strong>同模式</strong>。兩個 variant 擇一：</p>
+
+      <h4>Variant A · 互動腳本（推薦）</h4>
+
+      <p>三個值都會用 <code>read -p</code> 個別問：token / secret 不回顯（避免肩膀後面被看到），URL 回顯（純文字無妨）：</p>
+
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste LINE Channel Access Token: " TOKEN &amp;&amp; echo &amp;&amp; read -sp "Paste LINE Channel Secret: " SECRET &amp;&amp; echo &amp;&amp; read -p "Paste ngrok HTTPS URL: " PUBURL &amp;&amp; { grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' &gt;&gt; .env; grep -q '^LINE_CHANNEL_SECRET=' .env || echo 'LINE_CHANNEL_SECRET=' &gt;&gt; .env; grep -q '^LINE_PUBLIC_URL=' .env || echo 'LINE_PUBLIC_URL=' &gt;&gt; .env; grep -q '^LINE_ALLOWED_USERS=' .env || echo 'LINE_ALLOWED_USERS=' &gt;&gt; .env; grep -q '^LINE_ALLOW_ALL_USERS=' .env || echo 'LINE_ALLOW_ALL_USERS=true' &gt;&gt; .env; } &amp;&amp; sed -i "s|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=$TOKEN|" .env &amp;&amp; sed -i "s|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=$SECRET|" .env &amp;&amp; sed -i "s|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=$PUBURL|" .env &amp;&amp; unset TOKEN SECRET PUBURL</code></pre>
+
+      <p>跑完後再執行上方的 redacted verify 命令確認長度。</p>
+
+      <h4>Variant B · 手動範本</h4>
+
+      <p>把 <code>YOUR_TOKEN</code> / <code>YOUR_SECRET</code> / <code>YOUR_NGROK_URL</code> 三個占位字串替換成實際值再貼進終端機（這次<strong>不用</strong>連 <code>&lt;&gt;</code>，因為原字串就沒有）：</p>
+
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; { grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' &gt;&gt; .env; grep -q '^LINE_CHANNEL_SECRET=' .env || echo 'LINE_CHANNEL_SECRET=' &gt;&gt; .env; grep -q '^LINE_PUBLIC_URL=' .env || echo 'LINE_PUBLIC_URL=' &gt;&gt; .env; grep -q '^LINE_ALLOWED_USERS=' .env || echo 'LINE_ALLOWED_USERS=' &gt;&gt; .env; grep -q '^LINE_ALLOW_ALL_USERS=' .env || echo 'LINE_ALLOW_ALL_USERS=true' &gt;&gt; .env; } &amp;&amp; sed -i 's|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=YOUR_TOKEN|' .env &amp;&amp; sed -i 's|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=YOUR_SECRET|' .env &amp;&amp; sed -i 's|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=YOUR_NGROK_URL|' .env</code></pre>
+
+      <p>跑完任一個之後，再跑 awk redacted verify 確認長度合理。接著 Step 5 回 LINE Console 設 webhook。</p>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，跳到 Step 4，仔細看每個 `<pre data-copy>` 的 HTML escape 是否正確**
+
+特別檢查：
+- `&amp;&amp;` 渲染成 `&&`（不是 `&amp;&amp;`）
+- `&gt;` 渲染成 `>`
+- `&lt;` 渲染成 `<`
+- sed 用 `|` 當 delimiter（避免跟 URL 裡的 `/` 撞）
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 4 ngrok tunnel, .env LINE block, redacted verify, sed remedy"
+```
+
+---
+
+### Task 7: lesson-4.html Step 5（回 LINE Console 設 webhook URL + 5 toggles + Verify）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="5" hidden>` 區塊
+
+- [ ] **Step 1: 把 Step 5 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 7 · 回 LINE Console 設 webhook + 5 toggles</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>外部教材 Step 6（Bot 回應方式）我們剛剛跳過了，現在 ngrok URL 在手，回去把它填完。</p>
+
+      <h3>1. 進 channel 的 Messaging API 分頁</h3>
+
+      <p>瀏覽器開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">https://developers.line.biz/console/</a> → 你的 Provider → 你的 channel → 點 <strong>Messaging API</strong> 分頁。</p>
+
+      <h3>2. 設 Webhook URL</h3>
+
+      <p>在 <strong>Webhook settings</strong> section：</p>
+      <ol>
+        <li>Webhook URL 欄填：<code>&lt;ngrok URL&gt;/line/webhook</code>
+          <ul>
+            <li>例：<code>https://abcd-12-34-56-78.ngrok-free.app/line/webhook</code></li>
+            <li><strong>結尾必須是 <code>/line/webhook</code>，不要漏 path</strong>。沒這個 path hermes 收不到（其他 path 是給別的 platform 用）。</li>
+          </ul>
+        </li>
+        <li>按 <strong>Update</strong>（或 <em>更新</em>）儲存</li>
+      </ol>
+
+      <div class="notice">
+        ⚠️ <strong>現在還不要按 Verify 按鈕</strong>！Verify 會打你 ngrok URL 看有沒有回應，但現在 hermes gateway 還沒起來，按了一定失敗。Step 6 起動 gateway 後再回來按。
+      </div>
+
+      <h3>3. 5 個 Toggles 對照表</h3>
+
+      <p>同樣在 Messaging API 分頁，下半部有 5 個 toggle，外部教材只教前 3 個；<strong>後 2 個是本課新增</strong>，學員容易漏。</p>
+
+      <table>
+        <thead>
+          <tr><th>Toggle</th><th>設定</th><th>為什麼</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Use webhook</strong></td>
+            <td>ON ✅</td>
+            <td>必開，不然 LINE 根本不會送 webhook 給你</td>
+          </tr>
+          <tr>
+            <td><strong>Auto-reply messages</strong></td>
+            <td>OFF ❌</td>
+            <td>預設 ON 會自動回 LINE 預設客服訊息，蓋掉 hermes 的回應</td>
+          </tr>
+          <tr>
+            <td><strong>Greeting messages</strong></td>
+            <td>OFF ❌</td>
+            <td>預設 ON 加好友時學員會收到 LINE 預設歡迎訊息（不是 hermes 講的），造成困擾</td>
+          </tr>
+          <tr>
+            <td><strong>Webhook redelivery</strong></td>
+            <td>OFF ❌</td>
+            <td>開的話 hermes crash 時 LINE 會重送同訊息 → log 難辨識、bug 會被放大</td>
+          </tr>
+          <tr>
+            <td><strong>Error statistics aggregation</strong></td>
+            <td>ON ✅（隨意）</td>
+            <td>純資料收集，無風險；之後 debug 時友善</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>每個 toggle 我去哪找？</summary>
+        <p>5 個 toggle 都在 Messaging API 分頁，從上往下排列；前 3 個（Webhook / Auto-reply / Greeting）通常在 <em>Response settings</em> 或 <em>Webhook settings</em> 卡片裡；後 2 個（Redelivery / Error statistics）在 <em>Webhook URL</em> 那塊的下方。</p>
+        <p>LINE Console UI 偶爾改版，toggle 排列可能調整；若位置變，找 <em>Webhook</em>、<em>Auto-reply</em>、<em>Greeting</em>、<em>Redelivery</em>、<em>Error</em> 五個關鍵字即可。</p>
+      </details>
+
+      <p>✓ webhook URL 已存、5 個 toggle 已設。Verify 按鈕<strong>下一步</strong>啟動 gateway 後再回來按。</p>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，跳到 Step 5，確認表格顯示完整**
+
+預期：5 列 table 顯示、每列 toggle / 設定 / 原因都對齊、Pico CSS 的 zebra-stripe 樣式套用。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 5 LINE Console webhook URL + 5 toggles table"
+```
+
+---
+
+### Task 8: lesson-4.html Step 6（啟動 hermes gateway + 手機端到端 smoke + UID 收緊）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="6" hidden>` 區塊
+
+**目的：** Lesson 4 的「達標 ✓」就在這一步。包含啟動 gateway、Verify 按鈕通過、手機加好友送訊息、從 log 抓 U-ID、用 sed 收緊 allowlist（USER_ID 變數模式）、重啟 gateway 驗證。
+
+- [ ] **Step 1: 把 Step 6 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="6" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 6 / 7 · 啟動 hermes gateway + 手機端到端 smoke</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>串起所有東西的關鍵步驟：(1) 跑 gateway、(2) LINE Console 按 Verify、(3) 手機加好友送訊息、(4) 從 log 抓自己 U-ID、(5) 收緊 allowlist、(6) 重啟驗證。</p>
+
+      <h3>1. 第三個 shell（Window C）啟動 gateway</h3>
+
+      <p>開另一個 Windows Terminal 分頁進 WSL（這是 Window C，與 Window A 編輯用、Window B 跑 ngrok 並列），執行：</p>
+
+      <pre data-copy><code>hermes gateway run</code></pre>
+
+      <p>預期看到啟動 banner，含關鍵字（任何一個 traceback 都先停下查 log）：</p>
+
+      <ul>
+        <li><code>✓ line connected</code></li>
+        <li><code>Gateway running with 1 platform(s)</code></li>
+        <li><code>Secret redaction: ENABLED</code></li>
+      </ul>
+
+      <details>
+        <summary>🚨 啟動就 crash</summary>
+        <ul>
+          <li><strong>「Missing required env: LINE_CHANNEL_ACCESS_TOKEN」</strong> → Step 4 的 .env 變數名拼錯 / 漏寫，回 Step 4 重 awk verify</li>
+          <li><strong>「Invalid LINE_CHANNEL_SECRET length」</strong> → secret 長度不是 32，回 Step 4 sed 補救</li>
+          <li><strong>「Port 8646 already in use」</strong> → 前一個 gateway 還跑著，<code>hermes gateway stop</code> 或 <code>pkill -f "hermes gateway"</code> 後重跑</li>
+        </ul>
+      </details>
+
+      <h3>2. 回 LINE Console 按 Verify</h3>
+
+      <p>切回瀏覽器 LINE Console → Messaging API 分頁 → Webhook URL 旁邊的 <strong>Verify</strong> 按鈕，點下去。</p>
+
+      <p>預期：<strong>✅ Success</strong></p>
+
+      <p>失敗對策：</p>
+      <ul>
+        <li><strong>"Status 4xx"</strong> → webhook URL 路徑漏 <code>/line/webhook</code>，回 Step 5 補</li>
+        <li><strong>"Signature mismatch"</strong> → Channel Secret 抄錯，回 Step 4 redacted verify 確認 <code>LINE_CHANNEL_SECRET len=32</code></li>
+        <li><strong>"Timeout"</strong> → Window B 的 ngrok 斷了；切到 Window B 看 panel 還在不在；若已斷，<code>Ctrl+C</code> 再重跑 <code>ngrok http 8646</code>，<strong>注意新 URL 跟舊的不同</strong>，回 Step 4 用 sed 補救改 <code>LINE_PUBLIC_URL</code>，然後 LINE Console 也要把 webhook URL 改成新的</li>
+      </ul>
+
+      <h3>3. 手機 LINE 加 bot 為好友 → 送第一則訊息</h3>
+
+      <p>加好友兩條路徑：</p>
+      <ul>
+        <li>掃 LINE Console → Messaging API 分頁 → <strong>QR code</strong>（最快）</li>
+        <li>或 LINE app 搜尋 Step 2 拿到的 Bot basic ID（<code>@xxxxxx</code>）</li>
+      </ul>
+
+      <p>加好友成功後，送一句測試：</p>
+      <pre><code>測試</code></pre>
+
+      <h3>4. 看 Window C 的 gateway log，抓你的 U-ID</h3>
+
+      <p>切回 Window C，會看到類似輸出：</p>
+
+      <pre><code>inbound message: platform=line user=U0123456789abcdef0123456789abcdef chat=U0123456789abcdef0123456789abcdef msg='測試'
+response ready: platform=line chat=U0123456789abcdef0123456789abcdef time=5.x s api_calls=1 response=N chars
+[Line] Sending response (N chars) to U0123456789abcdef0123456789abcdef</code></pre>
+
+      <p>抓那段 <code>U</code> + 32 hex 字元（總長 33 字元的 user ID），等下要寫進 allowlist。</p>
+
+      <h3>5. 手機 LINE 確認收到 bot 回應</h3>
+
+      <ul>
+        <li>✅ 收到回應 → 鏈路通了！</li>
+        <li>❌ 沒收到但 log 顯示 Send 成功 → 手機 LINE 設定有擋（極少見），先擱著</li>
+        <li>❌ log 完全沒看到 inbound → Verify 沒過 / ngrok URL 對不上 / hermes 沒接到 platform line，回 Step 5 / 6 上方檢查</li>
+      </ul>
+
+      <h3>6. 收緊 <code>LINE_ALLOWED_USERS</code> 為單一 U-ID</h3>
+
+      <p>現在 <code>LINE_ALLOW_ALL_USERS=true</code>，bot 是公開的，<strong>任何加好友的人都會用你的 OpenRouter 額度</strong>。馬上收緊：</p>
+
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -p "Paste your LINE User ID (U&lt;32-hex&gt;): " USER_ID &amp;&amp; sed -i "s|^LINE_ALLOWED_USERS=.*|LINE_ALLOWED_USERS=$USER_ID|" .env &amp;&amp; sed -i 's|^LINE_ALLOW_ALL_USERS=.*|LINE_ALLOW_ALL_USERS=false|' .env &amp;&amp; grep -E '^LINE_(ALLOWED_USERS|ALLOW_ALL_USERS)' .env &amp;&amp; unset USER_ID</code></pre>
+
+      <p>跑完預期輸出（USER_ID 那段會是你剛貼的值）：</p>
+
+      <pre><code>LINE_ALLOWED_USERS=U0123456789abcdef0123456789abcdef
+LINE_ALLOW_ALL_USERS=false</code></pre>
+
+      <details>
+        <summary>為什麼用 <code>USER_ID</code> 變數名，不是 <code>UID</code>？</summary>
+        <p>Bash 的 <code>UID</code> 是 <strong>readonly built-in</strong>，賦值會靜默失敗 — <code>read -p "..." UID</code> 不會報錯，但 <code>$UID</code> 永遠是學員系統的 user ID（純數字），<strong>不是</strong>你 paste 的 LINE User ID。結果 sed 會把學員系統 UID 寫進 .env，bot 完全擋不住任何人。</p>
+        <p>用 <code>USER_ID</code>（或任何 non-builtin 名稱）就沒這個問題。同理見 Lesson 2 Step 4 補救段的 <a href="lesson-2.html#step-4">Variant A</a>。</p>
+      </details>
+
+      <h3>7. 重啟 gateway，驗證收緊有效</h3>
+
+      <p>切到 Window C，<kbd>Ctrl+C</kbd> 殺掉 gateway。再跑：</p>
+
+      <pre data-copy><code>hermes gateway run</code></pre>
+
+      <p>啟動 banner 同前。再回手機 LINE 送一句訊息：</p>
+
+      <pre><code>測試 2</code></pre>
+
+      <p>預期：自己仍能收到 bot 回應 ✅。代表 allowlist 收緊但你自己沒被擋掉。</p>
+
+      <details>
+        <summary>想額外驗證「名單外被擋」</summary>
+        <p>拿另一個 LINE 帳號加 bot 送訊息，Window C 的 gateway log 應該<strong>不會</strong> dispatch 給 LLM（會看到一行類似 <code>blocked: user U... not in allowlist</code>）。學員選做，不必。</p>
+      </details>
+
+      <p>✓ Verify 過、手機通、allowlist 收緊。最後 Step 7 收尾。</p>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，跳到 Step 6，仔細看 sed 那段是否完整顯示**
+
+特別檢查：
+- 兩段 `<pre data-copy>` 的 `&amp;&amp;` / `&lt;` / `&gt;` / `|` 都 render 對
+- `<kbd>Ctrl+C</kbd>` 顯示成鍵盤樣式
+- `<details>` 內的「為什麼用 USER_ID」段能展開
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 6 gateway run, phone smoke, UID extraction, allowlist tighten via sed"
+```
+
+---
+
+### Task 9: lesson-4.html Step 7（完成 + LINE quirks + 加碼預告）
+
+**Files:**
+- Modify: `lesson-4.html` 的 `<section class="step" data-step="7" hidden>` 區塊
+
+- [ ] **Step 1: 把 Step 7 的 placeholder 換成以下內容**
+
+```html
+    <section class="step" data-step="7" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 7 / 7 · 完成 + LINE quirks + 加碼預告</h2>
+          <p>~4 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>你做到了</h3>
+      <ol>
+        <li>✓ 一個跑著的 LINE bot（手機 LINE → ngrok → hermes → OpenRouter）</li>
+        <li>✓ 自己 LINE User ID 已寫進 allowlist、別人不能用你 OpenRouter 額度</li>
+        <li>✓ 學到 redacted-verify 命令模式（awk 看長度、不噴 secret）</li>
+        <li>✓ 學會 ngrok tunnel（任何未來要接的 webhook 平台都用得到）</li>
+      </ol>
+
+      <h3>⚠️ LINE quirks 必須知道（避免之後誤判 bot 壞了）</h3>
+
+      <table>
+        <thead>
+          <tr><th>Quirk</th><th>觀察</th><th>為什麼</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Markdown 不 render</strong></td>
+            <td>你叫 hermes 用 <code>**bold**</code> 回應，手機看到的是純文字（沒粗體）</td>
+            <td>LINE plugin 把 markdown strip 掉，因為 LINE 本身不支援 markdown 渲染</td>
+          </tr>
+          <tr>
+            <td><strong>第一則訊息可能雙 send</strong></td>
+            <td>你送一句，bot 回兩條（先短後長）</td>
+            <td>hermes 用 LINE bubble 分訊息回應；正常行為，不是 bug</td>
+          </tr>
+          <tr>
+            <td><strong>慢 LLM 會出 postback 按鈕</strong></td>
+            <td>若用 deepseek free 之類較慢 model，可能看到「請按這個按鈕拿答案」</td>
+            <td>LINE reply token 60 秒就過期；hermes 為了不浪費付費 Push API，先回 button，等學員按再傳完整答案</td>
+          </tr>
+          <tr>
+            <td><strong>ngrok URL 重啟會換</strong></td>
+            <td>隔天醒來 bot 不回 → 多半是 ngrok agent process 死了 / 重連、URL 換了</td>
+            <td>需要：重啟 ngrok → 抓新 URL → 改 <code>~/.hermes/.env</code> 的 <code>LINE_PUBLIC_URL</code> → 改 LINE Console webhook URL → 重啟 <code>hermes gateway</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>下次預告</h3>
+
+      <p>下次（Lesson 5 暫定 / 未排）可能會涵蓋：</p>
+      <ul>
+        <li>LINE Rich Menu 客製化按鈕</li>
+        <li>多 platform 同跑（Telegram + LINE 同支 hermes）</li>
+        <li>或你想學什麼下次告訴我</li>
+      </ul>
+
+      <details>
+        <summary>🎁 加碼 A · systemd 24/7 守護（out of scope，預告用）</summary>
+        <p>本堂教的前景版有兩個限制：</p>
+        <ul>
+          <li>Window B / C 任何一個關閉 → 整條鏈路斷</li>
+          <li>WSL 重啟或機器關機 → 需要手動把兩支重起</li>
+        </ul>
+        <p>要做到 24/7 在背景自動跑、機器重開也自動拉起，需要：</p>
+        <ol>
+          <li><strong>systemd --user service 守護 ngrok agent</strong>（unit 檔指定 <code>ExecStart=/usr/local/bin/ngrok http 8646</code>，<code>Restart=on-failure</code>）</li>
+          <li><strong>systemd --user service 守護 hermes gateway</strong>（類似 unit，<code>ExecStart=$(which hermes) gateway run</code>）</li>
+          <li><strong>ngrok URL 自動同步 watcher</strong>：ngrok agent 重連會換 URL；寫一支 watcher script 對比 ngrok API（<code>http://localhost:4040/api/tunnels</code>）跟 <code>.env</code> 的 <code>LINE_PUBLIC_URL</code>，不一致時 sed 改 .env + <code>systemctl --user restart hermes-gateway</code>。<strong>LINE Console 端的 webhook URL 仍需手動改</strong>（LINE 沒開 API）。</li>
+        </ol>
+        <p>完整步驟在後續的 <code>docs/advanced/lesson-4-systemd.md</code>（尚未寫，本堂不必修）。</p>
+      </details>
+
+      <details>
+        <summary>🎁 加碼 B · 用 hermes gateway lifecycle 指令快速複習</summary>
+        <p>同 Lesson 2 Step 5 加碼，這邊只列常用：</p>
+        <pre data-copy><code>hermes gateway status</code></pre>
+        <pre data-copy><code>hermes gateway restart</code></pre>
+        <pre data-copy><code>hermes gateway stop</code></pre>
+        <p>log：</p>
+        <pre data-copy><code>tail -f ~/.hermes/logs/gateway.log</code></pre>
+      </details>
+
+      <p><em>到這邊就是 Lesson 4 全部內容。下次見。</em></p>
+    </section>
+```
+
+- [ ] **Step 2: 瀏覽器 reload，跳到 Step 7，確認 LINE quirks 表格與兩個加碼 `<details>` 排版正確**
+
+預期：
+- 4 列 LINE quirks 表 zebra-stripe 樣式套用
+- 「下次預告」3 條 bullet
+- 兩個 `<details>` 預設關著
+- 完整看完後「下一步 →」按鈕應該變灰 / disabled（wizard.js 邏輯，最後一步沒下一步）
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lesson-4.html
+git commit -m "feat(lesson-4): add Step 7 completion checklist, LINE quirks, systemd preview"
+```
+
+---
+
+### Task 10: `lesson-2.html` Step 7「下次預告」加上 lesson-4.html 連結
+
+**目的：** Lesson 2 Step 7 末段已經提到「Lesson 4 · LINE gateway 設定」，現在 lesson-4.html 真的存在了，把那條文字包進 `<a href="lesson-4.html">` 讓學員能直接點進去。
+
+**Files:**
+- Modify: `lesson-2.html:462`
+
+- [ ] **Step 1: 開啟 `lesson-2.html` 找到「下次預告」區塊**
+
+當前內容（line 460-463 附近）：
+
+```html
+      <ul>
+        <li><strong>Lesson 3 · hermes 日常使用入門</strong>：context 管理、skills、cron、background sessions 完整介紹</li>
+        <li><strong>Lesson 4 · LINE gateway 設定</strong>：把同一支 hermes 也接到 LINE，讓 LINE 朋友也能用</li>
+      </ul>
+```
+
+- [ ] **Step 2: 把 Lesson 4 那行改成連結**
+
+改成：
+
+```html
+      <ul>
+        <li><strong>Lesson 3 · hermes 日常使用入門</strong>：context 管理、skills、cron、background sessions 完整介紹</li>
+        <li><strong><a href="lesson-4.html">Lesson 4 · LINE gateway 設定</a></strong>：把同一支 hermes 也接到 LINE，讓 LINE 朋友也能用（已上線）</li>
+      </ul>
+```
+
+兩個改動：(a) 整段 Lesson 4 標題包進 `<a href="lesson-4.html">`，(b) 末尾加 `（已上線）` 標示。
+
+- [ ] **Step 3: 瀏覽器開 `lesson-2.html`，跳到 Step 7，確認 Lesson 4 連結可點**
+
+預期：點連結會跳到 `lesson-4.html`、進入 Step 0。
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add lesson-2.html
+git commit -m "docs(lesson-2): link Lesson 4 in next-lesson preview"
+```
+
+---
+
+### Task 11: `README.md` 結構區補列 `lesson-4.html`
+
+**Files:**
+- Modify: `README.md:9-10`
+
+- [ ] **Step 1: 開啟 `README.md` 找到結構區**
+
+當前內容（line 7-11）：
+
+```markdown
+## 結構
+
+- `index.html` — **Lesson 1**：前言頁（為什麼選 hermes）+ 9 步安裝精靈
+- `lesson-2.html` — **Lesson 2**：把 hermes 接到 Telegram（Step 0 + 7 步，30–45 分鐘）
+- `style.css` / `wizard.js` — 共用樣式與導覽邏輯（`wizard.js` 從 `<body data-*>` 讀步數與 storage key）
+```
+
+- [ ] **Step 2: 在 `lesson-2.html` 那行下面插入 `lesson-4.html`**
+
+改成：
+
+```markdown
+## 結構
+
+- `index.html` — **Lesson 1**：前言頁（為什麼選 hermes）+ 9 步安裝精靈
+- `lesson-2.html` — **Lesson 2**：把 hermes 接到 Telegram（Step 0 + 7 步，30–45 分鐘）
+- `lesson-4.html` — **Lesson 4**：把 hermes 接到 LINE（Step 0 + 7 步，60 分鐘，含 ngrok）
+- `style.css` / `wizard.js` — 共用樣式與導覽邏輯（`wizard.js` 從 `<body data-*>` 讀步數與 storage key）
+```
+
+> 註：Lesson 3 暫時沒列（spec 預告但未動工），跳 Lesson 4 是設計選擇。
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add README.md
+git commit -m "docs(readme): list lesson-4.html in structure section"
+```
+
+---
+
+### Task 12: `pre-class-checklist.md` 加「Lesson 4 必檢項」section
+
+**目的：** Lesson 2 已有 5 條必檢；Lesson 4 加 4 條 — 外部教材、ngrok repo、hermes 升級、hermes line 平台。每次教學前若會教 Lesson 4 都跑一遍。
+
+**Files:**
+- Modify: `pre-class-checklist.md`（在 Lesson 2 必檢項 section 後新增 Lesson 4 必檢項 section）
+
+- [ ] **Step 1: 在 `pre-class-checklist.md` 找到 Lesson 2 必檢項 section 的結尾**
+
+Lesson 2 section 結束於 line 117 附近（`hermes gateway stop` 後再 status 該報 stopped 那段）。在「## 截圖檢查」section 之前插入 Lesson 4 區塊。
+
+- [ ] **Step 2: 在 `## 截圖檢查` 之前新增以下內容**
+
+```markdown
+## Lesson 4 必檢項（LINE 整合）
+
+每次教學前若會教 Lesson 4，這幾條一起跑：
+
+### 1. LINE Bot 外部教材連結還活著
+
+```bash
+curl -I https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。  
+若 4xx / 5xx：lesson-4.html Step 2 的 `<details>` 備援文案就是 fallback。  
+若主機完全打不到：考慮把備援升到主文。
+
+### 2. ngrok apt repo 仍可達
+
+```bash
+curl -I https://ngrok-agent.s3.amazonaws.com/ngrok.asc
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。  
+若失敗：ngrok 改了 distribution → 查 `https://ngrok.com/download` 看新指令，更新 lesson-4.html Step 3 的 apt 區塊。
+
+### 3. hermes 升級到最新 release
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+預期：升級成功、版本號顯示。  
+若 `npm` 權限 / 網路問題：排除後再開課。LINE plugin 必要 fix 已隨較新 release 收錄；學員 Step 1 也會做一次。
+
+### 4. hermes gateway 認得 `line` 平台
+
+```bash
+hermes gateway --help 2>&1 | grep -i line || hermes gateway list-platforms 2>&1
+```
+
+預期：任一行輸出含 `line`。  
+若沒有：升級 hermes：
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+升級後仍沒有 → 暫緩開課。
+```
+
+- [ ] **Step 3: 確認 markdown 結構正確**
+
+```bash
+grep -c '^## Lesson 4 必檢項' pre-class-checklist.md
+```
+
+預期：1。
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add pre-class-checklist.md
+git commit -m "docs(checklist): add Lesson 4 (LINE) smoke test items"
+```
+
+---
+
+### Task 13: `ai-runbook.md` 加 Lesson 4 Stage 18–24 + Check 9–12
+
+**Files:**
+- Modify: `ai-runbook.md`（在 Stage 17 後新增 Stage 18–24；在 Check 8 後新增 Check 9–12）
+
+- [ ] **Step 1: 在 Stage 17 結尾（line ~547 附近）新增以下 stages**
+
+```markdown
+## Lesson 4 · Stage 18–24（LINE 整合）
+
+對應 lesson-4.html 的 Step 0–7。本 Part 假設 Lesson 1 + Lesson 2 已驗證過、hermes / Telegram 都跑著。
+
+## Stage 18 · 開啟 lesson-4.html、走 Step 0–1
+
+1. 開 https://lewsiafat.github.io/hermes-windows-course/lesson-4.html
+2. Step 0：前言、結束時你會有
+3. Step 1：4 條前置 checklist 顯示、7 步預告、OpenRouter 警告
+
+截圖：`step-4-0-preface.png`、`step-4-1-checklist.png`
+
+## Stage 19 · 申請 LINE bot（Step 2）
+
+1. 開外部教材 `https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html`
+2. 走到 step 5「取得 Channel Access Token」
+3. 暫存：Channel Access Token (~170 字元)、Channel Secret (32 hex)、Bot basic ID (`@xxx`)
+
+截圖：`step-4-2-line-console-tokens.png`（兩段 token 已模糊 redact）
+
+## Stage 20 · 裝 ngrok + authtoken（Step 3）
+
+```
+curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrok
+ngrok version
+# 開 https://dashboard.ngrok.com → Your Authtoken → 複製
+ngrok config add-authtoken <token>
+```
+
+預期：`Authtoken saved to configuration file: ~/.config/ngrok/ngrok.yml`
+
+截圖：`step-4-3-ngrok-installed.png`、`step-4-3-authtoken-saved.png`
+
+## Stage 21 · 開 ngrok tunnel + 寫 .env（Step 4）
+
+Window B：
+
+```
+ngrok http 8646
+# 抄 Forwarding 那行 URL
+```
+
+Window A：
+
+```
+nano ~/.hermes/.env
+# 檔尾 append LINE block
+awk -F= '/^LINE_/{print $1, "len="length($2)}' ~/.hermes/.env
+```
+
+預期 5 行 LINE_* 都列出、token len ~170、secret len=32。
+
+截圖：`step-4-4-ngrok-panel.png`（URL redact）、`step-4-4-redacted-verify.png`
+
+## Stage 22 · LINE Console webhook + 5 toggles（Step 5）
+
+回 LINE Console → Messaging API → Webhook URL 填 `<ngrok>/line/webhook` → 5 toggles 對應設定。
+
+**先不要按 Verify**。
+
+截圖：`step-4-5-webhook-url.png`、`step-4-5-toggles.png`
+
+## Stage 23 · 啟動 gateway + 手機 smoke + UID 收緊（Step 6）
+
+Window C：
+
+```
+hermes gateway run
+```
+
+預期 log 含 `✓ line connected`。
+
+回 LINE Console 按 Verify → ✅ Success。
+
+手機掃 QR code 加 bot → 送「測試」→ Window C log 出現 inbound U-ID → 收下。
+
+Window A：
+
+```
+cd ~/.hermes && read -p "Paste your LINE User ID (U<32-hex>): " USER_ID && sed -i "s|^LINE_ALLOWED_USERS=.*|LINE_ALLOWED_USERS=$USER_ID|" .env && sed -i 's|^LINE_ALLOW_ALL_USERS=.*|LINE_ALLOW_ALL_USERS=false|' .env && grep -E '^LINE_(ALLOWED_USERS|ALLOW_ALL_USERS)' .env && unset USER_ID
+```
+
+預期：`LINE_ALLOWED_USERS=U...`、`LINE_ALLOW_ALL_USERS=false`。
+
+Window C 重啟 gateway，手機再送一句 → 仍收到回應。
+
+截圖：`step-4-6-gateway-banner.png`、`step-4-6-verify-success.png`、`step-4-6-phone-reply.png`（U-ID redact）
+
+## Stage 24 · 收尾（Step 7）
+
+確認學員看完 LINE quirks 表（4 條）、知道兩個加碼是 out of scope。
+
+截圖：`step-4-7-completion.png`
+
+---
+```
+
+- [ ] **Step 2: 在 Check 8 結尾（line ~688 附近）新增以下 checks**
+
+```markdown
+## Check 9 · LINE Bot 外部教材連結還活著
+
+```bash
+curl -I https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html
+```
+
+預期 200。失敗：lesson-4.html Step 2 fallback 升主文。
+
+## Check 10 · ngrok apt repo 仍可達
+
+```bash
+curl -I https://ngrok-agent.s3.amazonaws.com/ngrok.asc
+```
+
+預期 200。失敗：更新 lesson-4.html Step 3 安裝指令。
+
+## Check 11 · hermes 升級到最新 release
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+預期：升級成功、版本號顯示。`npm` 權限 / 網路問題 → 排除後再開課。
+
+## Check 12 · hermes gateway 認得 line 平台
+
+```bash
+hermes gateway --help 2>&1 | grep -i line || hermes gateway list-platforms 2>&1
+```
+
+預期：含 `line`。沒有 → 升級 hermes (`npm update -g @nousresearch/hermes`)，仍沒有 → 暫緩開課。
+
+---
+```
+
+- [ ] **Step 3: 確認新 stages / checks 數量**
+
+```bash
+grep -c '^## Stage' ai-runbook.md
+grep -c '^## Check' ai-runbook.md
+```
+
+預期：Stage 至少 24（10 + 7 Lesson 2 + 7 Lesson 4），Check 至少 12（4 + 4 Lesson 2 + 4 Lesson 4）。實際數字可能 +1（部分 stage 編號跳號），重點是新區塊都在。
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add ai-runbook.md
+git commit -m "docs(runbook): add Lesson 4 stages 18-24 + smoke checks 9-12"
+```
+
+---
+
+### Task 14: 整合 smoke test（user-run, 不 commit）
+
+**目的：** 整支 lesson-4.html 串完後，走一遍 user-facing 流程，確認 wizard / copy button / 跨檔連結都運作。這不是「程式測試」，是「教材完整性測試」。
+
+**Files:** 無修改。瀏覽器端 walkthrough 完，把結果寫進本檔最末段 `## Smoke Check Results` 區塊（Task 0 已預備）。
+
+- [ ] **Step 1: 瀏覽器開 `lesson-4.html`，從 Step 0 一路按「下一步 →」走到 Step 7**
+
+驗證每一步：
+- progress text 正確（Step 0 顯示「前言」、Step 1-7 顯示 `Step N / 7`）
+- 標題 / 段落 / `<details>` / 表格全部顯示
+- 「上一步」「下一步」按鈕運作
+- URL hash 同步 (`#step-0` … `#step-7`)
+- DevTools console 無 error / warning
+
+- [ ] **Step 2: 重整頁面，確認 localStorage 進度復原**
+
+走到 Step 3 後 `F5` 重整 → 應該停在 Step 3（從 localStorage `hermes-lesson4-step` 讀回來）。
+
+- [ ] **Step 3: 隨機點 4 個 `<pre data-copy>` 區塊的 Copy 按鈕**
+
+每點一次：
+- 按鈕短暫變 "✓ Copied"（wizard.js 行為）
+- 開 `nano /tmp/test.txt`、`Ctrl+Shift+V` 貼上 → 命令正確、無多餘空白 / HTML escape
+
+至少測一個含 `&amp;&amp;` 的（Task 6 / Task 8 的長 sed），確認貼出來是 `&&` 不是 `&amp;&amp;`。
+
+- [ ] **Step 4: 點所有跨檔連結確認跳轉**
+
+- footer 的 `← 回 Lesson 1` → `index.html`
+- footer 的 `← 回 Lesson 2` → `lesson-2.html`
+- Step 0 / Step 1 內 `<a href="index.html">` / `<a href="lesson-2.html">` 都通
+- Step 6 收緊段內 `<a href="lesson-2.html#step-4">` 跳到 Lesson 2 Step 4
+- 再從 `lesson-2.html` Step 7「下次預告」點 Lesson 4 連結回 `lesson-4.html` Step 0
+
+- [ ] **Step 5: 在 `## Smoke Check Results` 區塊加一條 walkthrough 紀錄**
+
+```markdown
+- (YYYY-MM-DD) lesson-4.html walkthrough: PASS / FAIL（描述具體問題）
+```
+
+本 step **不 commit**。
+
+---
+
+### Task 15: 合併 feature branch 到 main + push
+
+**目的：** 收尾。所有 task 完成 + smoke walkthrough 過後，把 `feat/lesson-4-line-integration` 合進 main 並推到 GitHub Pages 觸發部署。
+
+**Files:** 無修改。git 操作。
+
+- [ ] **Step 1: 確認 branch 上所有 commit 都 push 過了（如果之前有推）**
+
+```bash
+git status && git log --oneline main..feat/lesson-4-line-integration
+```
+
+預期：working tree 乾淨，列出本 plan 各 task 的 commit。
+
+- [ ] **Step 2: 切回 main、merge feature branch**
+
+```bash
+git checkout main && git merge --no-ff feat/lesson-4-line-integration -m "Merge feat/lesson-4-line-integration: Lesson 4 LINE integration"
+```
+
+`--no-ff` 維持「Merge ...」的 merge commit（沿用 Lesson 2 合併風格，見 commit `a6787dc`）。
+
+- [ ] **Step 3: Push 到 origin/main**
+
+```bash
+git push origin main
+```
+
+預期：GitHub Pages 10-30 秒後部署 `https://lewsiafat.github.io/hermes-windows-course/lesson-4.html`。
+
+- [ ] **Step 4: 等 30 秒後瀏覽器開上線版確認**
+
+```bash
+sleep 30 && xdg-open https://lewsiafat.github.io/hermes-windows-course/lesson-4.html
+```
+
+預期：上線版跟本機版內容一致。
+
+- [ ] **Step 5: 刪掉本地 feature branch**
+
+```bash
+git branch -d feat/lesson-4-line-integration
+```
+
+> 註：保留遠端 branch 與否看個人偏好；Lesson 2 那條已被刪。同樣 `git push origin --delete feat/lesson-4-line-integration` 可清遠端，但不強求。
+
+- [ ] **Step 6: 在 `## Smoke Check Results` 區塊加最終紀錄**
+
+```markdown
+- (YYYY-MM-DD) merged to main, deployed: PASS
+```
+
+---
+
+## Smoke Check Results
+
+> 執行 Task 0 / Task 14 / Task 15 時把結果寫到下方。一行一條，日期 + 結果。
+
+（待填）
+
+---
+
+## Self-Review 紀錄（plan 作者 own check）
+
+寫完本 plan 後 author 對照 spec 跑了三項 check：
+
+1. **Spec coverage：** spec §課程結構表中 8 個 sections（Step 0–7）每個都有對應 task（Task 2-9）；spec §開課前驗證 SOP 5 條映射到 Task 0 的 5 個 step；spec §Implementation hints 全部 7 條都映射到 task（hint #1 → Task 1 + Spec-to-Plan 決議 #1，hint #2-3 → Task 1 不動 wizard.js / style.css，hint #4 → Task 4 `<details>`，hint #5 → Task 6 / Task 8 `<pre data-copy>`，hint #6 → Task 9 `<details>` 摺疊，hint #7-9 → Task 11/12/13）。
+
+2. **Placeholder scan：** 無 TBD / TODO / "add error handling" / "similar to Task N" 等字眼。每個 step 都有具體指令或 HTML 字面。
+
+3. **Type consistency：**
+   - `<body data-storage-key="hermes-lesson4-step">` 從 Task 1 到 Task 14 一致
+   - `LINE_*` 5 個變數名（`LINE_CHANNEL_ACCESS_TOKEN` / `LINE_CHANNEL_SECRET` / `LINE_PUBLIC_URL` / `LINE_ALLOWED_USERS` / `LINE_ALLOW_ALL_USERS`）從 Task 6 出現後到 Task 13 全文一致
+   - `USER_ID` 變數名（不是 `UID`）在 Task 8 / Spec-to-Plan 決議 #2 兩處一致
+   - awk redacted verify 命令在 Task 6 (Step 1) 與 Task 13 (Stage 21) 完全相同
+   - sed 補救命令在 Task 6 與 Task 8 都用 `|` 當 delimiter 一致

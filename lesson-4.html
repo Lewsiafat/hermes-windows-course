@@ -20,7 +20,40 @@
 
   <main class="container">
     <section class="step" data-step="0">
-      <!-- Task 2 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼把 hermes 接到 LINE</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Lesson 2 你已經把 hermes 接到 Telegram，從手機就能對話。為什麼還要再接 LINE？兩個理由：</p>
+      <ul>
+        <li>LINE 是台 / 港學員每天最常用的 messenger，<strong>比 Telegram 親民</strong>，朋友家人都已經在裡面；</li>
+        <li>接 LINE 後 hermes 真正變「隨身助手」——通勤、會議、走路時都能丟訊息給它處理。</li>
+      </ul>
+
+      <p>Lesson 2 跟本堂的差別：<strong>LINE 強制要求公開 webhook URL</strong>（不像 Telegram 可以長 polling），所以多一層 <code>ngrok</code> 概念——把本機 hermes 暴露給 LINE 雲端。學完本堂你會懂 ngrok 怎麼用，未來想接任何 webhook 平台都用得到。</p>
+
+      <h3>結束時你會有</h3>
+      <ol>
+        <li>✓ 一支自己的 LINE bot 已加為好友、能用手機送訊息給它</li>
+        <li>✓ <code>ngrok</code> tunnel 跑在背景（前景版；24/7 守護是加碼預告）</li>
+        <li>✓ <code>hermes gateway</code> 跑著，會即時把 LINE 訊息 dispatch 給 LLM</li>
+        <li>✓ 知道 LINE 三大 quirks（Markdown 不 render / 雙 send / reply token TTL），不會誤以為 bot 壞了</li>
+      </ol>
+
+      <details>
+        <summary>沒做過 Lesson 1 / 2？</summary>
+        <p>本堂預設你已完成 <a href="index.html">Lesson 1</a>（hermes 在 WSL 裝好、可對話）+ <a href="lesson-2.html">Lesson 2</a>（Telegram bot 端到端可用，已熟悉 <code>.env</code> 與 <code>hermes gateway</code> 概念）。沒做過請先按順序走一遍。</p>
+      </details>
+
+      <details>
+        <summary>為什麼是 ngrok？沒別的選擇嗎？</summary>
+        <p>LINE 雲端只接受公開 HTTPS URL；本機 <code>localhost</code>、內網 IP、HTTP 都不行。</p>
+        <p>選 ngrok 原因：免費、無需架站、一行指令就跑、Linux/WSL 都能用。缺點：免費 tier 的 URL 重啟會變、agent process 死了 tunnel 就斷。本堂教前景版讓你看到全貌；想 24/7 看 Step 7 加碼預告。</p>
+        <p>替代品有 Cloudflare Tunnel、localtunnel、Tailscale Funnel——能用，但本堂選 ngrok 因為註冊最快（GitHub OAuth 30 秒搞定）。</p>
+      </details>
     </section>
 
     <section class="step" data-step="1" hidden>

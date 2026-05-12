@@ -230,7 +230,122 @@
     </section>
 
     <section class="step" data-step="4" hidden>
-      <!-- Task 6 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 4 / 7 · 開 ngrok tunnel + 寫 <code>.env</code> LINE block</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>三件事：(1) 第二個 shell 跑 <code>ngrok</code> 抓 public URL、(2) 編輯 <code>~/.hermes/.env</code> 加 LINE 區塊、(3) <strong>redacted verify</strong> 確認都填對沒漏字元（不直接 <code>cat .env</code>，避免 secret 暴露）。</p>
+
+      <h3>1. 第二個 shell（Window B）跑 ngrok</h3>
+
+      <p>開新的 Windows Terminal 分頁（<kbd>Ctrl+Shift+T</kbd>）進 WSL，跑：</p>
+
+      <pre data-copy><code>ngrok http 8646</code></pre>
+
+      <p>ngrok 終端機 panel 出現後，看 <strong>Forwarding</strong> 那行的 URL（類似 <code>https://abcd-12-34-56-78.ngrok-free.app</code>），<strong>完整含 <code>https://</code> 一起抄</strong>，下一步要用。</p>
+
+      <div class="notice">
+        ⚠️ <strong>Window B 不要關</strong>。關了 ngrok agent process 就死、tunnel 斷、LINE 收不到訊息。整堂課保留到 Step 7。
+      </div>
+
+      <details>
+        <summary>看不懂 ngrok panel？</summary>
+        <p>panel 大概長這樣：</p>
+        <pre><code>Session Status                online
+Account                       your-email@example.com (Plan: Free)
+Version                       3.x.x
+Region                        Asia Pacific (ap)
+Forwarding                    https://abcd-12-34-56-78.ngrok-free.app -&gt; http://localhost:8646
+Connections                   ttl     opn     rt1     rt5     p50     p90
+                              0       0       0.00    0.00    0.00    0.00</code></pre>
+        <p>抄 <strong>Forwarding</strong> 那行 <code>-&gt;</code> 左邊的 URL。<strong>不是</strong> <code>http://localhost:8646</code>（那是內網位址）。</p>
+      </details>
+
+      <h3>2. 回 Window A 編輯 <code>.env</code></h3>
+
+      <p>回到 Lesson 1/2 用的 shell（Window A），打開 <code>~/.hermes/.env</code>：</p>
+
+      <pre data-copy><code>nano ~/.hermes/.env</code></pre>
+
+      <p>nano 編輯器開啟後，<strong>捲到檔尾</strong>（<kbd>Ctrl+End</kbd> 或一直按 <kbd>↓</kbd>），手動 append 以下區塊。注意 hermes <code>.env</code> 預設<strong>沒有</strong> LINE 區塊，要自己加：</p>
+
+      <pre><code># =============================================================================
+# LINE INTEGRATION
+# =============================================================================
+LINE_CHANNEL_ACCESS_TOKEN=&lt;貼 Step 2 拿到的 token&gt;
+LINE_CHANNEL_SECRET=&lt;貼 Step 2 拿到的 secret&gt;
+LINE_PUBLIC_URL=&lt;貼上面 ngrok 那條 URL&gt;
+LINE_ALLOWED_USERS=
+LINE_ALLOW_ALL_USERS=true</code></pre>
+
+      <p>三個 <code>&lt;占位符&gt;</code> 都要連 <code>&lt;&gt;</code> 一起換掉。完成後 <kbd>Ctrl+O</kbd> 存檔 → <kbd>Enter</kbd> 確認 → <kbd>Ctrl+X</kbd> 退出。</p>
+
+      <details>
+        <summary>為什麼 <code>LINE_ALLOWED_USERS=</code> 留空 + <code>LINE_ALLOW_ALL_USERS=true</code>？</summary>
+        <p>我們現在還不知道學員自己的 LINE User ID（<code>U</code> 開頭 32 字元 hex），Step 6 從 gateway log 抓到後再回頭收緊。先放寬讓你能傳第一則訊息驗證鏈路。</p>
+        <p>放寬期間 <strong>不要把 bot basic ID 公開到任何地方</strong>（聊天群、社群），免得別人加你 bot、用你 OpenRouter 額度。</p>
+      </details>
+
+      <h3>3. Redacted verify（不要 <code>cat .env</code>）</h3>
+
+      <p>直接 <code>cat</code> 會把 token 噴到螢幕。改用下面這條 awk 只看「變數名 + 值的長度」：</p>
+
+      <pre data-copy><code>awk -F= '/^LINE_/{print $1, "len="length($2)}' ~/.hermes/.env</code></pre>
+
+      <p>預期輸出（長度可能略有出入，重點是 ratio 對得上）：</p>
+
+      <pre><code>LINE_CHANNEL_ACCESS_TOKEN len=170
+LINE_CHANNEL_SECRET len=32
+LINE_PUBLIC_URL len=40
+LINE_ALLOWED_USERS len=0
+LINE_ALLOW_ALL_USERS len=4</code></pre>
+
+      <p>判讀：</p>
+      <ul>
+        <li><code>LINE_CHANNEL_ACCESS_TOKEN len=170</code>（或 <code>~160-180</code>）→ token 對 ✓</li>
+        <li><code>LINE_CHANNEL_SECRET len=32</code> → secret 對 ✓（hex 32 字元 = 16 bytes）</li>
+        <li><code>LINE_PUBLIC_URL len=40</code>（前後可能差 5-10）→ ngrok URL 對 ✓</li>
+        <li><code>LINE_ALLOWED_USERS len=0</code> → 空字串，Step 6 收緊 ✓</li>
+        <li><code>LINE_ALLOW_ALL_USERS len=4</code> → 字面 "true" ✓</li>
+      </ul>
+
+      <div class="notice">
+        🚨 <strong>token 長度 &lt; 100 或 secret 長度不是 32</strong> → 多半 paste 帶到換行 / 空白 / 漏字元。回 <code>nano ~/.hermes/.env</code> 重貼。
+      </div>
+
+      <details>
+        <summary>🚨 變數完全沒列出來（awk 沒輸出 LINE_ 任何行）</summary>
+        <p>多半是貼到檔頭的 secret 預留區、或變數名拼錯。檢查：</p>
+        <ul>
+          <li>變數名必須是 <code>LINE_CHANNEL_ACCESS_TOKEN</code>、<code>LINE_CHANNEL_SECRET</code>、<code>LINE_PUBLIC_URL</code>、<code>LINE_ALLOWED_USERS</code>、<code>LINE_ALLOW_ALL_USERS</code>（一字不差，全大寫）</li>
+          <li>等號 <code>=</code> 前後不要空格</li>
+          <li>值不要加引號（<code>LINE_PUBLIC_URL=https://...</code>，不是 <code>LINE_PUBLIC_URL="https://..."</code>）</li>
+        </ul>
+        <p>若仍對不上，看 Step 4 末段的 sed 補救。</p>
+      </details>
+
+      <h3>補救：用 sed 直接改 .env（同 Lesson 1 / 2 paste 雷的解法）</h3>
+
+      <p>跟 <a href="index.html#step-7">Lesson 1 Step 7</a> 同根因（hermes <code>.env</code> 編輯 paste 雷），<strong>同模式</strong>。兩個 variant 擇一：</p>
+
+      <h4>Variant A · 互動腳本（推薦）</h4>
+
+      <p>三個值都會用 <code>read -p</code> 個別問：token / secret 不回顯（避免肩膀後面被看到），URL 回顯（純文字無妨）：</p>
+
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste LINE Channel Access Token: " TOKEN &amp;&amp; echo &amp;&amp; read -sp "Paste LINE Channel Secret: " SECRET &amp;&amp; echo &amp;&amp; read -p "Paste ngrok HTTPS URL: " PUBURL &amp;&amp; { grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' &gt;&gt; .env; grep -q '^LINE_CHANNEL_SECRET=' .env || echo 'LINE_CHANNEL_SECRET=' &gt;&gt; .env; grep -q '^LINE_PUBLIC_URL=' .env || echo 'LINE_PUBLIC_URL=' &gt;&gt; .env; grep -q '^LINE_ALLOWED_USERS=' .env || echo 'LINE_ALLOWED_USERS=' &gt;&gt; .env; grep -q '^LINE_ALLOW_ALL_USERS=' .env || echo 'LINE_ALLOW_ALL_USERS=true' &gt;&gt; .env; } &amp;&amp; sed -i "s|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=$TOKEN|" .env &amp;&amp; sed -i "s|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=$SECRET|" .env &amp;&amp; sed -i "s|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=$PUBURL|" .env &amp;&amp; unset TOKEN SECRET PUBURL</code></pre>
+
+      <p>跑完後再執行上方的 redacted verify 命令確認長度。</p>
+
+      <h4>Variant B · 手動範本</h4>
+
+      <p>把 <code>YOUR_TOKEN</code> / <code>YOUR_SECRET</code> / <code>YOUR_NGROK_URL</code> 三個占位字串替換成實際值再貼進終端機（這次<strong>不用</strong>連 <code>&lt;&gt;</code>，因為原字串就沒有）：</p>
+
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; { grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' &gt;&gt; .env; grep -q '^LINE_CHANNEL_SECRET=' .env || echo 'LINE_CHANNEL_SECRET=' &gt;&gt; .env; grep -q '^LINE_PUBLIC_URL=' .env || echo 'LINE_PUBLIC_URL=' &gt;&gt; .env; grep -q '^LINE_ALLOWED_USERS=' .env || echo 'LINE_ALLOWED_USERS=' &gt;&gt; .env; grep -q '^LINE_ALLOW_ALL_USERS=' .env || echo 'LINE_ALLOW_ALL_USERS=true' &gt;&gt; .env; } &amp;&amp; sed -i 's|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=YOUR_TOKEN|' .env &amp;&amp; sed -i 's|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=YOUR_SECRET|' .env &amp;&amp; sed -i 's|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=YOUR_NGROK_URL|' .env</code></pre>
+
+      <p>跑完任一個之後，再跑 awk redacted verify 確認長度合理。接著 Step 5 回 LINE Console 設 webhook。</p>
     </section>
 
     <section class="step" data-step="5" hidden>

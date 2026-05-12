@@ -57,7 +57,52 @@
     </section>
 
     <section class="step" data-step="1" hidden>
-      <!-- Task 3 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 1 / 7 · 開始之前</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>動工前先確認 4 件事到位。</p>
+
+      <h3>前置 checklist</h3>
+      <ul>
+        <li>✓ <strong>Lesson 1 完成</strong>：<code>hermes</code> CLI 能對話。沒做過？先去 <a href="index.html">Lesson 1</a>。</li>
+        <li>✓ <strong>Lesson 2 完成</strong>：Telegram bot 端到端可用，已熟悉 <code>~/.hermes/.env</code> 與 <code>hermes gateway</code> 概念。沒做過？先去 <a href="lesson-2.html">Lesson 2</a>。</li>
+        <li>✓ <strong>手機 LINE app 已登入個人帳號</strong>（或一個還沒用過的測試帳號，避免跟個人 ID 撞）。</li>
+        <li>✓ <strong>WSL / Linux shell</strong> 同一個（跟 Lesson 1 / 2 用的）。</li>
+      </ul>
+
+      <h3>動工前升級 hermes 到最新版</h3>
+      <p>LINE plugin 的必要 fix 在較新 release 才完整收錄。動工前先升級到最新版：</p>
+      <pre data-copy><code>npm update -g @nousresearch/hermes &amp;&amp; hermes --version</code></pre>
+      <p>看到新版本號顯示就過了，繼續往下看。</p>
+
+      <h3>這 7 步在做什麼</h3>
+      <ol>
+        <li><strong>Step 2</strong>：到 LINE Developers Console 申請 bot，拿到 Channel Access Token + Channel Secret（外連既有教學）</li>
+        <li><strong>Step 3</strong>：裝 <code>ngrok</code> 並設 authtoken（讓 LINE webhook 能從 internet 打進本機 hermes）</li>
+        <li><strong>Step 4</strong>：開 ngrok tunnel、把 LINE 相關變數寫進 <code>~/.hermes/.env</code></li>
+        <li><strong>Step 5</strong>：回 LINE Console 填 webhook URL + 設 5 個 toggles</li>
+        <li><strong>Step 6</strong>：啟動 <code>hermes gateway</code>、手機送訊息驗證、抓自己 LINE User ID 收緊 allowlist</li>
+        <li><strong>Step 7</strong>：收尾 + LINE quirks 警告 + 進階預告</li>
+      </ol>
+
+      <div class="notice">
+        ⚠️ <strong>本堂會花 OpenRouter credits</strong>：每則手機送出去的訊息都會經 hermes → OpenRouter 扣費。課堂示範請控制在 &lt; 5 則訊息；想用免費 model 請確認 Lesson 1 Step 7 設的是 <code>:free</code> 結尾的 model。
+      </div>
+
+      <details>
+        <summary>會用到 3 個 shell window，先預告</summary>
+        <p>本堂後半段同時跑 3 個程式：</p>
+        <ul>
+          <li><strong>Window A</strong>：你現在這個（給 <code>nano</code>、<code>sed</code>、查 log 用）</li>
+          <li><strong>Window B</strong>：Step 4 開來跑 <code>ngrok http 8646</code>，保留到課程結束</li>
+          <li><strong>Window C</strong>：Step 6 開來跑 <code>hermes gateway run</code>，保留到課程結束</li>
+        </ul>
+        <p>WSL 用 Windows Terminal 開新分頁即可（<kbd>Ctrl+Shift+T</kbd>）。三個 window 不要關，關了就要全部重來。</p>
+      </details>
     </section>
 
     <section class="step" data-step="2" hidden>

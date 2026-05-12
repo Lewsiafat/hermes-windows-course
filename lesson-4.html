@@ -426,7 +426,115 @@ LINE_ALLOW_ALL_USERS len=4</code></pre>
     </section>
 
     <section class="step" data-step="6" hidden>
-      <!-- Task 8 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 6 / 7 · 啟動 hermes gateway + 手機端到端 smoke</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>串起所有東西的關鍵步驟：(1) 跑 gateway、(2) LINE Console 按 Verify、(3) 手機加好友送訊息、(4) 從 log 抓自己 U-ID、(5) 收緊 allowlist、(6) 重啟驗證。</p>
+
+      <h3>1. 第三個 shell（Window C）啟動 gateway</h3>
+
+      <p>開另一個 Windows Terminal 分頁進 WSL（這是 Window C，與 Window A 編輯用、Window B 跑 ngrok 並列），執行：</p>
+
+      <pre data-copy><code>hermes gateway run</code></pre>
+
+      <p>預期看到啟動 banner，含關鍵字（任何一個 traceback 都先停下查 log）：</p>
+
+      <ul>
+        <li><code>✓ line connected</code></li>
+        <li><code>Gateway running with 1 platform(s)</code></li>
+        <li><code>Secret redaction: ENABLED</code></li>
+      </ul>
+
+      <details>
+        <summary>🚨 啟動就 crash</summary>
+        <ul>
+          <li><strong>「Missing required env: LINE_CHANNEL_ACCESS_TOKEN」</strong> → Step 4 的 .env 變數名拼錯 / 漏寫，回 Step 4 重 awk verify</li>
+          <li><strong>「Invalid LINE_CHANNEL_SECRET length」</strong> → secret 長度不是 32，回 Step 4 sed 補救</li>
+          <li><strong>「Port 8646 already in use」</strong> → 前一個 gateway 還跑著，<code>hermes gateway stop</code> 或 <code>pkill -f "hermes gateway"</code> 後重跑</li>
+        </ul>
+      </details>
+
+      <h3>2. 回 LINE Console 按 Verify</h3>
+
+      <p>切回瀏覽器 LINE Console → Messaging API 分頁 → Webhook URL 旁邊的 <strong>Verify</strong> 按鈕，點下去。</p>
+
+      <p>預期：<strong>✅ Success</strong></p>
+
+      <p>失敗對策：</p>
+      <ul>
+        <li><strong>"Status 4xx"</strong> → webhook URL 路徑漏 <code>/line/webhook</code>，回 Step 5 補</li>
+        <li><strong>"Signature mismatch"</strong> → Channel Secret 抄錯，回 Step 4 redacted verify 確認 <code>LINE_CHANNEL_SECRET len=32</code></li>
+        <li><strong>"Timeout"</strong> → Window B 的 ngrok 斷了；切到 Window B 看 panel 還在不在；若已斷，<code>Ctrl+C</code> 再重跑 <code>ngrok http 8646</code>，<strong>注意新 URL 跟舊的不同</strong>，回 Step 4 用 sed 補救改 <code>LINE_PUBLIC_URL</code>，然後 LINE Console 也要把 webhook URL 改成新的</li>
+      </ul>
+
+      <h3>3. 手機 LINE 加 bot 為好友 → 送第一則訊息</h3>
+
+      <p>加好友兩條路徑：</p>
+      <ul>
+        <li>掃 LINE Console → Messaging API 分頁 → <strong>QR code</strong>（最快）</li>
+        <li>或 LINE app 搜尋 Step 2 拿到的 Bot basic ID（<code>@xxxxxx</code>）</li>
+      </ul>
+
+      <p>加好友成功後，送一句測試：</p>
+      <pre><code>測試</code></pre>
+
+      <h3>4. 看 Window C 的 gateway log，抓你的 U-ID</h3>
+
+      <p>切回 Window C，會看到類似輸出：</p>
+
+      <pre><code>inbound message: platform=line user=U0123456789abcdef0123456789abcdef chat=U0123456789abcdef0123456789abcdef msg='測試'
+response ready: platform=line chat=U0123456789abcdef0123456789abcdef time=5.x s api_calls=1 response=N chars
+[Line] Sending response (N chars) to U0123456789abcdef0123456789abcdef</code></pre>
+
+      <p>抓那段 <code>U</code> + 32 hex 字元（總長 33 字元的 user ID），等下要寫進 allowlist。</p>
+
+      <h3>5. 手機 LINE 確認收到 bot 回應</h3>
+
+      <ul>
+        <li>✅ 收到回應 → 鏈路通了！</li>
+        <li>❌ 沒收到但 log 顯示 Send 成功 → 手機 LINE 設定有擋（極少見），先擱著</li>
+        <li>❌ log 完全沒看到 inbound → Verify 沒過 / ngrok URL 對不上 / hermes 沒接到 platform line，回 Step 5 / 6 上方檢查</li>
+      </ul>
+
+      <h3>6. 收緊 <code>LINE_ALLOWED_USERS</code> 為單一 U-ID</h3>
+
+      <p>現在 <code>LINE_ALLOW_ALL_USERS=true</code>，bot 是公開的，<strong>任何加好友的人都會用你的 OpenRouter 額度</strong>。馬上收緊：</p>
+
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -p "Paste your LINE User ID (U&lt;32-hex&gt;): " USER_ID &amp;&amp; sed -i "s|^LINE_ALLOWED_USERS=.*|LINE_ALLOWED_USERS=$USER_ID|" .env &amp;&amp; sed -i 's|^LINE_ALLOW_ALL_USERS=.*|LINE_ALLOW_ALL_USERS=false|' .env &amp;&amp; grep -E '^LINE_(ALLOWED_USERS|ALLOW_ALL_USERS)' .env &amp;&amp; unset USER_ID</code></pre>
+
+      <p>跑完預期輸出（USER_ID 那段會是你剛貼的值）：</p>
+
+      <pre><code>LINE_ALLOWED_USERS=U0123456789abcdef0123456789abcdef
+LINE_ALLOW_ALL_USERS=false</code></pre>
+
+      <details>
+        <summary>為什麼用 <code>USER_ID</code> 變數名，不是 <code>UID</code>？</summary>
+        <p>Bash 的 <code>UID</code> 是 <strong>readonly built-in</strong>，賦值會靜默失敗 — <code>read -p "..." UID</code> 不會報錯，但 <code>$UID</code> 永遠是學員系統的 user ID（純數字），<strong>不是</strong>你 paste 的 LINE User ID。結果 sed 會把學員系統 UID 寫進 .env，bot 完全擋不住任何人。</p>
+        <p>用 <code>USER_ID</code>（或任何 non-builtin 名稱）就沒這個問題。同理見 Lesson 2 Step 4 補救段的 <a href="lesson-2.html#step-4">Variant A</a>。</p>
+      </details>
+
+      <h3>7. 重啟 gateway，驗證收緊有效</h3>
+
+      <p>切到 Window C，<kbd>Ctrl+C</kbd> 殺掉 gateway。再跑：</p>
+
+      <pre data-copy><code>hermes gateway run</code></pre>
+
+      <p>啟動 banner 同前。再回手機 LINE 送一句訊息：</p>
+
+      <pre><code>測試 2</code></pre>
+
+      <p>預期：自己仍能收到 bot 回應 ✅。代表 allowlist 收緊但你自己沒被擋掉。</p>
+
+      <details>
+        <summary>想額外驗證「名單外被擋」</summary>
+        <p>拿另一個 LINE 帳號加 bot 送訊息，Window C 的 gateway log 應該<strong>不會</strong> dispatch 給 LLM（會看到一行類似 <code>blocked: user U... not in allowlist</code>）。學員選做，不必。</p>
+      </details>
+
+      <p>✓ Verify 過、手機通、allowlist 收緊。最後 Step 7 收尾。</p>
     </section>
 
     <section class="step" data-step="7" hidden>

@@ -538,7 +538,87 @@ LINE_ALLOW_ALL_USERS=false</code></pre>
     </section>
 
     <section class="step" data-step="7" hidden>
-      <!-- Task 9 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 7 / 7 · 完成 + LINE quirks + 加碼預告</h2>
+          <p>~4 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>你做到了</h3>
+      <ol>
+        <li>✓ 一個跑著的 LINE bot（手機 LINE → ngrok → hermes → OpenRouter）</li>
+        <li>✓ 自己 LINE User ID 已寫進 allowlist、別人不能用你 OpenRouter 額度</li>
+        <li>✓ 學到 redacted-verify 命令模式（awk 看長度、不噴 secret）</li>
+        <li>✓ 學會 ngrok tunnel（任何未來要接的 webhook 平台都用得到）</li>
+      </ol>
+
+      <h3>⚠️ LINE quirks 必須知道（避免之後誤判 bot 壞了）</h3>
+
+      <table>
+        <thead>
+          <tr><th>Quirk</th><th>觀察</th><th>為什麼</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Markdown 不 render</strong></td>
+            <td>你叫 hermes 用 <code>**bold**</code> 回應，手機看到的是純文字（沒粗體）</td>
+            <td>LINE plugin 把 markdown strip 掉，因為 LINE 本身不支援 markdown 渲染</td>
+          </tr>
+          <tr>
+            <td><strong>第一則訊息可能雙 send</strong></td>
+            <td>你送一句，bot 回兩條（先短後長）</td>
+            <td>hermes 用 LINE bubble 分訊息回應；正常行為，不是 bug</td>
+          </tr>
+          <tr>
+            <td><strong>慢 LLM 會出 postback 按鈕</strong></td>
+            <td>若用 deepseek free 之類較慢 model，可能看到「請按這個按鈕拿答案」</td>
+            <td>LINE reply token 60 秒就過期；hermes 為了不浪費付費 Push API，先回 button，等學員按再傳完整答案</td>
+          </tr>
+          <tr>
+            <td><strong>ngrok URL 重啟會換</strong></td>
+            <td>隔天醒來 bot 不回 → 多半是 ngrok agent process 死了 / 重連、URL 換了</td>
+            <td>需要：重啟 ngrok → 抓新 URL → 改 <code>~/.hermes/.env</code> 的 <code>LINE_PUBLIC_URL</code> → 改 LINE Console webhook URL → 重啟 <code>hermes gateway</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>下次預告</h3>
+
+      <p>下次（Lesson 5 暫定 / 未排）可能會涵蓋：</p>
+      <ul>
+        <li>LINE Rich Menu 客製化按鈕</li>
+        <li>多 platform 同跑（Telegram + LINE 同支 hermes）</li>
+        <li>或你想學什麼下次告訴我</li>
+      </ul>
+
+      <details>
+        <summary>🎁 加碼 A · systemd 24/7 守護（out of scope，預告用）</summary>
+        <p>本堂教的前景版有兩個限制：</p>
+        <ul>
+          <li>Window B / C 任何一個關閉 → 整條鏈路斷</li>
+          <li>WSL 重啟或機器關機 → 需要手動把兩支重起</li>
+        </ul>
+        <p>要做到 24/7 在背景自動跑、機器重開也自動拉起，需要：</p>
+        <ol>
+          <li><strong>systemd --user service 守護 ngrok agent</strong>（unit 檔指定 <code>ExecStart=/usr/local/bin/ngrok http 8646</code>，<code>Restart=on-failure</code>）</li>
+          <li><strong>systemd --user service 守護 hermes gateway</strong>（類似 unit，<code>ExecStart=$(which hermes) gateway run</code>）</li>
+          <li><strong>ngrok URL 自動同步 watcher</strong>：ngrok agent 重連會換 URL；寫一支 watcher script 對比 ngrok API（<code>http://localhost:4040/api/tunnels</code>）跟 <code>.env</code> 的 <code>LINE_PUBLIC_URL</code>，不一致時 sed 改 .env + <code>systemctl --user restart hermes-gateway</code>。<strong>LINE Console 端的 webhook URL 仍需手動改</strong>（LINE 沒開 API）。</li>
+        </ol>
+        <p>完整步驟在後續的 <code>docs/advanced/lesson-4-systemd.md</code>（尚未寫，本堂不必修）。</p>
+      </details>
+
+      <details>
+        <summary>🎁 加碼 B · 用 hermes gateway lifecycle 指令快速複習</summary>
+        <p>同 Lesson 2 Step 5 加碼，這邊只列常用：</p>
+        <pre data-copy><code>hermes gateway status</code></pre>
+        <pre data-copy><code>hermes gateway restart</code></pre>
+        <pre data-copy><code>hermes gateway stop</code></pre>
+        <p>log：</p>
+        <pre data-copy><code>tail -f ~/.hermes/logs/gateway.log</code></pre>
+      </details>
+
+      <p><em>到這邊就是 Lesson 4 全部內容。下次見。</em></p>
     </section>
 
     <nav id="step-nav" class="container">

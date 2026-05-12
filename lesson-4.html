@@ -164,7 +164,69 @@
     </section>
 
     <section class="step" data-step="3" hidden>
-      <!-- Task 5 填這裡 -->
+      <header>
+        <hgroup>
+          <h2>Step 3 / 7 · 裝 ngrok + 設 authtoken</h2>
+          <p>~7 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>ngrok 是把 LINE 雲端送來的 webhook 訊息轉發到你本機 hermes 的橋樑。LINE 不接受 <code>localhost</code> 或內網 IP，必須公開 HTTPS URL，ngrok free tier 適合學員入門。</p>
+
+      <h3>動作</h3>
+
+      <h4>1. 裝 ngrok（aarch64 / amd64 都用同一個 apt repo）</h4>
+
+      <pre data-copy><code>curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+  | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc &gt;/dev/null \
+  &amp;&amp; echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+  | sudo tee /etc/apt/sources.list.d/ngrok.list \
+  &amp;&amp; sudo apt update &amp;&amp; sudo apt install ngrok</code></pre>
+
+      <p>裝完驗證：</p>
+
+      <pre data-copy><code>ngrok version</code></pre>
+
+      <p>預期：<code>ngrok version 3.x.x</code></p>
+
+      <h4>2. 註冊 ngrok 帳號</h4>
+
+      <p>瀏覽器開 <a href="https://dashboard.ngrok.com/signup" target="_blank" rel="noopener">https://dashboard.ngrok.com/signup</a> → 用 GitHub 或 Google OAuth 註冊（最快）→ 進 Dashboard。</p>
+
+      <h4>3. 取 authtoken</h4>
+
+      <p>Dashboard sidebar → <strong>Your Authtoken</strong> → 複製顯示的字串。</p>
+
+      <div class="notice">
+        ⚠️ authtoken 也是 <strong>secret</strong>，<strong>不要截圖、不要 commit、不要貼進公開聊天</strong>。
+      </div>
+
+      <h4>4. 設定 authtoken</h4>
+
+      <p>把剛複製的 authtoken 貼到下面命令的 <code>&lt;your-authtoken&gt;</code> 位置（含 <code>&lt;&gt;</code> 一起換掉），執行：</p>
+
+      <pre data-copy><code>ngrok config add-authtoken &lt;your-authtoken&gt;</code></pre>
+
+      <p>預期輸出：</p>
+
+      <pre><code>Authtoken saved to configuration file: ~/.config/ngrok/ngrok.yml</code></pre>
+
+      <details>
+        <summary>為什麼這步是核心？</summary>
+        <p>ngrok free tier <strong>沒設 authtoken 時 session 撐不過半小時就會斷</strong>；設了之後 session 不會主動 timeout，<strong>agent process 不死就不斷</strong>。</p>
+        <p>學員若把 ngrok 當「打開 tunnel 就好」、忽略 authtoken，下午 bot 就會莫名其妙不回，多半找半天才發現是這個原因。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>apt install 報 GPG key 錯</strong> → 上面 curl 那行的 GPG key 沒下載成功，確認網路後重跑 curl 那段</li>
+          <li><strong>ngrok config add-authtoken 報「invalid authtoken」</strong> → 多半 paste 帶到換行 / 空白；回 Dashboard 重抄一次，paste 時注意去除前後空白</li>
+          <li><strong>ngrok.yml 存到別處</strong> → 預設路徑是 <code>~/.config/ngrok/ngrok.yml</code>；用 <code>cat ~/.config/ngrok/ngrok.yml</code> 看是否存在</li>
+        </ul>
+      </details>
+
+      <p>✓ <code>ngrok version</code> 報 3.x、<code>~/.config/ngrok/ngrok.yml</code> 已存。接著 Step 4 開 tunnel。</p>
     </section>
 
     <section class="step" data-step="4" hidden>

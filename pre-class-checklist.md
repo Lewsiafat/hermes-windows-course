@@ -116,6 +116,53 @@ hermes gateway stop
 - [ ] log 顯示在 polling 模式（而非 webhook 之類）
 - [ ] `hermes gateway stop` 後再 `hermes gateway status` 應該報 stopped
 
+## Lesson 4 必檢項（LINE 整合）
+
+每次教學前若會教 Lesson 4，這幾條一起跑：
+
+### 1. LINE Bot 外部教材連結還活著
+
+```bash
+curl -I https://lewsi.ddns.net/apply-tutorials/bots/line/line_bot_tutorial_zh.html
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。  
+若 4xx / 5xx：lesson-4.html Step 2 的 `<details>` 備援文案就是 fallback。  
+若主機完全打不到：考慮把備援升到主文。
+
+### 2. ngrok apt repo 仍可達
+
+```bash
+curl -I https://ngrok-agent.s3.amazonaws.com/ngrok.asc
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。  
+若失敗：ngrok 改了 distribution → 查 `https://ngrok.com/download` 看新指令，更新 lesson-4.html Step 3 的 apt 區塊。
+
+### 3. hermes 升級到最新 release
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+預期：升級成功、版本號顯示。  
+若 `npm` 權限 / 網路問題：排除後再開課。LINE plugin 必要 fix 已隨較新 release 收錄；學員 Step 1 也會做一次。
+
+### 4. hermes gateway 認得 `line` 平台
+
+```bash
+hermes gateway --help 2>&1 | grep -i line || hermes gateway list-platforms 2>&1
+```
+
+預期：任一行輸出含 `line`。  
+若沒有：升級 hermes：
+
+```bash
+npm update -g @nousresearch/hermes && hermes --version
+```
+
+升級後仍沒有 → 暫緩開課。
+
 ## 截圖檢查
 
 依 spec §8.1 走過 `assets/screenshots/`：

@@ -1570,16 +1570,54 @@ git push origin --delete feat/lesson-3-daily-use
 
 ---
 
-## Dogfood Results (YYYY-MM-DD)
+## Dogfood Results (2026-05-13)
 
-> Task 0 結果填這裡。範本：
+- **hermes 版本**：`Hermes Agent v0.13.0 (2026.5.7)`（Python 3.11.15, OpenAI SDK 2.36.0, project `/home/lewsi/.hermes/hermes-agent`）
 
-- hermes 版本：
-- `/skills` 行為：
-- skill 重啟識別：
-- config prompt UX：
-- wttr.in：
-- 對 plan 的影響：
+- **`/skills` 行為**：⚠️ **與 spec 假設不符**。`/skills` 本身不是「列清單」指令，而是 **Skills Hub 命令群**，子命令包含 `browse / search / install / inspect / list / check / update / audit / uninstall / reset / publish / snapshot / tap`。要看已安裝清單須跑：
+  - `/skills list`（全部來源；輸出多時會 partial 分頁）
+  - `/skills list --source local`（只看本地 / 自寫 skill）
+
+- **skill 重啟識別**：✅ 通。本地 SKILL.md 放到 `~/.hermes/skills/productivity/<name>/` 後，**重啟 hermes** → 直接以 top-level slash command `/<name>` 呼叫即可（不用 `/skills run <name>`）。觀察到：
+  - 載入時印 `⚡ Loading skill: <name>`
+  - hermes 在 LLM context 注入 `[IMPORTANT: ...]` 引導 + `[Skill directory: ...]` 絕對路徑
+  - SKILL.md `Procedure` 區段被 LLM 嚴格遵守
+
+- **config prompt UX**：**(d) 以上皆非**——`metadata.hermes.config.prompt` **不會** 在 skill 觸發時自動跳互動 prompt。實際機制：
+  - **讀取路徑**：hermes 載入 skill 時，把 `skills.config.<key>` 當下值注入 LLM context（例：`test-config.greeting = 哈摟migrate`），若沒設則 `(not set)`。
+  - **官方填值路徑**：`hermes config migrate`（或 `hermes update`）→ 掃所有 enabled skills 的 `metadata.hermes.config` → 用 `prompt:` 文字互動式問 → 寫到 `skills.config.<key>`。
+  - **⚠️ 重大 TRAP**：`hermes config migrate` 結束時會 print「Set later with: `hermes config set <key> <value>`」——**這條建議是錯的**。`hermes config set <skill-key> <value>` 會把值寫到 yaml **頂層** `<key>:` 而非 `skills.config.<key>`，skill 永遠讀不到。教材必須明示這個坑（hermes 上游 misleading message）。
+  - **同 session 不會 live-refresh**：改完 config 後必須 `/exit` 重開 `hermes` 才會吃到新值。
+
+- **wttr.in**：✅ 通。`HTTP/2 200`、`taipei: 🌧️ +22°C`（2026-05-13 22:xx 實測）。
+
+### 對 plan 的影響
+
+**Task 4 (lesson-3.html Step 2)：** 教材原本講「`/skills` 列清單」要改寫——分兩段教：
+1. `/skills` = Skills Hub 命令群（先給學員看完整子命令）
+2. 列已安裝用 `/skills list`、只看自己寫的用 `/skills list --source local`
+
+**Task 5 (lesson-3.html Step 3)：** 「skill 重啟後變 top-level slash command」假設 ✓ 已驗證，不用改。可順帶提 `⚡ Loading skill` 提示是學員會看到的視覺 cue。
+
+**Task 6 (lesson-3.html Step 4，寫 daily-journal SKILL.md)：** 不受影響（daily-journal 不用 `metadata.hermes.config`，那是加碼 D 才用）。但範本說明可加一句「`/skills list` 確認 daily-journal 出現」。
+
+**Task 8 (lesson-3.html Step 6 加碼 D)：** **大改寫**——
+- 原 spec「跑一次自動跳 prompt」整段刪掉
+- 新流程：
+  1. 寫好 daily-weather SKILL.md（含 `metadata.hermes.config.location` 等）
+  2. 跑 `hermes config migrate` → 看到「N skill setting(s) not configured」+ skill prompt 文字
+  3. 答完 location → hermes 寫到 `skills.config.daily-weather.location`
+  4. **`/exit` 重啟 hermes**
+  5. `/daily-weather` → 注入到 LLM context 的 location 已是答的值
+- **必須加 ⚠️ Pitfall 框**：「hermes 結尾 print 的『Set later with: hermes config set ...』是 misleading，**不要用** set，改 config 一律用 `migrate`」
+- 學員若先用了 `hermes config set` 把值寫錯位置 → 教材要給「直接編 `~/.hermes/config.yaml` 移到 `skills.config.<key>`」的補救（或重跑 migrate 應該也會偵測到 missing）
+
+**Task 13 (ai-runbook Stage 25–31)：** 對應 Task 8 改寫，新 stage 要包含：
+- `hermes config migrate` 互動截圖
+- /exit 重啟
+- 第二次 /daily-weather 確認注入值
+
+**Task 12 (pre-class-checklist Lesson 3 必檢項)：** 加一條「`hermes config migrate` 仍可偵測 skill-declared config」（這是 hermes 上游若大改最容易壞的點）。
 
 ---
 

@@ -73,8 +73,9 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 - **Step 7「補救：直接改 hermes 的 .env」section（Variant A / B 兩個 sed 腳本）** ← 被 Step 8「我卡住了」的 400 error 條目直接引用。改寫或搬位置時必須同步更新 Step 8 的指路文字。
 - 該 sed 腳本（含 `export` 前綴的替換寫法）是 hermes 上游官方暫未修正 paste 問題的**繞行解**，**寫法原樣引用、不可擅自簡化**（例如不要拿掉 `export`、不要改 sed delimiter）。
 
-### Lesson 之間（index.html ↔ lesson-2.html）
+### Lesson 之間（index.html ↔ lesson-2.html / lesson-4.html）
 
+- **Lesson 1 `index.html` Step 9 加碼 A 末段** → 連到 `lesson-4.html`。改寫加碼 A 時必須保留這個出口（與加碼 B → Lesson 2 對稱）。
 - **Lesson 1 `index.html` Step 9 加碼 B 末段** → 連到 `lesson-2.html`。改寫加碼 B 時必須保留這個出口。
 - **Lesson 2 `lesson-2.html` Step 0 / Step 1** → 提到沒做過 Lesson 1 請先去 `index.html`。改 Step 0 / Step 1 文案時保留這個 fallback 連結。
 - **Lesson 2 Step 4 補救 section** → cross-ref `index.html#step-7`，提示是同根因（hermes 上游 paste 雷）。Lesson 1 Step 7 搬位置或 anchor 改名時，Lesson 2 Step 4 的連結要對應改。

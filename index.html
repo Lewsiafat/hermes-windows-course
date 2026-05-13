@@ -481,15 +481,14 @@ cd ~</code></pre>
 
       <details>
         <summary>加碼 A：申請 LINE Messaging API channel</summary>
-        <p>下一堂課要用，現在拿 token 之後可以直接接通。</p>
+        <p>Lesson 4 要用，比 Telegram 久一點（~10 分鐘）。</p>
         <ol>
-          <li>開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">https://developers.line.biz/console/</a></li>
-          <li>用你的 LINE 帳號登入</li>
-          <li>「Create new provider」→ 隨便取名（例：<code>my-hermes</code>）</li>
-          <li>進入 provider → 「Create a Messaging API channel」→ 填 channel 名稱、icon、類別</li>
-          <li>建立後進入 channel → 「Messaging API」分頁</li>
-          <li>找到 <strong>Channel access token (long-lived)</strong> → Issue → 複製到記事本</li>
+          <li>開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers Console</a> → 用 LINE 帳號登入</li>
+          <li>Create new provider → Create a Messaging API channel（名稱、icon 隨意）</li>
+          <li>進 channel：<strong>Basic settings</strong> 分頁複製 <strong>Channel secret</strong>（32 hex 字元）</li>
+          <li><strong>Messaging API</strong> 分頁 Issue <strong>Channel access token</strong>（~170 字元），複製到記事本</li>
         </ol>
+        <p>✓ 兩個都拿到了？接著進 <a href="lesson-4.html"><strong>Lesson 4 · LINE 整合</strong></a>，把這支 channel 接通到 hermes。</p>
       </details>
 
       <details>

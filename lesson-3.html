@@ -136,7 +136,50 @@
     </section>
 
     <section class="step" data-step="3" hidden>
-      <!-- Task 5 填 -->
+      <header>
+        <hgroup>
+          <h2>Step 3 / 6 · skills 是什麼</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>還記得 Lesson 1 Step 0 講的 hermes 賣點「<strong>會自我學習與成長</strong>……完成複雜任務後自動學會新的『技能』（Skills）」嗎？這就是 skills。</p>
+
+      <h3>一句話定義</h3>
+      <p>Skill = 一份 markdown 檔，告訴 hermes「<strong>什麼情境</strong>用我」「<strong>怎麼做</strong>」「<strong>失敗怎麼救</strong>」。檔名統一叫 <code>SKILL.md</code>。</p>
+
+      <h3>它住在哪</h3>
+      <pre><code>~/.hermes/skills/
+├── productivity/              ← 類別目錄
+│   ├── maps/                  ← 內建：地圖查詢
+│   │   └── SKILL.md
+│   ├── ocr-and-documents/     ← 內建：OCR
+│   │   └── SKILL.md
+│   └── daily-journal/         ← 你 Step 4 會建這個
+│       └── SKILL.md
+├── research/
+│   └── arxiv/                 ← 內建：arxiv 搜尋
+│       └── SKILL.md
+├── creative/
+│   └── p5js/                  ← 內建：p5.js 視覺化
+│       └── SKILL.md
+└── ...                        ← 還有十幾個類別
+</code></pre>
+
+      <p>每個 skill 一個資料夾，最少必須有 <code>SKILL.md</code>。可選擇性附帶 <code>scripts/</code>（python / shell）、<code>references/</code>（額外文件）、<code>templates/</code>（輸出範本）。Step 4 的 <code>daily-journal</code> 只要 <code>SKILL.md</code>，零 scripts。</p>
+
+      <h3>為什麼這個設計很聰明</h3>
+      <ul>
+        <li><strong>純 markdown，零程式</strong>：寫 prompt 就行，不用學 Python 寫 plugin</li>
+        <li><strong>自動變 slash command</strong>：<code>name:</code> 欄位是什麼，<code>/&lt;那個 name&gt;</code> 就能呼叫</li>
+        <li><strong>所有 channel 共用</strong>：CLI 寫一次，Telegram 也有，Lesson 4 那邊接的 LINE 也有</li>
+        <li><strong>progressive disclosure</strong>：不用全部內容塞 prompt，hermes 只在判斷需要時才載入</li>
+      </ul>
+
+      <details>
+        <summary>🌐 還有 Skills Hub 可以「裝別人寫的 skill」（暫不教）</summary>
+        <p>上游有 <a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a> 這個社群 Hub。在 hermes 對話裡跑 <code>/skills browse</code>（看清單）、<code>/skills search &lt;關鍵字&gt;</code>（找）、<code>/skills install &lt;name&gt;</code>（裝）就能拉現成的 skill 進來，跟 <code>npm install</code> 概念類似。本堂為了專注，先教自己寫——Hub 安裝留給之後玩。</p>
+      </details>
     </section>
 
     <section class="step" data-step="4" hidden>

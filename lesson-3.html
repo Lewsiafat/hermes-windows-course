@@ -99,7 +99,40 @@
     </section>
 
     <section class="step" data-step="2" hidden>
-      <!-- Task 4 填 -->
+      <header>
+        <hgroup>
+          <h2>Step 2 / 6 · 常用 <code>/</code> 指令（skills 相關）</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Lesson 2 Step 7 的 cheatsheet 已經涵蓋 <code>/new</code> <code>/model</code> <code>/help</code> 這些。Lesson 3 新增兩組 skills 專用指令：</p>
+
+      <table>
+        <thead><tr><th>指令</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>/skills</code></td><td><strong>Skills Hub 命令群</strong>（不是「列清單」指令）。打進去會看到子命令選單：<code>browse / search / install / inspect / list / check / update / audit / uninstall / publish / snapshot / tap</code>……</td></tr>
+          <tr><td><code>/skills list</code></td><td>真正列出已安裝 skills（bundled 內建 + 你自己寫的）。輸出多會分頁，按 <code>continue</code> / <code>n</code> 看下一頁。</td></tr>
+          <tr><td><code>/skills list --source local</code></td><td>只列你自己寫的本地 skills（過濾掉一大串內建 skill 才好找）。Step 4 寫完 <code>daily-journal</code> 後用這條最快驗證。</td></tr>
+          <tr><td><code>/&lt;skill-name&gt;</code></td><td>直接呼叫某個 skill。例如 <code>/plan</code> 呼叫內建 plan skill；Step 4 寫完 <code>daily-journal</code> 就能打 <code>/daily-journal</code>。</td></tr>
+          <tr><td><code>/&lt;skill-name&gt; 額外參數</code></td><td>傳參數給 skill。例：<code>/plan 設計一個 cron 排程器</code> → 把後面字串當輸入。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>實作：跑一次 <code>/skills list</code></h3>
+      <ol>
+        <li>在你的 hermes CLI 或 Telegram bot 傳 <code>/skills</code>，先看一下 Skills Hub 命令選單長怎樣（之後 Step 4 收尾會用到 <code>install</code>、<code>inspect</code>）</li>
+        <li>傳 <code>/skills list</code> 看完整清單。應該看到一大堆 bundled skill：<code>plan</code>、<code>excalidraw</code>、<code>architecture-diagram</code>、<code>ascii-art</code>……</li>
+        <li>傳 <code>/plan 寫一份本週讀書計畫</code> → bot 套用 <code>plan</code> skill 的指令幫你寫出 markdown 計畫</li>
+      </ol>
+
+      <p>✓ 看到 <code>/skills list</code> 列出清單 → checkpoint 2 完成。</p>
+
+      <details>
+        <summary>📚 為什麼 skill 自動變成 slash command</summary>
+        <p>每個 skill 在 <code>~/.hermes/skills/&lt;category&gt;/&lt;name&gt;/SKILL.md</code> 的 frontmatter 都有 <code>name:</code> 欄位。hermes 啟動時掃描整個 skills 目錄、為每個 <code>name</code> 註冊一個對應的 top-level slash command。所以 Step 4 寫完 <code>name: daily-journal</code> 的 SKILL.md，重啟後就會自動有 <code>/daily-journal</code> 可用——CLI 跟 Telegram 都認得。</p>
+        <p>呼叫時 hermes 會印 <code>⚡ Loading skill: daily-journal</code>，並把 SKILL.md 整份內容注入 LLM context。你會在輸出開頭看到 <code>[IMPORTANT: The user has invoked the "daily-journal" skill...]</code> 的提示——那是 hermes 自己加的引導，讓 LLM 嚴格照 SKILL.md 的 Procedure 走。</p>
+      </details>
     </section>
 
     <section class="step" data-step="3" hidden>

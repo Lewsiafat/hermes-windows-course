@@ -183,7 +183,104 @@
     </section>
 
     <section class="step" data-step="4" hidden>
-      <!-- Task 6 填 -->
+      <header>
+        <hgroup>
+          <h2>Step 4 / 6 · 寫你的第一個 skill：<code>daily-journal</code></h2>
+          <p>~15 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>要寫的 skill：訪談式日記。學員打 <code>/daily-journal</code> → bot 一題一題問今日心得 → 答完整理成 markdown 存到 <code>~/journal/YYYY-MM-DD.md</code>。</p>
+
+      <h3>1. 建立 skill 目錄</h3>
+      <pre data-copy><code>mkdir -p ~/.hermes/skills/productivity/daily-journal</code></pre>
+
+      <h3>2. 寫 SKILL.md</h3>
+      <p>在你的 WSL Ubuntu 終端開 <code>nano</code>（或你慣用的編輯器）：</p>
+      <pre data-copy><code>nano ~/.hermes/skills/productivity/daily-journal/SKILL.md</code></pre>
+
+      <p>把下面整段貼進去：</p>
+
+      <pre data-copy><code>---
+name: daily-journal
+description: 用訪談形式引導使用者寫今日日記，存到 ~/journal/YYYY-MM-DD.md
+version: 0.1.0
+metadata:
+  hermes:
+    tags: [journal, daily, interview, personal]
+    category: productivity
+    requires_toolsets: [terminal]
+---
+
+# Daily Journal Skill
+
+## When to Use
+使用者打 `/daily-journal` 或在對話中提到「想寫日記」「記錄今天」。
+通常是一天結束時觸發。
+
+## Procedure
+**一次只問一題**，等使用者回答完才問下一題。順序：
+
+1. 「今天最有成就感的一件事是什麼？」
+2. 「今天遇到最卡的事？怎麼處理的？」
+3. 「明天最想優先做什麼？」
+4. 「一句話總結今天的心情？」
+
+四題都答完後，整理成這個格式的 markdown：
+
+```
+# YYYY-MM-DD
+
+## 成就
+{答案 1}
+
+## 卡點
+{答案 2}
+
+## 明日重點
+{答案 3}
+
+## 一句話心情
+{答案 4}
+```
+
+用 terminal toolset 把日期換成今天（`date +%Y-%m-%d`），
+寫入 `~/journal/YYYY-MM-DD.md`。資料夾不存在就 `mkdir -p`。
+若檔案已存在，append 一個 `## 補記` section 在後面。
+
+## Pitfalls
+- 不要一次把四題丟出來，學員會壓力大、答案會草率
+- 使用者中途想跳題就跳，不要強迫
+- 從 Telegram 觸發時更要強調一題一問（手機螢幕窄）
+
+## Verification
+- `~/journal/YYYY-MM-DD.md` 真的存在
+- 內容包含四題答案
+</code></pre>
+
+      <p>存檔離開（nano: <kbd>Ctrl</kbd>+<kbd>O</kbd> → <kbd>Enter</kbd> → <kbd>Ctrl</kbd>+<kbd>X</kbd>）。</p>
+
+      <h3>3. 重啟 hermes 讓它載入</h3>
+      <p>若你目前在 hermes CLI 裡，先離開（<code>/exit</code> 或 <kbd>Ctrl</kbd>+<kbd>D</kbd>）。然後重新進：</p>
+      <pre data-copy><code>hermes</code></pre>
+
+      <h3>4. 確認 skill 載入成功</h3>
+      <p>進到 hermes 對話、輸入：</p>
+      <pre data-copy><code>/skills list --source local</code></pre>
+
+      <p>清單裡應該看到 <code>daily-journal</code>。看不到的話翻 Step 6「我卡住了」。</p>
+
+      <p>✓ <code>/skills list --source local</code> 列出 <code>daily-journal</code> → checkpoint 3 完成。下 Step 從 Telegram 觸發看完整體驗。</p>
+
+      <details>
+        <summary>🤔 為什麼 <code>requires_toolsets: [terminal]</code>？</summary>
+        <p>因為 skill 要 <code>mkdir -p ~/journal</code>、<code>date +%Y-%m-%d</code>、寫檔——這些都靠 <code>terminal</code> toolset。寫進 frontmatter 讓 hermes 自動處理依賴，沒這個 toolset 就會跳訊息提示。</p>
+      </details>
+
+      <details>
+        <summary>🤔 為什麼放在 <code>productivity/</code> 目錄？</summary>
+        <p>對齊 frontmatter 寫的 <code>category: productivity</code>。上游 bundled skill 也是這種對齊方式（<code>skills/productivity/maps/</code>、<code>skills/research/arxiv/</code> 等）。理論上目錄與 category 不一致也能跑，但對齊比較好維護。</p>
+      </details>
     </section>
 
     <section class="step" data-step="5" hidden>

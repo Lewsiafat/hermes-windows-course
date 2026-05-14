@@ -101,3 +101,32 @@ body > footer {
     max-width: none;
   }
 }
+
+/* 1-on-1 課程 CTA box（指向 lewsiai.com） */
+article.cta {
+  margin-block: 2rem;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--pico-primary);
+  background: var(--pico-card-background-color);
+}
+
+article.cta header {
+  margin-bottom: 0.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+article.cta header strong {
+  font-size: 1.05rem;
+}
+
+article.cta p {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+article.cta [role="button"] {
+  display: inline-block;
+  margin-bottom: 0;
+}

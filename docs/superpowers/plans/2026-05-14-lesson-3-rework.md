@@ -1070,24 +1070,14 @@ GitHub Pages 10–30s 後生效。
 
 ## Dogfood Results
 
-> Task 0 完成後把結果寫進來。Task 1+ 開工前這份必須有內容。
+**Status: SKIPPED by user (2026-05-14)**
 
-### Dogfood 1：cron 對話式設定真的能跑
+User decision：跳過 pre-deploy dogfood、現場教學時應對差異。教材寫法以 spec §5 + 我對 hermes 行為的假設為準，未經實機驗證。
 
-（待填）
+**Known risks（若現場教學遇到要記下 → 之後 fixup commit）：**
+- Step 2 cron prompt：hermes 不一定真的會把 cron job 寫到 `~/.hermes/cron.yaml`（特別是 free model）；SP500 不保證拿得到
+- Step 3 對話式裝 skill-creator：`幫我裝這個 skill: <url>` 不確定 hermes 會不會主動執行 install 流程
+- Step 4 skill-creator 訪談順序與「evaluation」那題的實際措辭可能跟教材描述不同
+- skill 落地路徑（教材寫的 `~/.hermes/skills/meta/skill-creator/` 是假設，實際可能在別的 category）
 
-### Dogfood 2：cron 三條資訊 hermes 都拿得到
-
-（待填，特別記 SP500 拿不拿得到 → 影響 Step 2 prompt 是否要改範例）
-
-### Dogfood 3：對話式裝 skill-creator 真的能跑
-
-（待填，包含實際落地路徑）
-
-### Dogfood 4：skill-creator 訪談 UX
-
-（待填，記實際對話樣貌、訪談問題數量與順序、evaluation 那題的措辭）
-
-### Dogfood 5：造出來的 skill 重啟後可從 `/<name>` 跑
-
-（待填）
+教材已在每個 Step 末段放 `<details>` 「🚨 我卡住了」 fallback 覆蓋上述風險的常見失敗模式。

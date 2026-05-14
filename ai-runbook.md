@@ -635,85 +635,72 @@ Window C 重啟 gateway，手機再送一句 → 仍收到回應。
 
 ---
 
-# Lesson 3 · Stage 25–31（日常使用）
+# Lesson 3 · Stage 25–29（日常使用）
 
-接續 Lesson 4 的 Stage 24。本批 stage 假設學員已完成 Lesson 1+2，hermes 已裝、Telegram bot 已接。
+接續 Lesson 4 的 Stage 24。本批 stage 假設學員已完成 Lesson 1+2，hermes 已裝、Telegram bot 已接。**注意：原 Stage 25–31 已重寫為 Stage 25–29（少 2 stage），對應 lesson-3.html 從 7 sections（Step 0–6）改為 6 sections（Step 0–5）。**
 
 ## Stage 25 · 開啟 lesson-3.html、走 Step 0–1
 
 1. 在已開的瀏覽器 tab 開 `https://lewsiafat.github.io/hermes-windows-course/lesson-3.html`
 2. 確認進度顯示「前言」、標題「Lesson 3 · hermes 日常使用」
-3. 讀完 Step 0 4 個 checkpoints、點「下一步 →」進 Step 1
-4. Step 1 「實作：試一次 `/new`」步驟在 Telegram bot 跑：先傳算術題、再傳 `/new`、確認 context 清空
+3. 讀完 Step 0 4 個 checkpoints + 「★ 現在就想好一個 daily skill 主題」、心裡選定一個主題（例：「每天早上推一條英文俚語」）
+4. 點「下一步 →」進 Step 1
+5. Step 1 「實作：試一次 `/new`」步驟在 Telegram bot 跑：先傳算術題、再傳 `/new`、確認 context 清空
 
-預期：bot 回 `/new` 後再問 "what was my last question" 回答無法回憶。
+預期：bot 回 `/new` 後再問 "what was my last question" 回答無法回憶。Step 0 確認進度顯示「Step 1 / 5」（不是 / 6）。
 
-## Stage 26 · 進 Step 2 試 `/skills` 與 `/skills list`
+## Stage 26 · 進 Step 2 跑 cron 對話式設定
 
 1. 點「下一步 →」進 Step 2
-2. 在 hermes CLI（或 Telegram bot）傳 `/skills`，記下 Skills Hub 子命令選單（browse / search / install / list / ...）
-3. 傳 `/skills list`，記下 bundled skills 表格（至少 5 個）
-4. 傳 `/plan 寫一份本週讀書計畫`，確認 plan skill 生成 markdown
+2. Copy 「2 分鐘後跑 ⟨天氣+降雨+SP500⟩」prompt block、貼到 hermes CLI / Telegram
+3. hermes 應主動把 cron job 寫進 `~/.hermes/cron.yaml`，回覆「已設定，2 分鐘後會自動跑」
+4. 在 WSL terminal 看：`cat ~/.hermes/cron.yaml` 確認 job 在
+5. 等 2 分鐘，Telegram 收到 ⟨天氣+降雨預報+SP500⟩ 三件事
+6. Copy「把剛剛那個改成每天早上 7:00 跑」prompt、貼，hermes 更新 cron.yaml
+7. Copy「列出我目前的 cron 排程」prompt、確認 daily 7:00 job 在
 
-預期：`/skills` 顯示子命令選單；`/skills list` 印出表格至少含 `plan`、`excalidraw`；`/plan` 產出結構化計畫。
+預期：Telegram 收到推送、cron.yaml 確實被更新兩次。**Checkpoint 2 在此 stage 達成。**
 
-## Stage 27 · 進 Step 3、讀 skills 概念
+若 hermes 沒主動寫 cron.yaml：執行 lesson-3.html Step 2「我卡住了」`<details>` 的 fallback（更明確要求編輯 file path）。
+
+## Stage 27 · 進 Step 3 探索 hermes + 對話式裝 skill-creator
 
 1. 點「下一步 →」進 Step 3
-2. 讀完目錄結構樹
-3. 跑 `ls ~/.hermes/skills/` 對照課程裡的目錄樹
+2. Copy `/skills list`、貼 → 看到 bundled skill 清單分頁（至少含 plan / excalidraw / 其他類別）
+3. Copy `/plan 寫一份本週讀書計畫`、貼 → 看到 plan skill 輸出 markdown
+4. Copy「幫我裝這個 skill: https://github.com/anthropics/skills/tree/main/skills/skill-creator」prompt、貼
+5. hermes 應主動裝、回覆「裝好了」之類
+6. Copy `/skills list --source local`、確認看到 `skill-creator`
 
-預期：實際目錄至少包含 productivity/, research/ 等 category 子目錄。
+預期：`/skills list --source local` 含 `skill-creator`。**Checkpoint 3 在此 stage 達成。**
 
-## Stage 28 · 進 Step 4 寫 daily-journal SKILL.md
+若 hermes 沒主動裝：fallback 用 `/skills install <url>` 或 git clone（lesson-3.html Step 3「我卡住了」內第三段）。
+
+## Stage 28 · 進 Step 4 用 skill-creator 對話造 skill
 
 1. 點「下一步 →」進 Step 4
-2. 用 Copy 按鈕複製第一塊 `mkdir -p` 指令、貼到 WSL terminal 跑
-3. Copy `nano` 指令、貼到 terminal 跑
-4. Copy SKILL.md 整段、貼進 nano、存檔
-5. Copy `hermes` 指令、退出 CLI 再重進
-6. Copy `/skills list --source local` 指令、貼到 hermes 對話、確認列表出現 `daily-journal`
+2. Copy「我想用 skill-creator 造一個 skill: ⟨主題⟩」prompt、把 ⟨主題⟩ 換成 Stage 25 選的主題（例：「每天早上推一條英文俚語」），貼到 hermes
+3. skill-creator 開始訪談、依序回答（用簡單版本即可）
+4. **看到「evaluation / benchmarks / test cases」相關問題時**，回「不用 eval、只 vibe 就好」或「skip evaluation」
+5. skill-creator 寫完 SKILL.md，提示重啟。記下落地路徑（例：`~/.hermes/skills/productivity/morning-slang/SKILL.md`）
+6. Copy `sudo $(which hermes) gateway restart --system`、跑、等 gateway restart
+7. Copy `/skills list --source local`、確認看到剛造的 skill 名字
+8. CLI 跑 `/<your-skill-name>`、看 skill 輸出
+9. （可選）手機 Telegram bot 跑 `/<your-skill-name>`、看跨 channel 也認
 
-預期：`/skills list --source local` 輸出含 `daily-journal`。
+預期：CLI 端 skill 輸出符合預期。**Checkpoint 4 在此 stage 達成 → Lesson 3 全 4 checkpoints 達標。**
 
-## Stage 29 · 進 Step 5 從 Telegram 端到端訪談
+若訪談卡住 / 跑不起來：lesson-3.html Step 4「我卡住了」`<details>` 三段（「不知道怎麼回」/「認不出來」/「行為不對」）為 fallback。
+
+## Stage 29 · 進 Step 5 完成 + 加碼預告
 
 1. 點「下一步 →」進 Step 5
-2. Copy `sudo $(which hermes) gateway restart --system`、跑、等 gateway restart
-3. 手機 Telegram bot 傳 `/new` 再傳 `/daily-journal`
-4. 依序回答四題（隨意填，每題答案 5–10 字即可）
-5. bot 回覆寫檔確認
-6. 在 WSL terminal 跑 `cat ~/journal/$(date +%Y-%m-%d).md`
-
-預期：檔案存在、四個 markdown section 都有內容。
-
-## Stage 30 · 進 Step 6 完成 + 加碼預告
-
-1. 點「下一步 →」進 Step 6
-2. 確認 4 個 ✓ checkmark 都顯示
-3. 點開加碼 A/B/C/D 四個 `<details>`，每個收起再展開一次
-4. 加碼 D 內三個巢狀 `<details>`（⚠️ TRAP / 🚨 已誤用 / 🤔 同 session）都展開確認
+2. 確認 4 個 ✓ checkmark 都顯示、文字跟 Stage 25 看到的 Step 0 一致
+3. 點開加碼 A/B/C/D 四個 `<details>`，每個收起再展開一次（**新版加碼 D 沒有巢狀 `<details>`**）
+4. （選做）加碼 A：對 hermes 講「把 ⟨skill-name⟩ 串到 cron 每天 7:00」→ 看 `~/.hermes/cron.yaml` 是否多一條 job
+5. （選做）加碼 D：`cat ~/.hermes/skills/*/⟨your-skill-name⟩/SKILL.md` → 看 frontmatter + markdown 結構
 
 預期：所有 `<details>` 可開可收。
-
-## Stage 31 · 加碼 D 完整跑通（選做）
-
-加碼 D 用 `hermes config migrate` 設定 location，**不是** spec 原假設的「skill 觸發時自動跳 prompt」（見 plan §Dogfood Results 2026-05-13）。
-
-1. 照加碼 D Step 1–2 改 SKILL.md：frontmatter 加 `config:` 區塊、Procedure 開頭加天氣指令段
-2. 離開 hermes CLI（`/exit`）
-3. 跑 `hermes config migrate`（純 CLI，不在 hermes 對話內）
-4. 看到「1 skill setting(s) not configured: • daily-journal.location ... Configure skill settings? [y/N]:」prompt → 輸入 `y`
-5. 看到「你住哪個城市？...」prompt → 輸入 `Taipei` → 看到 `✓ Saved daily-journal.location = Taipei`
-6. `sudo $(which hermes) gateway restart --system`
-7. 從 Telegram 跑 `/new` 然後 `/daily-journal`
-8. 看 `~/journal/$(date +%Y-%m-%d).md` 開頭應該有「## 天氣」區塊含 wttr.in 輸出（例：`Taipei: 🌧 +24°C`）
-
-預期：日記檔含天氣行、bot 訪談前自動報天氣。
-
-收尾：刪掉 `~/.hermes/skills/productivity/daily-journal/`（若是 smoke test 環境）；或保留（若是 dogfood 跑通要留給學員看）。
-
-⚠️ **不要教 `hermes config set`**：hermes 上游 `migrate` 結尾印的「Set later with: hermes config set <key> <value>」是 misleading message——`set` 寫到 yaml 頂層而非 `skills.config.<key>`，skill 永遠讀不到。教材已加 TRAP 警告，runbook 對應的 Stage 31 也只走 migrate 路徑。
 
 ---
 
@@ -911,80 +898,76 @@ hermes -z "/skills list" 2>&1 | head -20
 
 預期：印出 bundled skill 清單（一行行類別 + 各類底下的 skill 名）。
 
-若 `/skills list` 報錯 / Unknown：hermes 可能改了指令命名，對照 plan §Dogfood Results 更新教材所有 `/skills list` 字串。
-
----
-
-## Check 14 · 自寫 skill 重啟識別仍 work
-
 ```bash
-mkdir -p ~/.hermes/skills/productivity/check-skill && cat > ~/.hermes/skills/productivity/check-skill/SKILL.md <<'EOF'
----
-name: check-skill
-description: Smoke check
-version: 0.0.1
-metadata:
-  hermes:
-    tags: [test]
-    category: productivity
----
-# Check
-## When to Use
-User runs /check-skill
-## Procedure
-Reply "ok".
-EOF
-hermes skills list --source local 2>&1 | grep -q check-skill
-echo "result: $?"   # 0 = found
-rm -r ~/.hermes/skills/productivity/check-skill
+hermes -z "/skills list --source local" 2>&1 | head -10
 ```
 
-預期：`result: 0`。
+預期：印出本地 skill 清單表格（可能 0 項，但不該報錯）。
+
+若 `/skills list` 或 `--source local` 報錯 / Unknown：hermes 可能改了指令命名，對照 plan §Dogfood Results 更新教材所有 `/skills list` 字串。
 
 ---
 
-## Check 15 · `hermes config migrate` 偵測 skill-declared config 仍 work（加碼 D 依賴）
+## Check 14 · cron 對話式設定仍可用（Step 2 核心依賴）
 
-```bash
-mkdir -p ~/.hermes/skills/productivity/check-config && cat > ~/.hermes/skills/productivity/check-config/SKILL.md <<'EOF'
----
-name: check-config
-description: Smoke check
-version: 0.0.1
-metadata:
-  hermes:
-    tags: [test]
-    category: productivity
-    config:
-      - key: check-config.value
-        description: Test
-        default: ""
-        prompt: Test?
----
-# Check
-## When to Use
-User runs /check-config
-## Procedure
-Echo skills.config.check-config.value.
-EOF
-echo "n" | hermes config migrate 2>&1 | grep -q "check-config.value"
-echo "result: $?"   # 0 = migrate detected the skill-declared config
-rm -r ~/.hermes/skills/productivity/check-config
+進 hermes CLI 或對 Telegram bot 講：
+
+```
+幫我設一個 cron job，2 分鐘後跑一次，內容：台北今日天氣，把結果推到我的 Telegram。
 ```
 
-預期：`result: 0`。
+預期：
+- hermes 主動寫入 `~/.hermes/cron.yaml`
+- `cat ~/.hermes/cron.yaml` 看到剛才那條 job
+- 2 分鐘後 Telegram 收到推送
 
-若 `result: 1`：hermes 上游可能改了 skill config 機制——加碼 D 整段需重新驗證後再教學。
+若 hermes 沒主動寫 cron.yaml：教學場景免費 model 也可能會這樣，但 lesson-3.html Step 2「我卡住了」`<details>` 已給 fallback（更明確指 file path）。
+
+若付費 model 也不寫：hermes 上游可能改了 cron 介面 → 整段 Step 2 重新驗證教材後再教學。
+
+收尾：對 hermes 講「刪掉剛才那個 2 分鐘 cron」或編輯 `~/.hermes/cron.yaml` 移除。
 
 ---
 
-## Check 16 · wttr.in 可達
+## Check 15 · 對話式裝 skill-creator 仍可用（Step 3 核心依賴）
 
 ```bash
-curl -sI 'https://wttr.in/Taipei?format=3' | head -1
+curl -fsI https://raw.githubusercontent.com/anthropics/skills/main/skills/skill-creator/SKILL.md
 ```
 
-預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。
+預期：第一行 `HTTP/2 200`、URL 仍有效。
+
+接著對 hermes 講：
+
+```
+幫我裝這個 skill：https://github.com/anthropics/skills/tree/main/skills/skill-creator
+```
+
+預期：hermes 主動抓 URL、放到 `~/.hermes/skills/...`；`hermes -z "/skills list --source local"` 看到 `skill-creator`。
+
+若 URL 失效（404）：去 https://github.com/anthropics/skills 找新位置，更新 lesson-3.html Step 3 + 本 check 的 URL。
+
+收尾：保留 skill-creator（學員會用到）。
+
+---
+
+## Check 16 · skill-creator 訪談 UX 沒變（Step 4 核心依賴）
+
+接 Check 15（skill-creator 已裝），跑：
+
+```bash
+hermes -z "/skill-creator 造一個 skill：每天推一句英文俚語" 2>&1 | head -50
+```
+
+或互動模式 `hermes` 進 CLI 後貼：
+
+```
+我想用 skill-creator 造一個 skill：每天推一句英文俚語
+```
+
+預期：skill-creator 開始訪談、會在某個問題問「evaluation / benchmarks / test cases」相關。**看到那個問題就 Ctrl+C 結束本驗證**（不必真造一個 skill）。
+
+若訪談順序大改 / 沒有 evaluation 那題：對照 plan §Dogfood Results 4 更新 lesson-3.html Step 4 訪談描述。
 
 ---
 

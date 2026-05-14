@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Lesson 3 · 日常使用</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-total-steps="6" data-storage-key="hermes-lesson3-step">
+  <header class="container">
+    <hgroup>
+      <h1>Lesson 3 · hermes 日常使用</h1>
+      <p>把 hermes 變成你每天會用的助手，45–55 分鐘</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼學「日常使用」</h2>
+          <p>~2 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Lesson 1 你已經裝好 hermes、做過第一次對話。Lesson 2 你已經把它接到 Telegram，從手機就能聊。<strong>但你還沒真的「日常使用」它</strong>——這堂課要把它變成你每天會打開的工具。</p>
+
+      <h3>今天會學什麼</h3>
+      <ol>
+        <li><strong>Step 1</strong>：context 管理 — 為什麼聊太久會變慢，怎麼救</li>
+        <li><strong>Step 2</strong>：常用 <code>/</code> 指令（skills 相關）</li>
+        <li><strong>Step 3</strong>：skills 是什麼 — hermes 的「自學能力」其實是這個</li>
+        <li><strong>Step 4</strong>：寫你的第一個 skill — <code>daily-journal</code>（訪談式日記）</li>
+        <li><strong>Step 5</strong>：★ 壓軸 — 從手機 Telegram 打 <code>/daily-journal</code>，bot 跟你訪談</li>
+        <li><strong>Step 6</strong>：收尾 + 加碼（cron 排程、自動帶天氣）</li>
+      </ol>
+
+      <h3>4 個 checkpoints</h3>
+      <ol>
+        <li>會用 <code>/new</code> 切話題</li>
+        <li><code>/skills list</code> 看得到內建 skill 清單</li>
+        <li>自己寫的 <code>daily-journal</code> 重啟後 <code>/skills list</code> 列得出來</li>
+        <li>從 Telegram 觸發完一次訪談、<code>~/journal/YYYY-MM-DD.md</code> 真的有檔案</li>
+      </ol>
+
+      <details>
+        <summary>必備：先做完 Lesson 1 + Lesson 2</summary>
+        <p>還沒做過？先回 <a href="index.html">Lesson 1（安裝 hermes）</a> 或 <a href="lesson-2.html">Lesson 2（接 Telegram）</a>。Lesson 3 假設你的 Telegram bot 仍在跑、<code>hermes gateway</code> 也仍在跑。</p>
+        <p>不依賴 Lesson 4（LINE）— 想學 LINE 整合可平行另開 <a href="lesson-4.html">Lesson 4</a>，先後順序隨便。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 6 · context 管理：聊太久會變慢</h2>
+          <p>~7 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>為什麼會變慢</h3>
+      <p>跟 hermes 講話，它會把目前對話的<strong>所有訊息</strong>都送進 LLM。對話越長 → context 越大 → LLM 處理越慢、回答越貴、注意力越分散。這叫 <em>context window 飽和</em>。</p>
+
+      <p>具體症狀：</p>
+      <ul>
+        <li>同一個 bot 越聊越慢回</li>
+        <li>有時 bot 忘記你前面講過的事</li>
+        <li>OpenRouter free 模型直接 rate limit 或丟錯</li>
+      </ul>
+
+      <h3>解法：切話題就 <code>/new</code></h3>
+      <p>規則就一句：<strong>你要問的東西跟前面沒關係 → <code>/new</code></strong>。</p>
+
+      <h3>實作：試一次 <code>/new</code></h3>
+      <ol>
+        <li>打開手機 Telegram，找你 Lesson 2 接好的 bot</li>
+        <li>傳：<code>幫我算 12345 * 6789</code></li>
+        <li>bot 回答後，傳 <code>/new</code></li>
+        <li>看到 bot 回確認訊息（類似「✓ 開新對話」、「session reset」等字眼）</li>
+        <li>傳 <code>what was my last question?</code> → bot 應該說「沒看到上一題」或類似（因為 context 已清）</li>
+      </ol>
+
+      <p>✓ 知道何時 <code>/new</code> + 確認 bot 清空 context → checkpoint 1 完成。</p>
+
+      <details>
+        <summary>還有 <code>/title</code> <code>/resume</code> <code>/sessions</code> 配合 <code>/new</code> 用</summary>
+        <p>Lesson 2 Step 7 已有完整 cheatsheet。簡單講：</p>
+        <ul>
+          <li><code>/title 中翻英練習</code> — 在 <code>/new</code> 開新對話<strong>之前</strong>幫目前 session 取名，這樣之後可找回</li>
+          <li><code>/sessions</code> — 列所有取過名的 session</li>
+          <li><code>/resume 中翻英練習</code> — 跳回那個 session 繼續聊</li>
+        </ul>
+        <p>實務節奏：寫一個專案 → <code>/title 專案名</code> → 聊完 → <code>/new</code>。下次想接著做 → <code>/resume 專案名</code>。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 6 · 常用 <code>/</code> 指令（skills 相關）</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Lesson 2 Step 7 的 cheatsheet 已經涵蓋 <code>/new</code> <code>/model</code> <code>/help</code> 這些。Lesson 3 新增兩組 skills 專用指令：</p>
+
+      <table>
+        <thead><tr><th>指令</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td><code>/skills</code></td><td><strong>Skills Hub 命令群</strong>（不是「列清單」指令）。打進去會看到子命令選單：<code>browse / search / install / inspect / list / check / update / audit / uninstall / publish / snapshot / tap</code>……</td></tr>
+          <tr><td><code>/skills list</code></td><td>真正列出已安裝 skills（bundled 內建 + 你自己寫的）。輸出多會分頁，按 <code>continue</code> / <code>n</code> 看下一頁。</td></tr>
+          <tr><td><code>/skills list --source local</code></td><td>只列你自己寫的本地 skills（過濾掉一大串內建 skill 才好找）。Step 4 寫完 <code>daily-journal</code> 後用這條最快驗證。</td></tr>
+          <tr><td><code>/&lt;skill-name&gt;</code></td><td>直接呼叫某個 skill。例如 <code>/plan</code> 呼叫內建 plan skill；Step 4 寫完 <code>daily-journal</code> 就能打 <code>/daily-journal</code>。</td></tr>
+          <tr><td><code>/&lt;skill-name&gt; 額外參數</code></td><td>傳參數給 skill。例：<code>/plan 設計一個 cron 排程器</code> → 把後面字串當輸入。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>實作：跑一次 <code>/skills list</code></h3>
+      <ol>
+        <li>在你的 hermes CLI 或 Telegram bot 傳 <code>/skills</code>，先看一下 Skills Hub 命令選單長怎樣（之後 Step 4 收尾會用到 <code>install</code>、<code>inspect</code>）</li>
+        <li>傳 <code>/skills list</code> 看完整清單。應該看到一大堆 bundled skill：<code>plan</code>、<code>excalidraw</code>、<code>architecture-diagram</code>、<code>ascii-art</code>……</li>
+        <li>傳 <code>/plan 寫一份本週讀書計畫</code> → bot 套用 <code>plan</code> skill 的指令幫你寫出 markdown 計畫</li>
+      </ol>
+
+      <p>✓ 看到 <code>/skills list</code> 列出清單 → checkpoint 2 完成。</p>
+
+      <details>
+        <summary>📚 為什麼 skill 自動變成 slash command</summary>
+        <p>每個 skill 在 <code>~/.hermes/skills/&lt;category&gt;/&lt;name&gt;/SKILL.md</code> 的 frontmatter 都有 <code>name:</code> 欄位。hermes 啟動時掃描整個 skills 目錄、為每個 <code>name</code> 註冊一個對應的 top-level slash command。所以 Step 4 寫完 <code>name: daily-journal</code> 的 SKILL.md，重啟後就會自動有 <code>/daily-journal</code> 可用——CLI 跟 Telegram 都認得。</p>
+        <p>呼叫時 hermes 會印 <code>⚡ Loading skill: daily-journal</code>，並把 SKILL.md 整份內容注入 LLM context。你會在輸出開頭看到 <code>[IMPORTANT: The user has invoked the "daily-journal" skill...]</code> 的提示——那是 hermes 自己加的引導，讓 LLM 嚴格照 SKILL.md 的 Procedure 走。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 6 · skills 是什麼</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>還記得 Lesson 1 Step 0 講的 hermes 賣點「<strong>會自我學習與成長</strong>……完成複雜任務後自動學會新的『技能』（Skills）」嗎？這就是 skills。</p>
+
+      <h3>一句話定義</h3>
+      <p>Skill = 一份 markdown 檔，告訴 hermes「<strong>什麼情境</strong>用我」「<strong>怎麼做</strong>」「<strong>失敗怎麼救</strong>」。檔名統一叫 <code>SKILL.md</code>。</p>
+
+      <h3>它住在哪</h3>
+      <pre><code>~/.hermes/skills/
+├── productivity/              ← 類別目錄
+│   ├── maps/                  ← 內建：地圖查詢
+│   │   └── SKILL.md
+│   ├── ocr-and-documents/     ← 內建：OCR
+│   │   └── SKILL.md
+│   └── daily-journal/         ← 你 Step 4 會建這個
+│       └── SKILL.md
+├── research/
+│   └── arxiv/                 ← 內建：arxiv 搜尋
+│       └── SKILL.md
+├── creative/
+│   └── p5js/                  ← 內建：p5.js 視覺化
+│       └── SKILL.md
+└── ...                        ← 還有十幾個類別
+</code></pre>
+
+      <p>每個 skill 一個資料夾，最少必須有 <code>SKILL.md</code>。可選擇性附帶 <code>scripts/</code>（python / shell）、<code>references/</code>（額外文件）、<code>templates/</code>（輸出範本）。Step 4 的 <code>daily-journal</code> 只要 <code>SKILL.md</code>，零 scripts。</p>
+
+      <h3>為什麼這個設計很聰明</h3>
+      <ul>
+        <li><strong>純 markdown，零程式</strong>：寫 prompt 就行，不用學 Python 寫 plugin</li>
+        <li><strong>自動變 slash command</strong>：<code>name:</code> 欄位是什麼，<code>/&lt;那個 name&gt;</code> 就能呼叫</li>
+        <li><strong>所有 channel 共用</strong>：CLI 寫一次，Telegram 也有，Lesson 4 那邊接的 LINE 也有</li>
+        <li><strong>progressive disclosure</strong>：不用全部內容塞 prompt，hermes 只在判斷需要時才載入</li>
+      </ul>
+
+      <details>
+        <summary>🌐 還有 Skills Hub 可以「裝別人寫的 skill」（暫不教）</summary>
+        <p>上游有 <a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a> 這個社群 Hub。在 hermes 對話裡跑 <code>/skills browse</code>（看清單）、<code>/skills search &lt;關鍵字&gt;</code>（找）、<code>/skills install &lt;name&gt;</code>（裝）就能拉現成的 skill 進來，跟 <code>npm install</code> 概念類似。本堂為了專注，先教自己寫——Hub 安裝留給之後玩。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 6 · 寫你的第一個 skill：<code>daily-journal</code></h2>
+          <p>~15 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>要寫的 skill：訪談式日記。學員打 <code>/daily-journal</code> → bot 一題一題問今日心得 → 答完整理成 markdown 存到 <code>~/journal/YYYY-MM-DD.md</code>。</p>
+
+      <h3>1. 建立 skill 目錄</h3>
+      <pre data-copy><code>mkdir -p ~/.hermes/skills/productivity/daily-journal</code></pre>
+
+      <h3>2. 寫 SKILL.md</h3>
+      <p>在你的 WSL Ubuntu 終端開 <code>nano</code>（或你慣用的編輯器）：</p>
+      <pre data-copy><code>nano ~/.hermes/skills/productivity/daily-journal/SKILL.md</code></pre>
+
+      <p>把下面整段貼進去：</p>
+
+      <pre data-copy><code>---
+name: daily-journal
+description: 用訪談形式引導使用者寫今日日記，存到 ~/journal/YYYY-MM-DD.md
+version: 0.1.0
+metadata:
+  hermes:
+    tags: [journal, daily, interview, personal]
+    category: productivity
+    requires_toolsets: [terminal]
+---
+
+# Daily Journal Skill
+
+## When to Use
+使用者打 `/daily-journal` 或在對話中提到「想寫日記」「記錄今天」。
+通常是一天結束時觸發。
+
+## Procedure
+**一次只問一題**，等使用者回答完才問下一題。順序：
+
+1. 「今天最有成就感的一件事是什麼？」
+2. 「今天遇到最卡的事？怎麼處理的？」
+3. 「明天最想優先做什麼？」
+4. 「一句話總結今天的心情？」
+
+四題都答完後，整理成這個格式的 markdown：
+
+```
+# YYYY-MM-DD
+
+## 成就
+{答案 1}
+
+## 卡點
+{答案 2}
+
+## 明日重點
+{答案 3}
+
+## 一句話心情
+{答案 4}
+```
+
+用 terminal toolset 把日期換成今天（`date +%Y-%m-%d`），
+寫入 `~/journal/YYYY-MM-DD.md`。資料夾不存在就 `mkdir -p`。
+若檔案已存在，append 一個 `## 補記` section 在後面。
+
+## Pitfalls
+- 不要一次把四題丟出來，學員會壓力大、答案會草率
+- 使用者中途想跳題就跳，不要強迫
+- 從 Telegram 觸發時更要強調一題一問（手機螢幕窄）
+
+## Verification
+- `~/journal/YYYY-MM-DD.md` 真的存在
+- 內容包含四題答案
+</code></pre>
+
+      <p>存檔離開（nano: <kbd>Ctrl</kbd>+<kbd>O</kbd> → <kbd>Enter</kbd> → <kbd>Ctrl</kbd>+<kbd>X</kbd>）。</p>
+
+      <h3>3. 重啟 hermes 讓它載入</h3>
+      <p>若你目前在 hermes CLI 裡，先離開（<code>/exit</code> 或 <kbd>Ctrl</kbd>+<kbd>D</kbd>）。然後重新進：</p>
+      <pre data-copy><code>hermes</code></pre>
+
+      <h3>4. 確認 skill 載入成功</h3>
+      <p>進到 hermes 對話、輸入：</p>
+      <pre data-copy><code>/skills list --source local</code></pre>
+
+      <p>清單裡應該看到 <code>daily-journal</code>。看不到的話翻 Step 6「我卡住了」。</p>
+
+      <p>✓ <code>/skills list --source local</code> 列出 <code>daily-journal</code> → checkpoint 3 完成。下 Step 從 Telegram 觸發看完整體驗。</p>
+
+      <details>
+        <summary>🤔 為什麼 <code>requires_toolsets: [terminal]</code>？</summary>
+        <p>因為 skill 要 <code>mkdir -p ~/journal</code>、<code>date +%Y-%m-%d</code>、寫檔——這些都靠 <code>terminal</code> toolset。寫進 frontmatter 讓 hermes 自動處理依賴，沒這個 toolset 就會跳訊息提示。</p>
+      </details>
+
+      <details>
+        <summary>🤔 為什麼放在 <code>productivity/</code> 目錄？</summary>
+        <p>對齊 frontmatter 寫的 <code>category: productivity</code>。上游 bundled skill 也是這種對齊方式（<code>skills/productivity/maps/</code>、<code>skills/research/arxiv/</code> 等）。理論上目錄與 category 不一致也能跑，但對齊比較好維護。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 6 · ★ 壓軸：從 Telegram 跑 <code>/daily-journal</code></h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>記得 Lesson 2 Step 5 你裝的 <code>hermes gateway</code> 嗎？它在背景持續跑，把 Telegram bot 的訊息轉給 hermes。你 Step 4 剛剛 <strong>重啟 CLI</strong> 載入新 skill，但 gateway 還在跑舊版的 skill 清單——所以要先重啟 gateway。</p>
+
+      <h3>1. 重啟 gateway 讓它載入新 skill</h3>
+      <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+
+      <p>等 ~3 秒看到「gateway started」字眼即可。</p>
+
+      <h3>2. 從手機 Telegram 跑訪談</h3>
+      <ol>
+        <li>打開手機 Telegram，找到你 Lesson 2 接好的 bot</li>
+        <li>先傳一句 <code>/new</code>（避免之前對話的 context 干擾）</li>
+        <li>傳：<code>/daily-journal</code></li>
+        <li>bot 開始問第一題（「今天最有成就感的一件事是什麼？」）</li>
+        <li>回答完 → bot 問第二題（「今天遇到最卡的事？」）</li>
+        <li>繼續回答到第四題</li>
+        <li>四題答完，bot 整理 markdown、寫檔、回覆「日記已存到 ~/journal/YYYY-MM-DD.md」之類</li>
+      </ol>
+
+      <h3>3. 在 WSL 終端確認檔案真的有寫</h3>
+      <pre data-copy><code>cat ~/journal/$(date +%Y-%m-%d).md</code></pre>
+
+      <p>預期看到四個 markdown section（成就 / 卡點 / 明日重點 / 一句話心情），每段都是你剛剛答的內容。</p>
+
+      <p>✓ Telegram 端到端訪談完成 + 檔案存在 → checkpoint 4 完成。<strong>Lesson 3 全部 4 checkpoints 達標。</strong></p>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <h4>Telegram 端打 <code>/daily-journal</code> bot 回「unknown command」</h4>
+        <p>Gateway 沒重啟成功 / 沒拿到新 skill。處置：</p>
+        <ol>
+          <li><code>sudo $(which hermes) gateway status --system</code> 確認 gateway 在跑</li>
+          <li>看 log：<code>tail -n 50 ~/.hermes/logs/gateway.log</code> 找有沒有 skill scan 錯誤</li>
+          <li>再跑一次 <code>sudo $(which hermes) gateway restart --system</code></li>
+        </ol>
+
+        <h4>bot 收到 <code>/daily-journal</code> 但只回一段普通回應、沒進訪談</h4>
+        <p>SKILL.md 的 Procedure 描述 hermes 沒抓到「一次一題」的意圖。處置：回 Step 4 確認你貼的 Procedure 是否有「<strong>一次只問一題</strong>」字眼。</p>
+
+        <h4>四題答完 bot 沒寫檔</h4>
+        <p>可能是 hermes 沒拿到 <code>terminal</code> toolset 權限。處置：</p>
+        <ol>
+          <li>確認 SKILL.md frontmatter 內有 <code>requires_toolsets: [terminal]</code></li>
+          <li>跑 <code>hermes config show</code> 確認 terminal toolset 已啟用</li>
+          <li>若仍無 → 從 CLI 直接跑 <code>/daily-journal</code> 看是否同樣不寫檔；若 CLI 跑得通但 Telegram 不行 → gateway 端的 toolset 設定問題</li>
+        </ol>
+      </details>
+    </section>
+
+    <section class="step" data-step="6" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 6 / 6 · 完成 + 加碼</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>恭喜，4 個 checkpoints 都完成：</p>
+      <ol>
+        <li>✓ 會用 <code>/new</code> 切話題</li>
+        <li>✓ <code>/skills list</code> 看得到清單</li>
+        <li>✓ 自己寫的 <code>daily-journal</code> 重啟後 <code>/skills list --source local</code> 列得出來</li>
+        <li>✓ 從 Telegram 觸發完一次訪談 + 檔案有存</li>
+      </ol>
+
+      <h3>建議下一步</h3>
+      <ul>
+        <li>把這個頁面加書籤，未來想複習可隨時回來</li>
+        <li>連續寫七天日記，看看自己一週的「成就」「卡點」pattern</li>
+        <li>從加碼 D 開始玩，把天氣自動帶進日記，每天一打開就看到「Taipei: 🌧 +24°C」</li>
+      </ul>
+
+      <details>
+        <summary>加碼 A · 用 cron 每天 22:00 自動 ping 你寫日記</summary>
+        <p>hermes 內建 cron 子系統（不用裝任何東西），開機就跑。設定一條排程，每天 22:00 從 Telegram 自動傳「該寫日記了」給你、然後直接觸發 <code>/daily-journal</code>。</p>
+
+        <p>建檔：</p>
+        <pre data-copy><code>nano ~/.hermes/cron.yaml</code></pre>
+
+        <p>內容：</p>
+        <pre data-copy><code>jobs:
+  - name: daily-journal-reminder
+    cron: "0 22 * * *"
+    channel: telegram
+    message: |
+      該寫日記了 📝
+      /daily-journal</code></pre>
+
+        <p>存檔後 <code>sudo $(which hermes) gateway restart --system</code> 重啟。明天 22:00 你的 Telegram bot 就會主動傳訊息來。</p>
+      </details>
+
+      <details>
+        <summary>加碼 B · 讓 hermes 在背景持續跑（不用每次開 CLI）</summary>
+        <p>Lesson 2 教的 <code>hermes gateway</code> 已經在背景跑了，這就是 background session 的一種。延伸玩法：</p>
+        <ul>
+          <li><code>sudo $(which hermes) gateway status --system</code> — 看狀態</li>
+          <li><code>sudo $(which hermes) gateway logs --system --follow</code> — 即時看 log</li>
+          <li>關掉 SSH session、關掉電腦 → gateway 仍在跑（因為 systemd 接管，這是 Lesson 2 Step 5 設好的）</li>
+        </ul>
+        <p>所以你的 Telegram bot + 所有 skill 都是 24/7 可用，hermes 已經是個「在背景的個人助理」。</p>
+      </details>
+
+      <details>
+        <summary>加碼 C · 改寫日記題目讓它更貼你</summary>
+        <p>SKILL.md 的 Procedure 段就是純 markdown，怎麼寫怎麼跑。常見改法：</p>
+        <ul>
+          <li><strong>加 mood 評分</strong>：問完四題加一題「今天心情 1–10 分？」，bot 把分數寫進日記檔開頭 <code>## 心情指數</code></li>
+          <li><strong>改題目</strong>：把預設四題換成你自己的問題（學到的事 / 感謝的人 / 想道歉的事 / 明天 top 3）</li>
+          <li><strong>每週彙總</strong>：加一個 <code>/weekly-review</code> skill，週日跑時 cat 本週七檔日記、整理成 weekly summary</li>
+        </ul>
+        <p>改完存檔、<code>sudo $(which hermes) gateway restart --system</code>，從 Telegram 就能看到新題目。</p>
+      </details>
+
+      <details>
+        <summary>加碼 D · 帶入今日天氣（學會 skill config 機制）</summary>
+        <p>讓 <code>daily-journal</code> 每天日記開頭自動帶當地天氣。重點不只是「天氣」，是學會 <strong>skill 怎麼記住個人設定</strong>：你只設一次城市，之後 hermes 啟動時自動注入給 skill。</p>
+
+        <h4>1. 編輯 SKILL.md frontmatter</h4>
+        <p>把 <code>metadata.hermes</code> 區塊整個換成（多加最下面 <code>config:</code> 那段）：</p>
+        <pre data-copy><code>metadata:
+  hermes:
+    tags: [journal, daily, interview, personal, weather]
+    category: productivity
+    requires_toolsets: [terminal]
+    config:
+      - key: daily-journal.location
+        description: 你住的城市（查天氣用）
+        default: ""
+        prompt: 你住哪個城市？（例：Taipei / Hsinchu / Tokyo）</code></pre>
+
+        <h4>2. 在 Procedure 第 1 題之前加一段</h4>
+        <p>在「<strong>一次只問一題</strong>」那行之前插入：</p>
+        <pre data-copy><code>四題之前先 `curl -s wttr.in/{location}?format=3` 取今日天氣（`{location}` 由 hermes 從 config 注入），
+把輸出放進日記檔開頭 `## 天氣` 區塊。若 curl 失敗（無網路 / wttr 掛了），跳過天氣繼續訪談。
+若 config 值為 `(not set)`，跳過天氣並提示使用者跑 `hermes config migrate`。</code></pre>
+
+        <h4>3. 跑 <code>hermes config migrate</code> 設定 location</h4>
+        <p>存檔後，先離開 hermes CLI（<code>/exit</code>），然後跑：</p>
+        <pre data-copy><code>hermes config migrate</code></pre>
+
+        <p>畫面會出現：</p>
+        <pre><code>1 skill setting(s) not configured:
+    • daily-journal.location — 你住的城市（查天氣用） (from skill: daily-journal)
+
+  Configure skill settings? [y/N]:</code></pre>
+
+        <p>輸入 <code>y</code> → 看到「你住哪個城市？（例：Taipei / Hsinchu / Tokyo）:」prompt → 輸入 <code>Taipei</code>（或你的城市）→ 看到 <code>✓ Saved daily-journal.location = Taipei</code>。</p>
+
+        <h4>4. 重啟 gateway，從 Telegram 試一次</h4>
+        <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+
+        <p>從手機 Telegram 跑 <code>/new</code> 然後 <code>/daily-journal</code>。應該在訪談開始前看到 bot 報今日天氣，日記檔開頭也會有 <code>## 天氣</code> section。</p>
+
+        <h4>5. 之後的日記檔長這樣</h4>
+        <pre><code># 2026-05-14
+
+## 天氣
+Taipei: 🌧 +24°C
+
+## 成就
+...</code></pre>
+
+        <details>
+          <summary>⚠️ TRAP：不要用 <code>hermes config set</code> 設 skill config</summary>
+          <p>跑完 <code>hermes config migrate</code>，畫面結尾會印一行：</p>
+          <pre><code>Set later with: hermes config set &lt;key&gt; &lt;value&gt;</code></pre>
+          <p><strong>這行建議是錯的</strong>（hermes 上游 misleading message）。<code>hermes config set daily-journal.location Taipei</code> 會把值寫到 <code>~/.hermes/config.yaml</code> 的<strong>頂層</strong> <code>daily-journal:</code> 區塊；但 skill 機制只讀 <code>skills.config.daily-journal.location</code>——位置不對，skill 永遠讀不到值，注入到 LLM context 的還是 <code>(not set)</code>。</p>
+          <p><strong>結論</strong>：改 skill config 一律用 <code>hermes config migrate</code>（互動式問），或直接編輯 <code>~/.hermes/config.yaml</code> 的 <code>skills.config.&lt;key&gt;</code> 路徑。</p>
+        </details>
+
+        <details>
+          <summary>🚨 已經誤用了 <code>hermes config set</code>，怎麼救</summary>
+          <p>查一下 yaml 看誤設位置：</p>
+          <pre data-copy><code>grep -A1 "^daily-journal:" ~/.hermes/config.yaml</code></pre>
+          <p>若有輸出 → 那是錯位置的死資料。處置：</p>
+          <ol>
+            <li>編輯 <code>~/.hermes/config.yaml</code>，刪掉頂層 <code>daily-journal:</code> + 下面的 <code>location:</code> 那兩行</li>
+            <li>重跑 <code>hermes config migrate</code>，它會偵測到 missing 並再 prompt 一次</li>
+            <li>正常輸入 → 寫到 <code>skills.config.daily-journal.location</code>（這次是正確位置）</li>
+          </ol>
+        </details>
+
+        <details>
+          <summary>🤔 同 session 改完 config 為什麼還 (not set)？</summary>
+          <p>hermes CLI 啟動時把 config 快取了，同個 session 不會 live-refresh。所以改完 config 必須 <code>/exit</code> 重開 <code>hermes</code>（或 <code>sudo $(which hermes) gateway restart --system</code> 重啟 gateway），新值才會被注入。</p>
+        </details>
+      </details>
+
+      <h3>下次預告</h3>
+      <p>下次（Lesson 5 暫定 / 未排）可能會涵蓋：</p>
+      <ul>
+        <li>分享你的 skill 上 <a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a></li>
+        <li>進階：用 <code>scripts/</code> 在 skill 裡放 Python helper</li>
+        <li>或你想學什麼下次告訴我</li>
+      </ul>
+
+      <p><em>到這邊就是 Lesson 3 全部內容。下次見。</em></p>
+    </section>
+
+    <nav id="step-nav" class="container">
+      <button id="prev-btn" type="button">← 上一步</button>
+      <button id="next-btn" type="button" class="primary">下一步 →</button>
+    </nav>
+  </main>
+
+  <footer class="container">
+    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a></small>
+  </footer>
+
+  <script src="wizard.js" defer></script>
+</body>
+</html>

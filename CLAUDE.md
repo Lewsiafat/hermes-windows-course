@@ -73,10 +73,13 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 - **Step 7「補救：直接改 hermes 的 .env」section（Variant A / B 兩個 sed 腳本）** ← 被 Step 8「我卡住了」的 400 error 條目直接引用。改寫或搬位置時必須同步更新 Step 8 的指路文字。
 - 該 sed 腳本（含 `export` 前綴的替換寫法）是 hermes 上游官方暫未修正 paste 問題的**繞行解**，**寫法原樣引用、不可擅自簡化**（例如不要拿掉 `export`、不要改 sed delimiter）。
 
-### Lesson 之間（index.html ↔ lesson-2.html / lesson-4.html）
+### Lesson 之間（index.html ↔ lesson-2.html / lesson-3.html / lesson-4.html）
 
 - **Lesson 1 `index.html` Step 9 加碼 A 末段** → 連到 `lesson-4.html`。改寫加碼 A 時必須保留這個出口（與加碼 B → Lesson 2 對稱）。
 - **Lesson 1 `index.html` Step 9 加碼 B 末段** → 連到 `lesson-2.html`。改寫加碼 B 時必須保留這個出口。
+- **Lesson 2 `lesson-2.html` Step 7「下次預告」第一條** → 連到 `lesson-3.html`。改寫 Step 7 預告區時必須保留這個出口（與 Lesson 1 加碼 B → Lesson 2 對稱）。
+- **Lesson 3 `lesson-3.html` Step 0 「必備」`<details>`** → fallback 連到 `index.html` + `lesson-2.html`。改 Step 0 文案時保留這兩個 fallback 連結，因為 Lesson 3 假設 Lesson 1+2 已完成。
+- **Lesson 3 Step 6 加碼 D 內「⚠️ TRAP」`<details>`** → 警告學員 `hermes config set <skill-key>` 寫錯 yaml 位置，必須用 `hermes config migrate`。這是 hermes 上游 misleading message 的繞行教學，**寫法原樣引用、不可擅自簡化**（不要拿掉 TRAP 警告、不要把 trap 跟 recovery 兩個 `<details>` 合併成一塊）。
 - **Lesson 2 `lesson-2.html` Step 0 / Step 1** → 提到沒做過 Lesson 1 請先去 `index.html`。改 Step 0 / Step 1 文案時保留這個 fallback 連結。
 - **Lesson 2 Step 4 補救 section** → cross-ref `index.html#step-7`，提示是同根因（hermes 上游 paste 雷）。Lesson 1 Step 7 搬位置或 anchor 改名時，Lesson 2 Step 4 的連結要對應改。
 - Lesson 2 Step 4 的兩段 sed 補救（Variant A 互動 + Variant B 手動範本）跟 Lesson 1 Step 7 同模式但操作不同變數（`TELEGRAM_BOT_TOKEN` / `TELEGRAM_ALLOWED_USERS`，含 `export`）—— **寫法原樣引用、不可擅自簡化**。

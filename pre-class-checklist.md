@@ -116,6 +116,105 @@ hermes gateway stop
 - [ ] log 顯示在 polling 模式（而非 webhook 之類）
 - [ ] `hermes gateway stop` 後再 `hermes gateway status` 應該報 stopped
 
+## Lesson 3 必檢項（日常使用）
+
+每次教學前若會教 Lesson 3，這幾條一起跑：
+
+### 1. hermes CLI 仍可啟動
+
+```bash
+hermes --version
+```
+
+預期：印出版本字串。若 command not found：Lesson 1 安裝環節需先修。
+
+### 2. `/skills list` 指令仍有效
+
+進 `hermes` CLI、傳 `/skills`（看到 Skills Hub 子命令選單）、再傳 `/skills list`。
+
+預期：`/skills list` 印出已安裝 skills 表格（至少有 `plan`、`excalidraw` 等 bundled）。
+
+若 `/skills` 直接 Unknown command 或 `/skills list` 報錯：hermes 版本可能改了指令命名。對照 plan §Dogfood Results 結果，更新 `lesson-3.html` Step 2 / Step 4 / Step 6 內所有 `/skills` / `/skills list` 字串。
+
+### 3. 自寫 skill 重啟後可被 `/skills list --source local` 列出
+
+建臨時 skill：
+
+```bash
+mkdir -p ~/.hermes/skills/productivity/smoke-test && cat > ~/.hermes/skills/productivity/smoke-test/SKILL.md <<'EOF'
+---
+name: smoke-test
+description: Throwaway
+version: 0.0.1
+metadata:
+  hermes:
+    tags: [test]
+    category: productivity
+---
+# Smoke Test
+## When to Use
+User runs /smoke-test
+## Procedure
+Reply "ok".
+EOF
+```
+
+退出重進 hermes、跑 `/skills list --source local`。預期清單出現 `smoke-test`。再跑 `/smoke-test` 應該回 `ok`。
+
+收尾：`rm -r ~/.hermes/skills/productivity/smoke-test`
+
+若沒出現：跑 `sudo $(which hermes) gateway restart --system` 再試；仍無 → lesson-3.html Step 4 「重啟 hermes」字眼要改更積極的指令。
+
+### 4. `hermes config migrate` 仍偵測 skill-declared config（加碼 D 依賴）
+
+在剛剛 smoke-test skill 還沒刪掉之前，先加一段 config：
+
+```bash
+cat > ~/.hermes/skills/productivity/smoke-test/SKILL.md <<'EOF'
+---
+name: smoke-test
+description: Throwaway
+version: 0.0.1
+metadata:
+  hermes:
+    tags: [test]
+    category: productivity
+    config:
+      - key: smoke-test.greeting
+        description: Test greeting
+        default: ""
+        prompt: Test prompt?
+---
+# Smoke Test
+## When to Use
+User runs /smoke-test
+## Procedure
+Echo skills.config.smoke-test.greeting.
+EOF
+```
+
+然後跑：
+
+```bash
+hermes config migrate
+```
+
+預期：看到「N skill setting(s) not configured: • smoke-test.greeting — Test greeting (from skill: smoke-test)」+ 提示 `Configure skill settings? [y/N]:`。按 n 跳過即可。
+
+若 migrate 沒偵測到：hermes 上游可能改了 skill config 機制——lesson-3.html Step 6 加碼 D 整段都要重新驗證後再教學。
+
+收尾再次：`rm -r ~/.hermes/skills/productivity/smoke-test`
+
+### 5. wttr.in 可達（加碼 D）
+
+```bash
+curl -sI 'https://wttr.in/Taipei?format=3' | head -1
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。
+
+若 4xx/5xx：lesson-3.html Step 6 加碼 D 仍可教，但提醒學員若 curl 失敗就跳過天氣。
+
 ## Lesson 4 必檢項（LINE 整合）
 
 每次教學前若會教 Lesson 4，這幾條一起跑：

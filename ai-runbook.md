@@ -635,6 +635,88 @@ Window C 重啟 gateway，手機再送一句 → 仍收到回應。
 
 ---
 
+# Lesson 3 · Stage 25–31（日常使用）
+
+接續 Lesson 4 的 Stage 24。本批 stage 假設學員已完成 Lesson 1+2，hermes 已裝、Telegram bot 已接。
+
+## Stage 25 · 開啟 lesson-3.html、走 Step 0–1
+
+1. 在已開的瀏覽器 tab 開 `https://lewsiafat.github.io/hermes-windows-course/lesson-3.html`
+2. 確認進度顯示「前言」、標題「Lesson 3 · hermes 日常使用」
+3. 讀完 Step 0 4 個 checkpoints、點「下一步 →」進 Step 1
+4. Step 1 「實作：試一次 `/new`」步驟在 Telegram bot 跑：先傳算術題、再傳 `/new`、確認 context 清空
+
+預期：bot 回 `/new` 後再問 "what was my last question" 回答無法回憶。
+
+## Stage 26 · 進 Step 2 試 `/skills` 與 `/skills list`
+
+1. 點「下一步 →」進 Step 2
+2. 在 hermes CLI（或 Telegram bot）傳 `/skills`，記下 Skills Hub 子命令選單（browse / search / install / list / ...）
+3. 傳 `/skills list`，記下 bundled skills 表格（至少 5 個）
+4. 傳 `/plan 寫一份本週讀書計畫`，確認 plan skill 生成 markdown
+
+預期：`/skills` 顯示子命令選單；`/skills list` 印出表格至少含 `plan`、`excalidraw`；`/plan` 產出結構化計畫。
+
+## Stage 27 · 進 Step 3、讀 skills 概念
+
+1. 點「下一步 →」進 Step 3
+2. 讀完目錄結構樹
+3. 跑 `ls ~/.hermes/skills/` 對照課程裡的目錄樹
+
+預期：實際目錄至少包含 productivity/, research/ 等 category 子目錄。
+
+## Stage 28 · 進 Step 4 寫 daily-journal SKILL.md
+
+1. 點「下一步 →」進 Step 4
+2. 用 Copy 按鈕複製第一塊 `mkdir -p` 指令、貼到 WSL terminal 跑
+3. Copy `nano` 指令、貼到 terminal 跑
+4. Copy SKILL.md 整段、貼進 nano、存檔
+5. Copy `hermes` 指令、退出 CLI 再重進
+6. Copy `/skills list --source local` 指令、貼到 hermes 對話、確認列表出現 `daily-journal`
+
+預期：`/skills list --source local` 輸出含 `daily-journal`。
+
+## Stage 29 · 進 Step 5 從 Telegram 端到端訪談
+
+1. 點「下一步 →」進 Step 5
+2. Copy `sudo $(which hermes) gateway restart --system`、跑、等 gateway restart
+3. 手機 Telegram bot 傳 `/new` 再傳 `/daily-journal`
+4. 依序回答四題（隨意填，每題答案 5–10 字即可）
+5. bot 回覆寫檔確認
+6. 在 WSL terminal 跑 `cat ~/journal/$(date +%Y-%m-%d).md`
+
+預期：檔案存在、四個 markdown section 都有內容。
+
+## Stage 30 · 進 Step 6 完成 + 加碼預告
+
+1. 點「下一步 →」進 Step 6
+2. 確認 4 個 ✓ checkmark 都顯示
+3. 點開加碼 A/B/C/D 四個 `<details>`，每個收起再展開一次
+4. 加碼 D 內三個巢狀 `<details>`（⚠️ TRAP / 🚨 已誤用 / 🤔 同 session）都展開確認
+
+預期：所有 `<details>` 可開可收。
+
+## Stage 31 · 加碼 D 完整跑通（選做）
+
+加碼 D 用 `hermes config migrate` 設定 location，**不是** spec 原假設的「skill 觸發時自動跳 prompt」（見 plan §Dogfood Results 2026-05-13）。
+
+1. 照加碼 D Step 1–2 改 SKILL.md：frontmatter 加 `config:` 區塊、Procedure 開頭加天氣指令段
+2. 離開 hermes CLI（`/exit`）
+3. 跑 `hermes config migrate`（純 CLI，不在 hermes 對話內）
+4. 看到「1 skill setting(s) not configured: • daily-journal.location ... Configure skill settings? [y/N]:」prompt → 輸入 `y`
+5. 看到「你住哪個城市？...」prompt → 輸入 `Taipei` → 看到 `✓ Saved daily-journal.location = Taipei`
+6. `sudo $(which hermes) gateway restart --system`
+7. 從 Telegram 跑 `/new` 然後 `/daily-journal`
+8. 看 `~/journal/$(date +%Y-%m-%d).md` 開頭應該有「## 天氣」區塊含 wttr.in 輸出（例：`Taipei: 🌧 +24°C`）
+
+預期：日記檔含天氣行、bot 訪談前自動報天氣。
+
+收尾：刪掉 `~/.hermes/skills/productivity/daily-journal/`（若是 smoke test 環境）；或保留（若是 dogfood 跑通要留給學員看）。
+
+⚠️ **不要教 `hermes config set`**：hermes 上游 `migrate` 結尾印的「Set later with: hermes config set <key> <value>」是 misleading message——`set` 寫到 yaml 頂層而非 `skills.config.<key>`，skill 永遠讀不到。教材已加 TRAP 警告，runbook 對應的 Stage 31 也只走 migrate 路徑。
+
+---
+
 # Part 2: Quick Smoke Test
 
 每次教學前 10–15 分鐘做完。**不重新捕捉截圖**（除非發現 UI 已改），只驗證 3 個最容易壞的地方。
@@ -812,6 +894,97 @@ hermes gateway --help 2>&1 | grep -i line || hermes gateway list-platforms 2>&1
 ```
 
 預期：含 `line`。沒有 → 升級 hermes (`npm update -g @nousresearch/hermes`)，仍沒有 → 暫緩開課。
+
+---
+
+## Check 13 · hermes CLI / `/skills list` 仍可用
+
+```bash
+hermes --version
+```
+
+預期：印出版本字串（例：`Hermes Agent v0.13.x`）。
+
+```bash
+hermes -z "/skills list" 2>&1 | head -20
+```
+
+預期：印出 bundled skill 清單（一行行類別 + 各類底下的 skill 名）。
+
+若 `/skills list` 報錯 / Unknown：hermes 可能改了指令命名，對照 plan §Dogfood Results 更新教材所有 `/skills list` 字串。
+
+---
+
+## Check 14 · 自寫 skill 重啟識別仍 work
+
+```bash
+mkdir -p ~/.hermes/skills/productivity/check-skill && cat > ~/.hermes/skills/productivity/check-skill/SKILL.md <<'EOF'
+---
+name: check-skill
+description: Smoke check
+version: 0.0.1
+metadata:
+  hermes:
+    tags: [test]
+    category: productivity
+---
+# Check
+## When to Use
+User runs /check-skill
+## Procedure
+Reply "ok".
+EOF
+hermes skills list --source local 2>&1 | grep -q check-skill
+echo "result: $?"   # 0 = found
+rm -r ~/.hermes/skills/productivity/check-skill
+```
+
+預期：`result: 0`。
+
+---
+
+## Check 15 · `hermes config migrate` 偵測 skill-declared config 仍 work（加碼 D 依賴）
+
+```bash
+mkdir -p ~/.hermes/skills/productivity/check-config && cat > ~/.hermes/skills/productivity/check-config/SKILL.md <<'EOF'
+---
+name: check-config
+description: Smoke check
+version: 0.0.1
+metadata:
+  hermes:
+    tags: [test]
+    category: productivity
+    config:
+      - key: check-config.value
+        description: Test
+        default: ""
+        prompt: Test?
+---
+# Check
+## When to Use
+User runs /check-config
+## Procedure
+Echo skills.config.check-config.value.
+EOF
+echo "n" | hermes config migrate 2>&1 | grep -q "check-config.value"
+echo "result: $?"   # 0 = migrate detected the skill-declared config
+rm -r ~/.hermes/skills/productivity/check-config
+```
+
+預期：`result: 0`。
+
+若 `result: 1`：hermes 上游可能改了 skill config 機制——加碼 D 整段需重新驗證後再教學。
+
+---
+
+## Check 16 · wttr.in 可達
+
+```bash
+curl -sI 'https://wttr.in/Taipei?format=3' | head -1
+```
+
+預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。
 
 ---
 

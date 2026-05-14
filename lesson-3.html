@@ -284,7 +284,59 @@ metadata:
     </section>
 
     <section class="step" data-step="5" hidden>
-      <!-- Task 7 填 -->
+      <header>
+        <hgroup>
+          <h2>Step 5 / 6 · ★ 壓軸：從 Telegram 跑 <code>/daily-journal</code></h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>記得 Lesson 2 Step 5 你裝的 <code>hermes gateway</code> 嗎？它在背景持續跑，把 Telegram bot 的訊息轉給 hermes。你 Step 4 剛剛 <strong>重啟 CLI</strong> 載入新 skill，但 gateway 還在跑舊版的 skill 清單——所以要先重啟 gateway。</p>
+
+      <h3>1. 重啟 gateway 讓它載入新 skill</h3>
+      <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+
+      <p>等 ~3 秒看到「gateway started」字眼即可。</p>
+
+      <h3>2. 從手機 Telegram 跑訪談</h3>
+      <ol>
+        <li>打開手機 Telegram，找到你 Lesson 2 接好的 bot</li>
+        <li>先傳一句 <code>/new</code>（避免之前對話的 context 干擾）</li>
+        <li>傳：<code>/daily-journal</code></li>
+        <li>bot 開始問第一題（「今天最有成就感的一件事是什麼？」）</li>
+        <li>回答完 → bot 問第二題（「今天遇到最卡的事？」）</li>
+        <li>繼續回答到第四題</li>
+        <li>四題答完，bot 整理 markdown、寫檔、回覆「日記已存到 ~/journal/YYYY-MM-DD.md」之類</li>
+      </ol>
+
+      <h3>3. 在 WSL 終端確認檔案真的有寫</h3>
+      <pre data-copy><code>cat ~/journal/$(date +%Y-%m-%d).md</code></pre>
+
+      <p>預期看到四個 markdown section（成就 / 卡點 / 明日重點 / 一句話心情），每段都是你剛剛答的內容。</p>
+
+      <p>✓ Telegram 端到端訪談完成 + 檔案存在 → checkpoint 4 完成。<strong>Lesson 3 全部 4 checkpoints 達標。</strong></p>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <h4>Telegram 端打 <code>/daily-journal</code> bot 回「unknown command」</h4>
+        <p>Gateway 沒重啟成功 / 沒拿到新 skill。處置：</p>
+        <ol>
+          <li><code>sudo $(which hermes) gateway status --system</code> 確認 gateway 在跑</li>
+          <li>看 log：<code>tail -n 50 ~/.hermes/logs/gateway.log</code> 找有沒有 skill scan 錯誤</li>
+          <li>再跑一次 <code>sudo $(which hermes) gateway restart --system</code></li>
+        </ol>
+
+        <h4>bot 收到 <code>/daily-journal</code> 但只回一段普通回應、沒進訪談</h4>
+        <p>SKILL.md 的 Procedure 描述 hermes 沒抓到「一次一題」的意圖。處置：回 Step 4 確認你貼的 Procedure 是否有「<strong>一次只問一題</strong>」字眼。</p>
+
+        <h4>四題答完 bot 沒寫檔</h4>
+        <p>可能是 hermes 沒拿到 <code>terminal</code> toolset 權限。處置：</p>
+        <ol>
+          <li>確認 SKILL.md frontmatter 內有 <code>requires_toolsets: [terminal]</code></li>
+          <li>跑 <code>hermes config show</code> 確認 terminal toolset 已啟用</li>
+          <li>若仍無 → 從 CLI 直接跑 <code>/daily-journal</code> 看是否同樣不寫檔；若 CLI 跑得通但 Telegram 不行 → gateway 端的 toolset 設定問題</li>
+        </ol>
+      </details>
     </section>
 
     <section class="step" data-step="6" hidden>

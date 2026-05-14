@@ -8,7 +8,7 @@
 
 - `index.html` — **Lesson 1**：前言頁（為什麼選 hermes）+ 9 步安裝精靈
 - `lesson-2.html` — **Lesson 2**：把 hermes 接到 Telegram（Step 0 + 7 步，30–45 分鐘）
-- `lesson-3.html` — **Lesson 3**：hermes 日常使用入門（Step 0 + 6 步，45–55 分鐘，含寫一個 daily-journal skill）
+- `lesson-3.html` — **Lesson 3**：hermes 日常使用入門（Step 0 + 5 步，45–55 分鐘，對話式 cron + 用 skill-creator 造你自己的 skill）
 - `lesson-4.html` — **Lesson 4**：把 hermes 接到 LINE（Step 0 + 7 步，60 分鐘，含 ngrok）
 - `style.css` / `wizard.js` — 共用樣式與導覽邏輯（`wizard.js` 從 `<body data-*>` 讀步數與 storage key）
 - `assets/screenshots/` — 各步截圖（每次驗證後可能更新）

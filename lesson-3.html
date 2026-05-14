@@ -55,7 +55,47 @@
     </section>
 
     <section class="step" data-step="1" hidden>
-      <!-- Task 3 填 -->
+      <header>
+        <hgroup>
+          <h2>Step 1 / 6 · context 管理：聊太久會變慢</h2>
+          <p>~7 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>為什麼會變慢</h3>
+      <p>跟 hermes 講話，它會把目前對話的<strong>所有訊息</strong>都送進 LLM。對話越長 → context 越大 → LLM 處理越慢、回答越貴、注意力越分散。這叫 <em>context window 飽和</em>。</p>
+
+      <p>具體症狀：</p>
+      <ul>
+        <li>同一個 bot 越聊越慢回</li>
+        <li>有時 bot 忘記你前面講過的事</li>
+        <li>OpenRouter free 模型直接 rate limit 或丟錯</li>
+      </ul>
+
+      <h3>解法：切話題就 <code>/new</code></h3>
+      <p>規則就一句：<strong>你要問的東西跟前面沒關係 → <code>/new</code></strong>。</p>
+
+      <h3>實作：試一次 <code>/new</code></h3>
+      <ol>
+        <li>打開手機 Telegram，找你 Lesson 2 接好的 bot</li>
+        <li>傳：<code>幫我算 12345 * 6789</code></li>
+        <li>bot 回答後，傳 <code>/new</code></li>
+        <li>看到 bot 回確認訊息（類似「✓ 開新對話」、「session reset」等字眼）</li>
+        <li>傳 <code>what was my last question?</code> → bot 應該說「沒看到上一題」或類似（因為 context 已清）</li>
+      </ol>
+
+      <p>✓ 知道何時 <code>/new</code> + 確認 bot 清空 context → checkpoint 1 完成。</p>
+
+      <details>
+        <summary>還有 <code>/title</code> <code>/resume</code> <code>/sessions</code> 配合 <code>/new</code> 用</summary>
+        <p>Lesson 2 Step 7 已有完整 cheatsheet。簡單講：</p>
+        <ul>
+          <li><code>/title 中翻英練習</code> — 在 <code>/new</code> 開新對話<strong>之前</strong>幫目前 session 取名，這樣之後可找回</li>
+          <li><code>/sessions</code> — 列所有取過名的 session</li>
+          <li><code>/resume 中翻英練習</code> — 跳回那個 session 繼續聊</li>
+        </ul>
+        <p>實務節奏：寫一個專案 → <code>/title 專案名</code> → 聊完 → <code>/new</code>。下次想接著做 → <code>/resume 專案名</code>。</p>
+      </details>
     </section>
 
     <section class="step" data-step="2" hidden>

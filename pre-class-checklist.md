@@ -128,92 +128,68 @@ hermes --version
 
 預期：印出版本字串。若 command not found：Lesson 1 安裝環節需先修。
 
-### 2. `/skills list` 指令仍有效
+### 2. `/skills list` 與 `/skills list --source local` 仍有效
 
-進 `hermes` CLI、傳 `/skills`（看到 Skills Hub 子命令選單）、再傳 `/skills list`。
+進 `hermes` CLI、傳 `/skills list`（看 bundled 清單）、再傳 `/skills list --source local`（看本地清單，可能空，但不該報錯）。
 
-預期：`/skills list` 印出已安裝 skills 表格（至少有 `plan`、`excalidraw` 等 bundled）。
+預期：兩個指令都印出表格（local 可能 0 項）、沒 Unknown command。
 
-若 `/skills` 直接 Unknown command 或 `/skills list` 報錯：hermes 版本可能改了指令命名。對照 plan §Dogfood Results 結果，更新 `lesson-3.html` Step 2 / Step 4 / Step 6 內所有 `/skills` / `/skills list` 字串。
+若 `/skills list` 報錯：hermes 版本可能改了指令命名。對照 plan §Dogfood Results 結果，更新 `lesson-3.html` Step 3 / Step 4 內所有 `/skills` 字串。
 
-### 3. 自寫 skill 重啟後可被 `/skills list --source local` 列出
+### 3. cron 對話式設定仍可用（Step 2 主要依賴）
 
-建臨時 skill：
+進 hermes CLI 或 Telegram bot，貼：
 
-```bash
-mkdir -p ~/.hermes/skills/productivity/smoke-test && cat > ~/.hermes/skills/productivity/smoke-test/SKILL.md <<'EOF'
----
-name: smoke-test
-description: Throwaway
-version: 0.0.1
-metadata:
-  hermes:
-    tags: [test]
-    category: productivity
----
-# Smoke Test
-## When to Use
-User runs /smoke-test
-## Procedure
-Reply "ok".
-EOF
+```
+幫我設一個 cron job，2 分鐘後跑一次，內容：台北今日天氣，把結果推到我的 Telegram。
 ```
 
-退出重進 hermes、跑 `/skills list --source local`。預期清單出現 `smoke-test`。再跑 `/smoke-test` 應該回 `ok`。
+預期：hermes 主動寫入 `~/.hermes/cron.yaml`（`cat ~/.hermes/cron.yaml` 確認）+ 2 分鐘後 Telegram 真的收到推送。
 
-收尾：`rm -r ~/.hermes/skills/productivity/smoke-test`
+若 hermes 沒主動寫 cron.yaml：
+- 學員場景免費 model 也可能不會 —— lesson-3.html Step 2「我卡住了」`<details>` 已給 fallback（更明確要求編輯 file path）。教學場景假設付費 model，此 fallback 仍要保留。
+- 若付費 model 也不寫：hermes 上游可能改了 cron 介面 —— 整段 Step 2 要重新驗證教材。
 
-若沒出現：跑 `sudo $(which hermes) gateway restart --system` 再試；仍無 → lesson-3.html Step 4 「重啟 hermes」字眼要改更積極的指令。
+收尾：對 hermes 講「刪掉剛才那個 2 分鐘 cron」或直接編輯 `~/.hermes/cron.yaml` 移除。
 
-### 4. `hermes config migrate` 仍偵測 skill-declared config（加碼 D 依賴）
+### 4. 對話式裝 skill-creator 仍可用（Step 3 主要依賴）
 
-在剛剛 smoke-test skill 還沒刪掉之前，先加一段 config：
+進 hermes CLI，貼：
 
-```bash
-cat > ~/.hermes/skills/productivity/smoke-test/SKILL.md <<'EOF'
----
-name: smoke-test
-description: Throwaway
-version: 0.0.1
-metadata:
-  hermes:
-    tags: [test]
-    category: productivity
-    config:
-      - key: smoke-test.greeting
-        description: Test greeting
-        default: ""
-        prompt: Test prompt?
----
-# Smoke Test
-## When to Use
-User runs /smoke-test
-## Procedure
-Echo skills.config.smoke-test.greeting.
-EOF
+```
+幫我裝這個 skill：https://github.com/anthropics/skills/tree/main/skills/skill-creator
 ```
 
-然後跑：
+預期：hermes 主動抓 URL、放到 `~/.hermes/skills/` 底下；`/skills list --source local` 看得到 `skill-creator`。
 
-```bash
-hermes config migrate
+若沒主動裝 → fallback：
+
+```
+/skills install https://github.com/anthropics/skills/tree/main/skills/skill-creator
 ```
 
-預期：看到「N skill setting(s) not configured: • smoke-test.greeting — Test greeting (from skill: smoke-test)」+ 提示 `Configure skill settings? [y/N]:`。按 n 跳過即可。
+若仍裝不起來（404 / repo 變動）：對照 plan §Dogfood Results 確認 skill-creator URL 是否還有效；若上游搬家：更新 lesson-3.html Step 3 與本 checklist 的 URL。
 
-若 migrate 沒偵測到：hermes 上游可能改了 skill config 機制——lesson-3.html Step 6 加碼 D 整段都要重新驗證後再教學。
+收尾：保留 skill-creator（學員用得到）；或 `rm -r ~/.hermes/skills/meta/skill-creator/`（看實際落地路徑）。
 
-收尾再次：`rm -r ~/.hermes/skills/productivity/smoke-test`
+### 5. skill-creator 訪談 UX 沒變
 
-### 5. wttr.in 可達（加碼 D）
+接續上一條（skill-creator 已裝），跑：
 
-```bash
-curl -sI 'https://wttr.in/Taipei?format=3' | head -1
+```
+/skill-creator
 ```
 
-預期：`HTTP/2 200` 或 `HTTP/1.1 200 OK`。
+或對 hermes 講「用 skill-creator 造一個 skill：每天早上推一條英文俚語」。
 
-若 4xx/5xx：lesson-3.html Step 6 加碼 D 仍可教，但提醒學員若 curl 失敗就跳過天氣。
+預期：
+- skill-creator 開始訪談、問基本問題（是什麼 / 何時觸發 / 輸出格式）
+- 會在某個時點問「要不要 evaluation / benchmarks / test cases」（用對應措辭）
+- 對「不用 eval、只 vibe 就好」這類回應能跳過繼續
+
+若訪談流程跟教材描述差很多（例如沒問 evaluation 那題、或基本問題順序大不同）：對照 plan §Dogfood Results 4 → 更新 lesson-3.html Step 4 訪談描述字眼。
+
+**不必跑到底**：看到「evaluation」那題的措辭就 Ctrl+C 退出，這條目的只是驗教材描述還對得上。
 
 ## Lesson 4 必檢項（LINE 整合）
 

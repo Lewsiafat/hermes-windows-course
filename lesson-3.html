@@ -340,7 +340,153 @@ metadata:
     </section>
 
     <section class="step" data-step="6" hidden>
-      <!-- Task 8 填 -->
+      <header>
+        <hgroup>
+          <h2>Step 6 / 6 · 完成 + 加碼</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>恭喜，4 個 checkpoints 都完成：</p>
+      <ol>
+        <li>✓ 會用 <code>/new</code> 切話題</li>
+        <li>✓ <code>/skills list</code> 看得到清單</li>
+        <li>✓ 自己寫的 <code>daily-journal</code> 重啟後 <code>/skills list --source local</code> 列得出來</li>
+        <li>✓ 從 Telegram 觸發完一次訪談 + 檔案有存</li>
+      </ol>
+
+      <h3>建議下一步</h3>
+      <ul>
+        <li>把這個頁面加書籤，未來想複習可隨時回來</li>
+        <li>連續寫七天日記，看看自己一週的「成就」「卡點」pattern</li>
+        <li>從加碼 D 開始玩，把天氣自動帶進日記，每天一打開就看到「Taipei: 🌧 +24°C」</li>
+      </ul>
+
+      <details>
+        <summary>加碼 A · 用 cron 每天 22:00 自動 ping 你寫日記</summary>
+        <p>hermes 內建 cron 子系統（不用裝任何東西），開機就跑。設定一條排程，每天 22:00 從 Telegram 自動傳「該寫日記了」給你、然後直接觸發 <code>/daily-journal</code>。</p>
+
+        <p>建檔：</p>
+        <pre data-copy><code>nano ~/.hermes/cron.yaml</code></pre>
+
+        <p>內容：</p>
+        <pre data-copy><code>jobs:
+  - name: daily-journal-reminder
+    cron: "0 22 * * *"
+    channel: telegram
+    message: |
+      該寫日記了 📝
+      /daily-journal</code></pre>
+
+        <p>存檔後 <code>sudo $(which hermes) gateway restart --system</code> 重啟。明天 22:00 你的 Telegram bot 就會主動傳訊息來。</p>
+      </details>
+
+      <details>
+        <summary>加碼 B · 讓 hermes 在背景持續跑（不用每次開 CLI）</summary>
+        <p>Lesson 2 教的 <code>hermes gateway</code> 已經在背景跑了，這就是 background session 的一種。延伸玩法：</p>
+        <ul>
+          <li><code>sudo $(which hermes) gateway status --system</code> — 看狀態</li>
+          <li><code>sudo $(which hermes) gateway logs --system --follow</code> — 即時看 log</li>
+          <li>關掉 SSH session、關掉電腦 → gateway 仍在跑（因為 systemd 接管，這是 Lesson 2 Step 5 設好的）</li>
+        </ul>
+        <p>所以你的 Telegram bot + 所有 skill 都是 24/7 可用，hermes 已經是個「在背景的個人助理」。</p>
+      </details>
+
+      <details>
+        <summary>加碼 C · 改寫日記題目讓它更貼你</summary>
+        <p>SKILL.md 的 Procedure 段就是純 markdown，怎麼寫怎麼跑。常見改法：</p>
+        <ul>
+          <li><strong>加 mood 評分</strong>：問完四題加一題「今天心情 1–10 分？」，bot 把分數寫進日記檔開頭 <code>## 心情指數</code></li>
+          <li><strong>改題目</strong>：把預設四題換成你自己的問題（學到的事 / 感謝的人 / 想道歉的事 / 明天 top 3）</li>
+          <li><strong>每週彙總</strong>：加一個 <code>/weekly-review</code> skill，週日跑時 cat 本週七檔日記、整理成 weekly summary</li>
+        </ul>
+        <p>改完存檔、<code>sudo $(which hermes) gateway restart --system</code>，從 Telegram 就能看到新題目。</p>
+      </details>
+
+      <details>
+        <summary>加碼 D · 帶入今日天氣（學會 skill config 機制）</summary>
+        <p>讓 <code>daily-journal</code> 每天日記開頭自動帶當地天氣。重點不只是「天氣」，是學會 <strong>skill 怎麼記住個人設定</strong>：你只設一次城市，之後 hermes 啟動時自動注入給 skill。</p>
+
+        <h4>1. 編輯 SKILL.md frontmatter</h4>
+        <p>把 <code>metadata.hermes</code> 區塊整個換成（多加最下面 <code>config:</code> 那段）：</p>
+        <pre data-copy><code>metadata:
+  hermes:
+    tags: [journal, daily, interview, personal, weather]
+    category: productivity
+    requires_toolsets: [terminal]
+    config:
+      - key: daily-journal.location
+        description: 你住的城市（查天氣用）
+        default: ""
+        prompt: 你住哪個城市？（例：Taipei / Hsinchu / Tokyo）</code></pre>
+
+        <h4>2. 在 Procedure 第 1 題之前加一段</h4>
+        <p>在「<strong>一次只問一題</strong>」那行之前插入：</p>
+        <pre data-copy><code>四題之前先 `curl -s wttr.in/{location}?format=3` 取今日天氣（`{location}` 由 hermes 從 config 注入），
+把輸出放進日記檔開頭 `## 天氣` 區塊。若 curl 失敗（無網路 / wttr 掛了），跳過天氣繼續訪談。
+若 config 值為 `(not set)`，跳過天氣並提示使用者跑 `hermes config migrate`。</code></pre>
+
+        <h4>3. 跑 <code>hermes config migrate</code> 設定 location</h4>
+        <p>存檔後，先離開 hermes CLI（<code>/exit</code>），然後跑：</p>
+        <pre data-copy><code>hermes config migrate</code></pre>
+
+        <p>畫面會出現：</p>
+        <pre><code>1 skill setting(s) not configured:
+    • daily-journal.location — 你住的城市（查天氣用） (from skill: daily-journal)
+
+  Configure skill settings? [y/N]:</code></pre>
+
+        <p>輸入 <code>y</code> → 看到「你住哪個城市？（例：Taipei / Hsinchu / Tokyo）:」prompt → 輸入 <code>Taipei</code>（或你的城市）→ 看到 <code>✓ Saved daily-journal.location = Taipei</code>。</p>
+
+        <h4>4. 重啟 gateway，從 Telegram 試一次</h4>
+        <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+
+        <p>從手機 Telegram 跑 <code>/new</code> 然後 <code>/daily-journal</code>。應該在訪談開始前看到 bot 報今日天氣，日記檔開頭也會有 <code>## 天氣</code> section。</p>
+
+        <h4>5. 之後的日記檔長這樣</h4>
+        <pre><code># 2026-05-14
+
+## 天氣
+Taipei: 🌧 +24°C
+
+## 成就
+...</code></pre>
+
+        <details>
+          <summary>⚠️ TRAP：不要用 <code>hermes config set</code> 設 skill config</summary>
+          <p>跑完 <code>hermes config migrate</code>，畫面結尾會印一行：</p>
+          <pre><code>Set later with: hermes config set &lt;key&gt; &lt;value&gt;</code></pre>
+          <p><strong>這行建議是錯的</strong>（hermes 上游 misleading message）。<code>hermes config set daily-journal.location Taipei</code> 會把值寫到 <code>~/.hermes/config.yaml</code> 的<strong>頂層</strong> <code>daily-journal:</code> 區塊；但 skill 機制只讀 <code>skills.config.daily-journal.location</code>——位置不對，skill 永遠讀不到值，注入到 LLM context 的還是 <code>(not set)</code>。</p>
+          <p><strong>結論</strong>：改 skill config 一律用 <code>hermes config migrate</code>（互動式問），或直接編輯 <code>~/.hermes/config.yaml</code> 的 <code>skills.config.&lt;key&gt;</code> 路徑。</p>
+        </details>
+
+        <details>
+          <summary>🚨 已經誤用了 <code>hermes config set</code>，怎麼救</summary>
+          <p>查一下 yaml 看誤設位置：</p>
+          <pre data-copy><code>grep -A1 "^daily-journal:" ~/.hermes/config.yaml</code></pre>
+          <p>若有輸出 → 那是錯位置的死資料。處置：</p>
+          <ol>
+            <li>編輯 <code>~/.hermes/config.yaml</code>，刪掉頂層 <code>daily-journal:</code> + 下面的 <code>location:</code> 那兩行</li>
+            <li>重跑 <code>hermes config migrate</code>，它會偵測到 missing 並再 prompt 一次</li>
+            <li>正常輸入 → 寫到 <code>skills.config.daily-journal.location</code>（這次是正確位置）</li>
+          </ol>
+        </details>
+
+        <details>
+          <summary>🤔 同 session 改完 config 為什麼還 (not set)？</summary>
+          <p>hermes CLI 啟動時把 config 快取了，同個 session 不會 live-refresh。所以改完 config 必須 <code>/exit</code> 重開 <code>hermes</code>（或 <code>sudo $(which hermes) gateway restart --system</code> 重啟 gateway），新值才會被注入。</p>
+        </details>
+      </details>
+
+      <h3>下次預告</h3>
+      <p>下次（Lesson 5 暫定 / 未排）可能會涵蓋：</p>
+      <ul>
+        <li>分享你的 skill 上 <a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a></li>
+        <li>進階：用 <code>scripts/</code> 在 skill 裡放 Python helper</li>
+        <li>或你想學什麼下次告訴我</li>
+      </ul>
+
+      <p><em>到這邊就是 Lesson 3 全部內容。下次見。</em></p>
     </section>
 
     <nav id="step-nav" class="container">

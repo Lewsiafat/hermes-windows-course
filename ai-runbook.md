@@ -572,7 +572,7 @@ ngrok config add-authtoken <token>
 
 截圖：`step-4-3-ngrok-installed.png`、`step-4-3-authtoken-saved.png`
 
-## Stage 21 · 開 ngrok tunnel + 寫 .env（Step 4）
+## Stage 21 · 開 ngrok tunnel + 一鍵寫 .env（Step 4）
 
 Window B：
 
@@ -581,11 +581,25 @@ ngrok http 8646
 # 抄 Forwarding 那行 URL
 ```
 
-Window A：
+Window A（互動腳本，bash heredoc，default shell 是 bash / zsh 都可跑）：
 
 ```
-nano ~/.hermes/.env
-# 檔尾 append LINE block
+bash <<'BASH'
+set -euo pipefail
+cd ~/.hermes
+read -sp "Paste LINE Channel Access Token: " TOKEN </dev/tty && echo
+read -sp "Paste LINE Channel Secret: "        SECRET </dev/tty && echo
+read -p  "Paste ngrok HTTPS URL: "            PUBURL </dev/tty
+grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' >> .env
+grep -q '^LINE_CHANNEL_SECRET='       .env || echo 'LINE_CHANNEL_SECRET='       >> .env
+grep -q '^LINE_PUBLIC_URL='           .env || echo 'LINE_PUBLIC_URL='           >> .env
+grep -q '^LINE_ALLOWED_USERS='        .env || echo 'LINE_ALLOWED_USERS='        >> .env
+grep -q '^LINE_ALLOW_ALL_USERS='      .env || echo 'LINE_ALLOW_ALL_USERS=true'  >> .env
+sed -i "s|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=$TOKEN|" .env
+sed -i "s|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=$SECRET|"            .env
+sed -i "s|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=$PUBURL|"                    .env
+BASH
+
 awk -F= '/^LINE_/{print $1, "len="length($2)}' ~/.hermes/.env
 ```
 

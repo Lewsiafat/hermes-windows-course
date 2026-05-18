@@ -195,8 +195,12 @@
       <h3>1. 看 hermes 內建了什麼 skill</h3>
       <p>每個 skill 是 hermes 的一塊「能力包」——剛才 Step 2 cron 拿到天氣、降雨、SP500，背後就是 hermes 用某些 skill / tool 抓的。</p>
 
-      <p>在 hermes CLI 或 Telegram bot 跑：</p>
+      <p>在 hermes TUI（終端機跑 <code>hermes</code>）裡輸入：</p>
       <pre data-copy><code>/skills list</code></pre>
+
+      <blockquote>
+        <strong>⚠️ TUI 限定</strong>：<code>/skills</code> 系列指令只在 hermes TUI 有效，<strong>Telegram bot 不支援</strong>。要在 Telegram 查，對 bot 說「幫我列出已安裝的 skills」即可。
+      </blockquote>
 
       <p>你會看到一大堆 bundled skill，分成幾個類別（productivity / research / creative / autonomous-ai-agents...）。輸出多會分頁，按 <code>continue</code> 或 <code>n</code> 看下一頁。</p>
 
@@ -222,11 +226,13 @@
       </ol>
 
       <h3>4. 確認裝好了</h3>
+      <p>在 hermes TUI 跑：</p>
       <pre data-copy><code>/skills list --source local</code></pre>
 
       <p>清單應該看到 <code>skill-creator</code>。</p>
+      <p>（用 Telegram 的話，直接在終端機查：<code>ls ~/.hermes/skills/meta/</code>）</p>
 
-      <p>✓ <code>/skills list --source local</code> 列出 <code>skill-creator</code> → <strong>checkpoint 3 完成</strong>。下一步用它造你的 skill。</p>
+      <p>✓ 看到 <code>skill-creator</code> → <strong>checkpoint 3 完成</strong>。下一步用它造你的 skill。</p>
 
       <details>
         <summary>🚨 我卡住了</summary>
@@ -234,12 +240,13 @@
         <p>免費 model 可能推理不出該執行什麼。fallback 直接給 slash command：</p>
         <pre data-copy><code>/skills install https://github.com/anthropics/skills/tree/main/skills/skill-creator</code></pre>
 
-        <h4><code>/skills list --source local</code> 還是沒看到</h4>
+        <h4>TUI 的 <code>/skills list --source local</code> 還是沒看到</h4>
         <p>可能 gateway / CLI 還沒重載入 skill 清單：</p>
         <ol>
-          <li>離開 hermes CLI（<code>/exit</code>），重新 <code>hermes</code> 進來</li>
+          <li>離開 hermes TUI（<code>/exit</code>），重新 <code>hermes</code> 進來</li>
           <li>或 <code>sudo $(which hermes) gateway restart --system</code> 重啟</li>
           <li>再跑一次 <code>/skills list --source local</code></li>
+          <li>也可以直接查資料夾：<code>ls ~/.hermes/skills/meta/</code></li>
         </ol>
 
         <h4>抓 URL 失敗（網路 / 上游下架）</h4>
@@ -307,7 +314,7 @@ Restart hermes to use it.</code></pre>
       <p>在 hermes CLI 或 Telegram bot 跑：</p>
       <pre data-copy><code>/&lt;your-skill-name&gt;</code></pre>
 
-      <p>例如剛才造「每天早上推一條英文俚語」，名字可能是 <code>/daily-slang</code> 或 <code>/morning-slang</code>（看 skill-creator 取了什麼）。打 <code>/skills list --source local</code> 可以看到實際名字。</p>
+      <p>例如剛才造「每天早上推一條英文俚語」，名字可能是 <code>/daily-slang</code> 或 <code>/morning-slang</code>（看 skill-creator 取了什麼）。在 TUI 打 <code>/skills list --source local</code>、或終端機跑 <code>ls ~/.hermes/skills/*/</code> 可以看到實際名字。</p>
 
       <p>✓ 自己造的 skill 跑起來、輸出符合預期 → <strong>checkpoint 4 完成</strong>。<strong>Lesson 3 全部 4 checkpoints 達標。</strong></p>
 
@@ -321,7 +328,7 @@ Restart hermes to use it.</code></pre>
         <h4>造完 <code>/&lt;your-skill-name&gt;</code> 認不出來</h4>
         <ol>
           <li>確認 gateway 重啟成功（<code>sudo $(which hermes) gateway status --system</code> 看 running）</li>
-          <li><code>/skills list --source local</code> 看實際名字（可能跟你想的不一樣）</li>
+          <li>TUI 跑 <code>/skills list --source local</code>、或終端機跑 <code>ls ~/.hermes/skills/*/</code> 看實際名字（可能跟你想的不一樣）</li>
           <li>若清單也沒有：<code>ls ~/.hermes/skills/*/</code> 直接看資料夾是否落地</li>
         </ol>
 
@@ -344,7 +351,7 @@ Restart hermes to use it.</code></pre>
       <ol>
         <li>✓ 會用 <code>/new</code> 切話題（Telegram 真的清掉 context）</li>
         <li>✓ Telegram 收到 cron 推送的 ⟨台北天氣 + 降雨預報 + SP500⟩</li>
-        <li>✓ <code>/skills list --source local</code> 看到 <code>skill-creator</code></li>
+        <li>✓ TUI 的 <code>/skills list --source local</code>（或 <code>ls ~/.hermes/skills/meta/</code>）看到 <code>skill-creator</code></li>
         <li>✓ 自己發想的 skill 從 <code>/&lt;your-skill-name&gt;</code> 真的跑起來</li>
       </ol>
 

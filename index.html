@@ -3,520 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hermes Windows 安裝課程</title>
+  <title>Hermes Agent 課程</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
+  <script>
+    (function () {
+      var m = window.location.hash.match(/^#step-(\d+)$/);
+      if (m) {
+        window.location.replace('lesson-1.html#step-' + m[1]);
+      }
+    })();
+  </script>
 </head>
-<body data-total-steps="9" data-storage-key="hermes-course-step">
+<body>
   <header class="container">
     <hgroup>
-      <h1>Hermes 安裝課程</h1>
-      <p>60 分鐘從零裝好你的第一個 AI agent</p>
+      <h1>Hermes Agent 課程</h1>
+      <p>從零裝好 hermes-agent，串到 Telegram / LINE，學會日常使用</p>
     </hgroup>
-    <nav id="progress" aria-label="進度">
-      <span id="progress-text">Step 1 / 9</span>
-    </nav>
   </header>
 
   <main class="container">
-    <section class="step" data-step="0">
-      <header>
-        <hgroup>
-          <h2>前言 · 為什麼選 Hermes Agent</h2>
-          <p>1 分鐘讀完，再決定要不要花 60 分鐘裝它</p>
-        </hgroup>
-      </header>
+    <section>
+      <hgroup>
+        <h2>從這裡開始</h2>
+        <p>挑你的作業系統，跟著精靈一步一步走。</p>
+      </hgroup>
 
-      <p>這是一份專為「非開發者」撰寫的 AI 助理框架分析。如果您沒有深厚的程式碼背景，主要看重「好不好用」、「功能是否齊全」以及「維護起來會不會很痛苦」，以下是選擇 Hermes Agent 相較於另外三款（OpenClaw、NanoClaw、nanobot）的深度比較與優勢分析。</p>
+      <div class="grid">
+        <article>
+          <header>
+            <h3>Lesson 1 · Windows</h3>
+          </header>
+          <p>用 WSL2 在 Windows 上裝 hermes-agent，完成第一次對話。</p>
+          <p><small>⏱ 60 分鐘 · 9 步精靈</small></p>
+          <footer>
+            <a href="lesson-1.html" role="button">開始 Lesson 1</a>
+          </footer>
+        </article>
 
-      <h3>對非開發者最友善的 4 個亮點</h3>
-      <ul>
-        <li><strong>會自我學習與成長</strong>：少數內建「學習迴圈」的助理。從對話中記住您的偏好、建立長期記憶，甚至在完成複雜任務後自動學會新的「技能」（Skills），下次會做得更好。</li>
-        <li><strong>不綁死單一 AI 模型</strong>：可隨時切換 AI 大腦（OpenAI、Claude、Google Gemini，甚至免費的開源模型），完全不需要改程式碼，不會被單一廠商綁架。</li>
-        <li><strong>無縫接軌您的生活</strong>：支援 17 種以上通訊軟體，包含 Telegram、WhatsApp、Discord、Slack、Email。架設在雲端後可直接用手機 Telegram 傳訊息或語音請它幫忙做事。</li>
-        <li><strong>自動化排程</strong>：內建定時任務，可用自然語言請它「每天早上發送新聞摘要給我」或「每週備份資料」，自動執行。</li>
-      </ul>
-
-      <details>
-        <summary>vs. OpenClaw — 「適中好用」對決「過度複雜」</summary>
-        <p><strong>OpenClaw 的問題</strong>：極度龐大（270 萬行程式碼），功能多到不可思議，但安裝門檻極高，需要 Node.js、Docker、甚至編譯底層環境。對非開發者是噩夢，「大砲打蚊子」。</p>
-        <p><strong>Hermes 的優勢</strong>：相對輕量，官方甚至內建「從 OpenClaw 搬家（Migrate）」功能，可自動把設定、記憶和 API 密鑰無縫轉移過來。</p>
-      </details>
-
-      <details>
-        <summary>vs. NanoClaw — 「模型自由」對決「深度綁定」</summary>
-        <p><strong>NanoClaw 的問題</strong>：為解決 OpenClaw 太複雜而誕生的「輕量安全版」，把每個 AI 關在獨立 Docker 容器中以確保安全。但深度綁定 Anthropic（Claude）模型，每次對話可能需支付 Claude API 費用，成本較高且缺乏彈性。安裝也強烈依賴 Docker 容器技術，對新手仍有門檻。</p>
-        <p><strong>Hermes 的優勢</strong>：模型選擇自由（支援 200+ 模型），運作方式更符合一般人對軟體的理解，不需要搞懂容器隔離技術也能享受強大功能。</p>
-      </details>
-
-      <details>
-        <summary>vs. nanobot — 「成熟產品」對決「學術專案」</summary>
-        <p><strong>nanobot 的問題</strong>：在亞洲市場（微信、釘釘）支援度極高，但本質是一個大學（香港大學）的「學術專案」，還是 Alpha（測試）版本，可能有很多 Bug，且未來若學生或研究員畢業，專案可能面臨無人維護的風險。</p>
-        <p><strong>Hermes 的優勢</strong>：由活躍的商業/社群團隊（Nous Research）開發，每天都有大量更新，版本迭代快，有專門社群維護除錯，長期穩定性與支援度比學術專案更有保障。</p>
-      </details>
-
-      <h3>⚠️ 非開發者的「現實提醒」</h3>
-      <p>雖然 Hermes 在比較中勝出，作為非開發者，您仍需有以下心理準備：</p>
-      <ul>
-        <li><strong>不是「下載就能用」的手機 App</strong>：本課程帶您在自己的 Windows 筆電上裝（透過微軟官方的 Linux 子系統 WSL2）。整個過程約 60 分鐘，需要連續不被打斷的時間。</li>
-        <li><strong>會用到終端機（Terminal），但全程有指令可複製</strong>：您會在 PowerShell 和 Ubuntu 終端機裡貼幾行指令，不需要看懂指令的內容。每個步驟旁都有「Copy」按鈕。</li>
-        <li><strong>需要自己申請一個 API Key</strong>：用 email 註冊 OpenRouter（免費，不用刷卡），拿到一串密碼貼到 hermes 設定裡。Step 3 會帶您做。</li>
-      </ul>
-
-      <h3>總結</h3>
-      <p>如果您希望擁有一個聰明、能記憶、能串接各種通訊軟體，且未來不會被單一公司綁架的專屬 AI 助理，Hermes Agent 是這四者中最平衡、生態最完整且最友好的選擇。</p>
-
-      <p><em>準備好了？按下「下一步」開始 60 分鐘安裝流程。</em></p>
+        <article>
+          <header>
+            <h3>macOS</h3>
+          </header>
+          <p>macOS 路徑無需 WSL2，直接安裝即可。</p>
+          <p><small>⏱ 30 分鐘</small></p>
+          <footer>
+            <a href="mac.html" role="button">開始 macOS 課程</a>
+          </footer>
+        </article>
+      </div>
     </section>
 
-    <section class="step" data-step="1" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 1 / 9 · 開始之前</h2>
-          <p>大約 60 分鐘，零預備</p>
-        </hgroup>
-      </header>
+    <section>
+      <hgroup>
+        <h2>進階整合與日常使用</h2>
+        <p>裝好 hermes-agent 之後，挑你想先學的那一塊。Lesson 2 → 3 → 4 是建議順序，但每堂彼此獨立。</p>
+      </hgroup>
 
-      <p>這份教材會帶你從零安裝好 <strong>hermes-agent</strong>——一個可以在你筆電裡跟你聊天、執行任務、甚至自己學東西的 AI agent。Hermes 不支援原生 Windows，所以我們會先在 Windows 裡裝一個 Linux 子系統 (WSL2)，再把 hermes 裝進那個 Linux 裡。</p>
+      <div class="grid">
+        <article>
+          <header>
+            <h3>Lesson 2 · Telegram</h3>
+          </header>
+          <p>把 hermes-agent 接到 Telegram，用手機隨時聊。</p>
+          <p><small>⏱ 30–45 分鐘 · 7 步</small></p>
+          <footer>
+            <a href="lesson-2.html" role="button" class="secondary">開始 Lesson 2</a>
+          </footer>
+        </article>
 
-      <h3>今天要走完 4 個 checkpoints</h3>
-      <ol>
-        <li>☐ 安裝 WSL2 + Ubuntu</li>
-        <li>☐ 申請 OpenRouter（免費 LLM API 入口，不需要刷卡）</li>
-        <li>☐ 安裝 hermes-agent</li>
-        <li>☐ 完成第一次對話</li>
-      </ol>
+        <article>
+          <header>
+            <h3>Lesson 3 · 日常使用</h3>
+          </header>
+          <p>對話式排程 cron、用 skill-creator 造自己的 skill。</p>
+          <p><small>⏱ 45–55 分鐘 · 5 步</small></p>
+          <footer>
+            <a href="lesson-3.html" role="button" class="secondary">開始 Lesson 3</a>
+          </footer>
+        </article>
 
-      <h3>準備物</h3>
-      <ul>
-        <li>Windows 10（1903 以上）或 Windows 11</li>
-        <li>有管理員權限的帳號</li>
-        <li>能收得到 email</li>
-        <li>連續 60 分鐘不被打斷</li>
-      </ul>
-
-      <h3>加碼預告（時間夠才會講）</h3>
-      <p>如果安裝順利、有時間剩，會帶你看 <strong>LINE Messaging API</strong> 或 <strong>Telegram bot</strong> 的申請流程，這樣下一堂課就能直接接通讓你從手機跟 hermes 講話。</p>
-
-      <p><em>右下角「下一步」按鈕在頁面底部，本頁不需要做任何事，準備好就往下走。</em></p>
+        <article>
+          <header>
+            <h3>Lesson 4 · LINE</h3>
+          </header>
+          <p>把 hermes-agent 接到 LINE，含 ngrok 公網隧道設定。</p>
+          <p><small>⏱ 60 分鐘 · 7 步</small></p>
+          <footer>
+            <a href="lesson-4.html" role="button" class="secondary">開始 Lesson 4</a>
+          </footer>
+        </article>
+      </div>
     </section>
-
-    <section class="step" data-step="2" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 2 / 9 · 啟動 WSL2 安裝</h2>
-          <p>~4 分鐘觸發、之後 5–10 分鐘背景下載</p>
-        </hgroup>
-      </header>
-
-      <p>WSL = Windows Subsystem for Linux，微軟官方的 Linux 子系統。安裝這條指令會自動下載 WSL 核心 + Ubuntu。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>開始功能表搜尋「<strong>PowerShell</strong>」</li>
-        <li>右鍵 → 「<strong>以系統管理員身分執行</strong>」（藍底白標題會出現）</li>
-        <li>把下面這行貼進去，按 Enter</li>
-        <li>看到下載進度條後，<strong>不要關掉視窗</strong>，繼續往下讀</li>
-      </ol>
-
-      <h3>指令</h3>
-      <pre data-copy><code>wsl --install</code></pre>
-
-      <details>
-        <summary>等下載時可以順便讀：殼層 / 終端機 / WSL 是什麼</summary>
-        <p><strong>殼層 (shell)</strong> 是讓你打字命令給作業系統的程式。Windows 的 PowerShell、cmd 都是殼層；Linux 上常見的是 bash、zsh。</p>
-        <p><strong>終端機 (terminal)</strong> 是顯示殼層的視窗。你看到的黑底白字就是終端機。</p>
-        <p><strong>WSL</strong> 把一個完整 Linux 跑在你 Windows 裡（不是虛擬機，效能接近原生）。Hermes 在 Linux 跑，所以我們要它。</p>
-      </details>
-
-      <details>
-        <summary>等下載時可以順便做：把下一步要的 OpenRouter 開起來</summary>
-        <p>下載 5–10 分鐘是死時間，可以順手開另一個瀏覽器分頁跑下一步：<a href="#step-3">Step 3 · 申請 OpenRouter API Key</a></p>
-      </details>
-
-      <details>
-        <summary>🚨 我卡住了</summary>
-        <ul>
-          <li><strong>Windows 太舊</strong>（1903 以下）→ 先跑 Windows Update 再回來</li>
-          <li><strong>跳「WSL not enabled」</strong>→ 跑 <code>wsl --install --no-distribution</code> 重啟、再跑 <code>wsl --install -d Ubuntu</code></li>
-          <li><strong>跳「具有所提供名稱的發佈已經存在」</strong>（英文版：<em>A distribution with the supplied name already exists</em>，錯誤碼 <code>Wsl/InstallDistro/ERROR_ALREADY_EXISTS</code>）→ 表示這台機器之前裝過 Ubuntu。
-            <ul>
-              <li>想沿用既有環境：跑 <code>wsl -d Ubuntu</code> 直接啟動，跳到 Step 5。</li>
-              <li>想砍掉重來：<code>wsl --unregister Ubuntu</code> 再 <code>wsl --install -d Ubuntu</code>。<strong>注意：unregister 會清掉舊 Ubuntu 裡的所有檔案，無法還原。</strong></li>
-            </ul>
-          </li>
-          <li><strong>沒有管理員權限</strong>（公司電腦常見）→ 這台機器無法繼續，請改個人電腦</li>
-        </ul>
-      </details>
-    </section>
-
-    <section class="step" data-step="3" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 3 / 9 · 申請 OpenRouter API Key</h2>
-          <p>~5 分鐘，純瀏覽器操作</p>
-        </hgroup>
-      </header>
-
-      <p>OpenRouter 是一個 LLM API 的整合入口：一支 API key 可以呼叫 200+ 模型，包含好幾個免費模型。課堂上我們會用免費的 <em>deepseek 系列</em>讓你不用刷卡就能跑通；課後若要重度使用，建議儲值 Credits 解鎖更穩定的付費 model。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>新分頁開啟 <a href="https://openrouter.ai" target="_blank" rel="noopener">https://openrouter.ai</a></li>
-        <li>右上角「Sign In」→ 用 email 註冊（Google 登入也可以）</li>
-        <li>登入後進入 <strong>Dashboard</strong> → 左側 <strong>Keys</strong></li>
-        <li>點「<strong>Create Key</strong>」→ 名稱隨便（例：<code>hermes-course</code>）→ 建立</li>
-        <li>⚠️ Key 只會顯示一次，<strong>立刻複製</strong>，貼到 Windows 的「記事本」暫存</li>
-        <li>（建議）回 Dashboard 左側點 <strong>Credits</strong>（或直接訪 <a href="https://openrouter.ai/credits" target="_blank" rel="noopener">openrouter.ai/credits</a>）→ 選 <code>$5</code>（新手建議起跳金額）→ 信用卡付款 → 餘額立即更新</li>
-      </ol>
-
-      <h3>建議試用的 model</h3>
-      <p>免費路徑（課堂示範用）跟付費路徑都可以，看你手上有沒有 Credits：</p>
-      <ul>
-        <li><strong>免費</strong>：挑名稱含 <code>deepseek</code> 且標 <code>:free</code> 的（例：<code>deepseek/deepseek-chat:free</code>）</li>
-        <li><strong>付費（推薦）</strong>：<code>deepseek/deepseek-v4-pro</code> 或 <code>minimax/minimax-m2.7</code>——速度與穩定度都明顯比免費 model 好</li>
-      </ul>
-
-      <details>
-        <summary>為什麼需要 API key</summary>
-        <p>API key 等於 hermes 對 OpenRouter 講話的密碼。每次發一句話，OpenRouter 用這把 key 認得是你、扣你帳號的額度。Key 外洩等於別人可以拿來用、花你的錢（雖然這次是免費 model，但養成好習慣不要外流）。</p>
-      </details>
-
-      <details>
-        <summary>免費 model 是什麼意思（以及為什麼建議課後儲值）</summary>
-        <p>OpenRouter 上一些 model（例如 <code>deepseek/deepseek-chat:free</code>、qwen 系列等）標註 <code>:free</code>，背後由提供方贊助、對使用者免費。</p>
-        <p><strong>但有兩個現實限制：</strong></p>
-        <ul>
-          <li><strong>速率限制</strong>：每分鐘只能打幾次，課堂中段可能會被擋</li>
-          <li><strong>回應較不穩定</strong>：偶爾延遲很高、偶爾跳 error，不適合你想真的拿它做事</li>
-        </ul>
-        <p>學會夠用，但**課後想日常使用 hermes 的話，建議儲值 $5 起跳**。OpenRouter 採按量計費（用多少付多少），$5 通常可以撐很久。儲值後就能用 <code>deepseek/deepseek-v4-pro</code>、<code>minimax/minimax-m2.7</code>，或 GPT/Claude/Gemini 等主流付費 model。</p>
-      </details>
-
-      <details>
-        <summary>🚨 我卡住了</summary>
-        <ul>
-          <li><strong>驗證信沒收到</strong> → 等 2–3 分鐘、檢查垃圾信。還是沒有 → 改用 OpenAI 或 Anthropic（要刷卡）</li>
-          <li><strong>不小心關掉 Create Key 視窗，key 沒抄到</strong> → 沒救，回 Keys 頁面砍掉重建一支</li>
-        </ul>
-      </details>
-    </section>
-
-    <section class="step" data-step="4" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 4 / 9 · 重啟 Windows</h2>
-          <p>~5 分鐘</p>
-        </hgroup>
-      </header>
-
-      <p>WSL 安裝完成後 Windows 會要求重新啟動。重啟後 Linux 子系統才會正式可用。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>回到 PowerShell 視窗，確認看到 <strong>「The requested operation is successful. Changes will not be effective until the system is rebooted.」</strong> 或類似訊息</li>
-        <li>儲存所有開著的工作（重啟後不會自動回來）</li>
-        <li>Windows 開始功能表 → 電源 → <strong>重新啟動</strong></li>
-      </ol>
-
-      <details>
-        <summary>離開頁面也沒關係</summary>
-        <p>這個教學頁會自動記得你看到第幾步。重啟完回來、重新打開這個網址，會自動跳回 Step 4，按下一步繼續。</p>
-      </details>
-    </section>
-
-    <section class="step" data-step="5" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 5 / 9 · Ubuntu 首次啟動</h2>
-          <p>~7 分鐘</p>
-        </hgroup>
-      </header>
-
-      <p>重啟後第一次啟動 Ubuntu 會做幾項初始化：建立你的 Linux 帳號、設密碼。這個帳號跟 Windows 帳號完全分開。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>開始功能表搜尋「<strong>Ubuntu</strong>」→ 開啟它</li>
-        <li>等待「<code>Installing, this may take a few minutes</code>」訊息消失</li>
-        <li>看到 <code>Enter new UNIX username:</code> → 打一個小寫、無空白的名字（例：<code>lewsi</code>）按 Enter</li>
-        <li>看到 <code>New password:</code> → 打密碼。<strong>螢幕不會顯示任何字元（連點點都沒有），這是正常的</strong>。打完按 Enter</li>
-        <li>再打一次密碼確認 → 看到 <code>$</code> 提示符就完成了</li>
-        <li>試打三個指令熟悉一下</li>
-      </ol>
-
-      <h3>練習指令</h3>
-      <pre data-copy><code>pwd
-ls
-cd ~</code></pre>
-
-      <details>
-        <summary>Linux 終端機三招</summary>
-        <ul>
-          <li><code>pwd</code> = print working directory，告訴你現在在哪個資料夾</li>
-          <li><code>ls</code> = list，列出當前資料夾內容</li>
-          <li><code>cd ~</code> = change directory，<code>~</code> 是你的家目錄（home）</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary>Linux 密碼為什麼不顯示</summary>
-        <p>Unix 傳統。打字時不顯示任何字元（不像 Windows 顯示星號），是為了讓旁邊的人連密碼長度都看不到。新手第一次都以為鍵盤壞了。</p>
-      </details>
-
-      <details>
-        <summary>🚨 我卡住了</summary>
-        <ul>
-          <li><strong>Username 顯示 invalid</strong> → 不能有大寫、空白、底線開頭。改成全小寫純字母</li>
-          <li><strong>兩次密碼不一樣</strong> → 它會要你重來，沒事</li>
-          <li><strong>Ubuntu app 一直顯示 Installing</strong> → 等到 5 分鐘以上沒動 → 關掉重開（資料不會丟）</li>
-        </ul>
-      </details>
-    </section>
-
-    <section class="step" data-step="6" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 6 / 9 · 安裝 hermes</h2>
-          <p>~15 分鐘（多半在等下載）</p>
-        </hgroup>
-      </header>
-
-      <p>這是整堂課最久的一段。一行 curl 指令會下載官方安裝腳本並立刻執行：裝 uv、建 Python 虛擬環境、把 hermes 裝進去、把 <code>hermes</code> 指令連結到你的 PATH。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>確認你還在 Ubuntu 視窗、看到 <code>$</code> 提示符</li>
-        <li>把下面整行貼進去（在 Ubuntu 終端機是 <strong>Ctrl+Shift+V</strong> 貼上）</li>
-        <li>按 Enter，看著它跑</li>
-        <li>看到 <strong><code>Hermes installed!</code></strong> 訊息就完成（5–10 分鐘）</li>
-      </ol>
-
-      <h3>指令</h3>
-      <pre data-copy><code>curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</code></pre>
-
-      <details>
-        <summary><code>curl | bash</code> 在做什麼？這安全嗎？</summary>
-        <p><code>curl</code> 是「從網路抓檔」的指令；<code>| bash</code> 是「把抓到的內容直接餵給 bash 執行」。</p>
-        <p>等於：<strong>下載一個腳本立刻跑它</strong>。一般情況下這有風險（中間人攻擊或來源不可信），這次因為來源是 hermes 官方 GitHub repo、走 HTTPS、是業界廣泛使用的 quick-install 模式，所以可接受。</p>
-      </details>
-
-      <details>
-        <summary>等下載時可以順便讀：下一步 hermes setup 會問你 4 件事</summary>
-        <ol>
-          <li><strong>Provider</strong>（供應商）→ 選 OpenRouter</li>
-          <li><strong>Model</strong>（模型）→ 選一個有「<code>:free</code>」標籤的 deepseek 模型</li>
-          <li><strong>API Key</strong> → 貼你 Step 3 拿到的 key</li>
-          <li><strong>Tools / Terminal</strong>（工具與終端後端）→ 全部用預設按 Enter 跳過</li>
-        </ol>
-        <p>先看一遍，下一步會比較不慌。</p>
-      </details>
-
-      <details>
-        <summary>🚨 我卡住了</summary>
-        <ul>
-          <li><strong>下載卡 5 分鐘以上沒動</strong> → 正常，繼續等。網速差可能要 10 分鐘</li>
-          <li><strong>SSL certificate problem</strong>（極少）→ 跑 <code>sudo apt update &amp;&amp; sudo apt install -y ca-certificates</code> 後重試</li>
-          <li><strong>結束後跑 <code>hermes</code> 顯示 command not found</strong> → 跑 <code>source ~/.bashrc</code></li>
-        </ul>
-      </details>
-    </section>
-
-    <section class="step" data-step="7" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 7 / 9 · <code>hermes setup</code> 設定精靈</h2>
-          <p>~8 分鐘</p>
-        </hgroup>
-      </header>
-
-      <p><code>hermes setup</code> 是 hermes 官方的設定精靈，會依序問你 provider、model、API key、tools、terminal。我們會選 OpenRouter + 免費 deepseek 模型，其他全部預設。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>先 reload bash 環境，讓系統認得新的 <code>hermes</code> 指令</li>
-      </ol>
-
-      <pre data-copy><code>source ~/.bashrc</code></pre>
-
-      <ol start="2">
-        <li>啟動精靈</li>
-      </ol>
-
-      <pre data-copy><code>hermes setup</code></pre>
-
-      <ol start="3">
-        <li>依下面 5 個提示一個一個填</li>
-      </ol>
-
-      <h3>5 個提示怎麼答</h3>
-      <table>
-        <thead>
-          <tr><th>提示</th><th>選 / 填</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><strong>Choose your provider</strong></td><td>用方向鍵選 <code>openrouter</code>，Enter</td></tr>
-          <tr><td><strong>Choose a model</strong></td><td>免費：挑名稱含 <code>deepseek</code> 且標 <code>:free</code> 的；付費（推薦）：<code>deepseek/deepseek-v4-pro</code> 或 <code>minimax/minimax-m2.7</code>。Enter</td></tr>
-          <tr><td><strong>Enter your API key</strong></td><td>⚠️ <strong>建議手動 key in</strong>（Ubuntu 終端機 paste 偶爾會把 key 截斷或變空白），或先看下面「補救」section 用 script 把 key 寫進 .env。若還是要 paste：Ctrl+Shift+V，Enter</td></tr>
-          <tr><td><strong>Configure tools?</strong></td><td>直接 Enter（預設）</td></tr>
-          <tr><td><strong>Configure terminal backend?</strong></td><td>直接 Enter（預設 = local）</td></tr>
-        </tbody>
-      </table>
-
-      <p>看到 <strong><code>Setup complete!</code></strong> 就成功。</p>
-
-      <details>
-        <summary>每個提示在做什麼</summary>
-        <ul>
-          <li><strong>Provider</strong> = 你要呼叫哪家 LLM API（OpenAI、Anthropic、OpenRouter 等）</li>
-          <li><strong>Model</strong> = 那家底下的哪個模型</li>
-          <li><strong>API key</strong> = 拿來證明「這個請求是我發的」的密碼</li>
-          <li><strong>Tools</strong> = hermes 可以用哪些工具（讀檔、寫檔、執行指令等），先用預設安全</li>
-          <li><strong>Terminal backend</strong> = hermes 開新終端的方式（local = 直接在你 Ubuntu 跑）</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary>🚨 我卡住了</summary>
-        <ul>
-          <li><strong>不小心 Ctrl+C 中斷</strong> → 重跑 <code>hermes setup</code></li>
-          <li><strong>API key 貼進去變空白 / 跑 hermes 出 400 error</strong> → 用下面的補救 script 直接改 <code>~/.hermes/.env</code></li>
-          <li><strong>看不到 <code>:free</code> 模型</strong> → OpenRouter 偶爾會調整 free 列表，挑名字最像的，下一步試了就知道</li>
-        </ul>
-      </details>
-
-      <h3>補救：直接改 hermes 的 .env</h3>
-      <p>hermes 的 API key 存在 <code>~/.hermes/.env</code>。如果 <code>hermes setup</code> 在 TUI 裡 paste 出問題（截斷、變空白），最快的修法是直接 sed 改這支檔案——<strong>不必重跑整個 setup 精靈</strong>。</p>
-      <p><em>此為 hermes 上游官方暫未完全修正 paste 問題的繞行解。下面兩個版本擇一用：</em></p>
-
-      <h4>Variant A · 互動腳本（推薦）</h4>
-      <p>貼 key 進去後自動寫入 .env，避免在 TUI 裡 paste：</p>
-      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your OpenRouter API key: " KEY &amp;&amp; echo &amp;&amp; sed -i "s/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=$KEY/" .env &amp;&amp; unset KEY</code></pre>
-
-      <h4>Variant B · 手動範本</h4>
-      <p>把 <code>YOUR_API_KEY</code> 替換成你的實際 key 再貼進終端機：</p>
-      <pre data-copy><code>cd ~/.hermes &amp;&amp; sed -i 's/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=YOUR_API_KEY/' .env</code></pre>
-
-      <p>跑完任一個之後，下一步直接 <code>hermes</code> 就能對話。</p>
-    </section>
-
-    <section class="step" data-step="8" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 8 / 9 · 第一次對話</h2>
-          <p>~5 分鐘</p>
-        </hgroup>
-      </header>
-
-      <p>所有設定完成。打 <code>hermes</code> 啟動 TUI（文字介面），然後跟它講話。</p>
-
-      <h3>動作</h3>
-      <ol>
-        <li>啟動 hermes</li>
-      </ol>
-
-      <pre data-copy><code>hermes</code></pre>
-
-      <ol start="2">
-        <li>看到 hermes 的 ASCII art 標題 + 輸入框</li>
-        <li>打第一句話試試看，例如：</li>
-      </ol>
-
-      <pre data-copy><code>介紹一下你自己</code></pre>
-
-      <ol start="4">
-        <li>按 Enter，你會看到回應 <strong>一個字一個字浮出來</strong>（streaming）</li>
-        <li>多聊幾句也行</li>
-        <li>結束對話 → 打 <code>/exit</code> 按 Enter，或按 Ctrl+D</li>
-      </ol>
-
-      <details>
-        <summary>什麼是 streaming</summary>
-        <p>LLM 一次產生一個 token（大約一個字或半個詞），生一個吐一個給你看，不用等整段話算完。這就是你看到的「打字機效果」。技術上這是 Server-Sent Events 的 chunked response。</p>
-      </details>
-
-      <details>
-        <summary>常用 hermes 指令</summary>
-        <ul>
-          <li><code>/new</code> 或 <code>/reset</code> — 開新對話（清空當前 context）</li>
-          <li><code>/model</code> — 切換 model</li>
-          <li><code>/exit</code> — 結束</li>
-          <li><code>Ctrl+C</code> — 中斷當前回應（不離開 hermes）</li>
-        </ul>
-      </details>
-
-      <details>
-        <summary>🚨 我卡住了</summary>
-        <ul>
-          <li><strong>跑 <code>hermes</code> 收到 400 / Unauthorized</strong> → API key 沒寫對。最常見原因是 Step 7 在 TUI 裡 paste 時被截斷。回 Step 7 結尾的「補救：直接改 hermes 的 .env」section，跑 Variant A 或 B 任一個，再執行 <code>hermes</code> 即可。<strong>不必重跑 <code>hermes setup</code>。</strong></li>
-          <li><strong>送出後沒回應、卡很久</strong> → 免費模型的速率限制。Ctrl+C 中斷，跑 <code>/model</code> 換另一個 free model</li>
-          <li><strong>顯示亂碼或方框</strong> → Windows Terminal 字型問題。設定 → Profile → Ubuntu → 字型改 <code>Cascadia Code</code> 或 <code>Consolas</code></li>
-          <li><strong>所有設定看起來都對但跑 hermes 出 error</strong> → 跑 <code>hermes doctor</code>，它會告訴你哪邊配置有問題</li>
-        </ul>
-      </details>
-    </section>
-
-    <section class="step" data-step="9" hidden>
-      <header>
-        <hgroup>
-          <h2>Step 9 / 9 · 你做到了 + 下一步</h2>
-          <p>~5 分鐘</p>
-        </hgroup>
-      </header>
-
-      <p>恭喜，4 個 checkpoints 都完成：</p>
-      <ol>
-        <li>✓ WSL2 + Ubuntu 安裝</li>
-        <li>✓ OpenRouter API key</li>
-        <li>✓ hermes-agent 安裝</li>
-        <li>✓ 第一次對話</li>
-      </ol>
-
-      <h3>建議下一步</h3>
-      <ul>
-        <li>把這個頁面 <strong>加書籤</strong>，未來想複習可以隨時回來</li>
-        <li>跑 <code>hermes doctor</code> 做一次體檢，確認所有元件都健康</li>
-        <li>下次課程：把 hermes 接到 LINE 或 Telegram，這樣可以從手機跟它講話</li>
-      </ul>
-
-      <details>
-        <summary>加碼 A：申請 LINE Messaging API channel</summary>
-        <p>Lesson 4 要用，比 Telegram 久一點（~10 分鐘）。</p>
-        <ol>
-          <li>開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers Console</a> → 用 LINE 帳號登入</li>
-          <li>Create new provider → Create a Messaging API channel（名稱、icon 隨意）</li>
-          <li>進 channel：<strong>Basic settings</strong> 分頁複製 <strong>Channel secret</strong>（32 hex 字元）</li>
-          <li><strong>Messaging API</strong> 分頁 Issue <strong>Channel access token</strong>（~170 字元），複製到記事本</li>
-        </ol>
-        <p>✓ 兩個都拿到了？接著進 <a href="lesson-4.html"><strong>Lesson 4 · LINE 整合</strong></a>，把這支 channel 接通到 hermes。</p>
-      </details>
-
-      <details>
-        <summary>加碼 B：申請 Telegram bot</summary>
-        <p>比 LINE 更快，2 分鐘。</p>
-        <ol>
-          <li>在你手機/電腦的 Telegram 開 <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a></li>
-          <li>送 <code>/newbot</code></li>
-          <li>依提示填 bot 顯示名稱、username（必須 <code>_bot</code> 結尾）</li>
-          <li>BotFather 會回一段話，裡面有 <strong>HTTP API token</strong>（一串長字元）</li>
-          <li>複製到記事本</li>
-        </ol>
-        <p>✓ 拿到 token 了？接著進 <a href="lesson-2.html"><strong>Lesson 2 · Telegram 整合</strong></a>，把這支 bot 接通到 hermes。</p>
-      </details>
-
-      <p><em>到這邊就是今天的全部內容。下次見。</em></p>
-    </section>
-
-    <nav id="step-nav" class="container">
-      <button id="prev-btn" type="button">← 上一步</button>
-      <button id="next-btn" type="button" class="primary">下一步 →</button>
-    </nav>
   </main>
 
   <footer class="container">
-    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="mac.html">macOS 版本</a></small>
+    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="CHANGELOG.md">v1.0.0</a></small>
   </footer>
-
-  <script src="wizard.js" defer></script>
 </body>
 </html>

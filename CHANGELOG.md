@@ -2,6 +2,20 @@
 
 本專案遵循 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/) 格式，版號採 [Semantic Versioning](https://semver.org/lang/zh-TW/)。
 
+## [Unreleased]
+
+### Added
+
+- **Course hub landing page (`index.html`)**：列出所有 lesson 的目錄頁，Pico grid 卡片版面（上 2 下 3），不載入 `wizard.js`。學員第一次訪站可直接挑路徑（Windows / macOS / 進階整合）。
+- 每個 lesson 與 macOS 頁的 footer 新增「課程首頁」連結，可從任一頁回到 hub。
+
+### Changed
+
+- **`index.html` 變成 landing hub，原 Lesson 1 內容搬到 `lesson-1.html`**（內容完全不動，含 `<body data-storage-key>` 不變，學員既有 localStorage 進度仍對得上）。
+- 舊 deep link `index.html#step-N` 由新 `index.html` 的 inline `<script>` 重導到 `lesson-1.html#step-N`，舊書籤不會壞。
+- `lesson-2.html` / `lesson-3.html` / `lesson-4.html` / `mac.html` 內所有 `href="index.html"` cross-ref 改為 `lesson-1.html`（含 `#step-7` 補救連結）。
+- README / CLAUDE.md 同步更新檔案結構描述。
+
 ## [1.0.0] - 2026-05-18
 
 首次正式 release。涵蓋 Windows / macOS 安裝路徑 + 三條第三方串接（Telegram、LINE、日常使用），各 lesson 可獨立或依序教學。

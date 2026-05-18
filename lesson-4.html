@@ -97,7 +97,7 @@
         <summary>會用到 3 個 shell window，先預告</summary>
         <p>本堂後半段同時跑 3 個程式：</p>
         <ul>
-          <li><strong>Window A</strong>：你現在這個（給 <code>nano</code>、<code>sed</code>、查 log 用）</li>
+          <li><strong>Window A</strong>：你現在這個（互動腳本、<code>sed</code>、查 log 用）</li>
           <li><strong>Window B</strong>：Step 4 開來跑 <code>ngrok http 8646</code>，保留到課程結束</li>
           <li><strong>Window C</strong>：Step 6 開來跑 <code>hermes gateway run</code>，保留到課程結束</li>
         </ul>
@@ -132,7 +132,7 @@
         <summary>token / secret 安全提醒（重要）</summary>
         <ul>
           <li>三樣都是 <strong>secret</strong>，<strong>不要截圖共享、不要 commit 進 git、不要貼進公開聊天</strong></li>
-          <li>Step 4 填進 <code>.env</code> 時用 <code>nano</code>，<strong>不要</strong> <code>echo</code> 或命令列 paste（避免進 shell history）</li>
+          <li>Step 4 用<strong>互動腳本</strong>把 secret 寫進 <code>.env</code>（值在 read prompt 輸入，<strong>不會進 shell history</strong>）</li>
           <li>若不小心外洩：LINE Console → Channel settings → <em>Issue / reissue</em> 按鈕作廢舊 token、重發新的</li>
         </ul>
       </details>
@@ -439,7 +439,7 @@ LINE_ALLOW_ALL_USERS len=4</code></pre>
         <summary>🚨 啟動就 crash</summary>
         <ul>
           <li><strong>「Missing required env: LINE_CHANNEL_ACCESS_TOKEN」</strong> → Step 4 的 .env 變數名拼錯 / 漏寫，回 Step 4 重 awk verify</li>
-          <li><strong>「Invalid LINE_CHANNEL_SECRET length」</strong> → secret 長度不是 32，回 Step 4 sed 補救</li>
+          <li><strong>「Invalid LINE_CHANNEL_SECRET length」</strong> → secret 長度不是 32，回 Step 4 重跑互動腳本</li>
           <li><strong>「Port 8646 already in use」</strong> → 前一個 gateway 還跑著，<code>hermes gateway stop</code> 或 <code>pkill -f "hermes gateway"</code> 後重跑</li>
         </ul>
       </details>
@@ -454,7 +454,7 @@ LINE_ALLOW_ALL_USERS len=4</code></pre>
       <ul>
         <li><strong>"Status 4xx"</strong> → webhook URL 路徑漏 <code>/line/webhook</code>，回 Step 5 補</li>
         <li><strong>"Signature mismatch"</strong> → Channel Secret 抄錯，回 Step 4 redacted verify 確認 <code>LINE_CHANNEL_SECRET len=32</code></li>
-        <li><strong>"Timeout"</strong> → Window B 的 ngrok 斷了；切到 Window B 看 panel 還在不在；若已斷，<code>Ctrl+C</code> 再重跑 <code>ngrok http 8646</code>，<strong>注意新 URL 跟舊的不同</strong>，回 Step 4 用 sed 補救改 <code>LINE_PUBLIC_URL</code>，然後 LINE Console 也要把 webhook URL 改成新的</li>
+        <li><strong>"Timeout"</strong> → Window B 的 ngrok 斷了；切到 Window B 看 panel 還在不在；若已斷，<code>Ctrl+C</code> 再重跑 <code>ngrok http 8646</code>，<strong>注意新 URL 跟舊的不同</strong>，回 Step 4 重跑互動腳本（會覆蓋舊 <code>LINE_PUBLIC_URL</code> 為新值），然後 LINE Console 也要把 webhook URL 改成新的</li>
       </ul>
 
       <h3>3. 手機 LINE 加 bot 為好友 → 送第一則訊息</h3>

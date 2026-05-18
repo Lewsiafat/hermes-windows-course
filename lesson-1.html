@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hermes macOS 安裝課程</title>
+  <title>Hermes Windows 安裝課程</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-total-steps="7" data-storage-key="hermes-mac-course-step">
+<body data-total-steps="9" data-storage-key="hermes-course-step">
   <header class="container">
     <hgroup>
-      <h1>Hermes 安裝課程 · macOS</h1>
-      <p>30 分鐘從零裝好你的第一個 AI agent</p>
+      <h1>Hermes 安裝課程</h1>
+      <p>60 分鐘從零裝好你的第一個 AI agent</p>
     </hgroup>
     <nav id="progress" aria-label="進度">
-      <span id="progress-text">Step 1 / 7</span>
+      <span id="progress-text">Step 1 / 9</span>
     </nav>
   </header>
 
@@ -23,7 +23,7 @@
       <header>
         <hgroup>
           <h2>前言 · 為什麼選 Hermes Agent</h2>
-          <p>1 分鐘讀完，再決定要不要花 30 分鐘裝它</p>
+          <p>1 分鐘讀完，再決定要不要花 60 分鐘裝它</p>
         </hgroup>
       </header>
 
@@ -55,43 +55,44 @@
         <p><strong>Hermes 的優勢</strong>：由活躍的商業/社群團隊（Nous Research）開發，每天都有大量更新，版本迭代快，有專門社群維護除錯，長期穩定性與支援度比學術專案更有保障。</p>
       </details>
 
-      <h3>非開發者的「現實提醒」</h3>
+      <h3>⚠️ 非開發者的「現實提醒」</h3>
       <p>雖然 Hermes 在比較中勝出，作為非開發者，您仍需有以下心理準備：</p>
       <ul>
-        <li><strong>不是「下載就能用」的手機 App</strong>：本課程帶您在自己的 Mac 上安裝。macOS 本身就是 Unix 系統，不需要額外裝 Linux 子系統，所以整個過程只要約 30 分鐘，需要連續不被打斷的時間。</li>
-        <li><strong>會用到終端機（Terminal），但全程有指令可複製</strong>：您會在 macOS 內建的 Terminal.app 裡貼幾行指令，不需要看懂指令的內容。每個步驟旁都有「Copy」按鈕。</li>
+        <li><strong>不是「下載就能用」的手機 App</strong>：本課程帶您在自己的 Windows 筆電上裝（透過微軟官方的 Linux 子系統 WSL2）。整個過程約 60 分鐘，需要連續不被打斷的時間。</li>
+        <li><strong>會用到終端機（Terminal），但全程有指令可複製</strong>：您會在 PowerShell 和 Ubuntu 終端機裡貼幾行指令，不需要看懂指令的內容。每個步驟旁都有「Copy」按鈕。</li>
         <li><strong>需要自己申請一個 API Key</strong>：用 email 註冊 OpenRouter（免費，不用刷卡），拿到一串密碼貼到 hermes 設定裡。Step 3 會帶您做。</li>
       </ul>
 
       <h3>總結</h3>
       <p>如果您希望擁有一個聰明、能記憶、能串接各種通訊軟體，且未來不會被單一公司綁架的專屬 AI 助理，Hermes Agent 是這四者中最平衡、生態最完整且最友好的選擇。</p>
 
-      <p><em>準備好了？按下「下一步」開始 30 分鐘安裝流程。</em></p>
+      <p><em>準備好了？按下「下一步」開始 60 分鐘安裝流程。</em></p>
     </section>
 
     <section class="step" data-step="1" hidden>
       <header>
         <hgroup>
-          <h2>Step 1 / 7 · 開始之前</h2>
-          <p>大約 30 分鐘，零預備</p>
+          <h2>Step 1 / 9 · 開始之前</h2>
+          <p>大約 60 分鐘，零預備</p>
         </hgroup>
       </header>
 
-      <p>這份教材會帶你從零安裝好 <strong>hermes-agent</strong>——一個可以在你 Mac 裡跟你聊天、執行任務、甚至自己學東西的 AI agent。macOS 本身就是 Unix 系統，所以不需要像 Windows 那樣額外安裝 Linux 子系統，流程更簡潔。</p>
+      <p>這份教材會帶你從零安裝好 <strong>hermes-agent</strong>——一個可以在你筆電裡跟你聊天、執行任務、甚至自己學東西的 AI agent。Hermes 不支援原生 Windows，所以我們會先在 Windows 裡裝一個 Linux 子系統 (WSL2)，再把 hermes 裝進那個 Linux 裡。</p>
 
-      <h3>今天要走完 3 個 checkpoints</h3>
+      <h3>今天要走完 4 個 checkpoints</h3>
       <ol>
-        <li>☐ 確認 Git 安裝</li>
+        <li>☐ 安裝 WSL2 + Ubuntu</li>
         <li>☐ 申請 OpenRouter（免費 LLM API 入口，不需要刷卡）</li>
-        <li>☐ 安裝 hermes-agent 並完成第一次對話</li>
+        <li>☐ 安裝 hermes-agent</li>
+        <li>☐ 完成第一次對話</li>
       </ol>
 
       <h3>準備物</h3>
       <ul>
-        <li>macOS 11 Big Sur 或更新版本</li>
-        <li>Terminal.app（內建，不需要額外安裝）</li>
+        <li>Windows 10（1903 以上）或 Windows 11</li>
+        <li>有管理員權限的帳號</li>
         <li>能收得到 email</li>
-        <li>連續 30 分鐘不被打斷</li>
+        <li>連續 60 分鐘不被打斷</li>
       </ul>
 
       <h3>加碼預告（時間夠才會講）</h3>
@@ -103,55 +104,48 @@
     <section class="step" data-step="2" hidden>
       <header>
         <hgroup>
-          <h2>Step 2 / 7 · 確認 Git 安裝</h2>
-          <p>~3 分鐘</p>
+          <h2>Step 2 / 9 · 啟動 WSL2 安裝</h2>
+          <p>~4 分鐘觸發、之後 5–10 分鐘背景下載</p>
         </hgroup>
       </header>
 
-      <p>Git 是 hermes 安裝腳本的前置條件。好消息：大部分 Mac 已經有 Git 了（來自 Xcode Command Line Tools）。我們先確認一下。</p>
+      <p>WSL = Windows Subsystem for Linux，微軟官方的 Linux 子系統。安裝這條指令會自動下載 WSL 核心 + Ubuntu。</p>
 
       <h3>動作</h3>
       <ol>
-        <li>打開 <strong>Terminal.app</strong>：Spotlight 搜尋（<kbd>Cmd</kbd>+<kbd>Space</kbd>）→ 輸入「Terminal」→ 按 Enter</li>
-        <li>在終端機裡輸入以下指令，按 Enter</li>
+        <li>開始功能表搜尋「<strong>PowerShell</strong>」</li>
+        <li>右鍵 → 「<strong>以系統管理員身分執行</strong>」（藍底白標題會出現）</li>
+        <li>把下面這行貼進去，按 Enter</li>
+        <li>看到下載進度條後，<strong>不要關掉視窗</strong>，繼續往下讀</li>
       </ol>
 
       <h3>指令</h3>
-      <pre data-copy><code>git --version</code></pre>
-
-      <h3>判斷結果</h3>
-      <ul>
-        <li><strong>看到 <code>git version 2.x.x</code></strong> → Git 已安裝，直接跳下一步</li>
-        <li><strong>跳出系統對話框「需要安裝開發者工具」</strong> → 點「<strong>安裝</strong>」，等它跑完（約 2–5 分鐘），完成後再跑一次 <code>git --version</code> 確認</li>
-        <li><strong>沒有對話框也沒有版本號</strong> → 用下面的指令手動觸發安裝</li>
-      </ul>
-
-      <pre data-copy><code>xcode-select --install</code></pre>
+      <pre data-copy><code>wsl --install</code></pre>
 
       <details>
-        <summary>用 Homebrew 安裝 Git（進階替代方案）</summary>
-        <p>如果你已經有 Homebrew（Mac 的套件管理工具），也可以用它裝 Git：</p>
-        <pre data-copy><code>brew install git</code></pre>
-        <p>沒有 Homebrew 的話不用裝，Xcode Command Line Tools 附帶的 Git 就夠用了。</p>
+        <summary>等下載時可以順便讀：殼層 / 終端機 / WSL 是什麼</summary>
+        <p><strong>殼層 (shell)</strong> 是讓你打字命令給作業系統的程式。Windows 的 PowerShell、cmd 都是殼層；Linux 上常見的是 bash、zsh。</p>
+        <p><strong>終端機 (terminal)</strong> 是顯示殼層的視窗。你看到的黑底白字就是終端機。</p>
+        <p><strong>WSL</strong> 把一個完整 Linux 跑在你 Windows 裡（不是虛擬機，效能接近原生）。Hermes 在 Linux 跑，所以我們要它。</p>
       </details>
 
       <details>
-        <summary>什麼是 Xcode Command Line Tools</summary>
-        <p>Apple 把開發者常用的命令列工具（Git、Make、Clang 編譯器等）打包成一個安裝包。你不需要裝完整的 Xcode（那個 12 GB 的大傢伙），只要 Command Line Tools 就好，大約 500 MB。macOS 在你第一次使用這些工具時會自動提示你安裝。</p>
+        <summary>等下載時可以順便做：把下一步要的 OpenRouter 開起來</summary>
+        <p>下載 5–10 分鐘是死時間，可以順手開另一個瀏覽器分頁跑下一步：<a href="#step-3">Step 3 · 申請 OpenRouter API Key</a></p>
       </details>
 
       <details>
-        <summary>什麼是終端機（Terminal）</summary>
-        <p><strong>終端機 (Terminal)</strong> 是讓你用打字的方式跟 Mac 的作業系統溝通的窗口。macOS 內建的 Terminal.app 在「應用程式 → 工具程式」裡，或用 Spotlight（<kbd>Cmd</kbd>+<kbd>Space</kbd>）搜尋 "Terminal" 最快。</p>
-        <p><strong>殼層 (shell)</strong> 是在終端機裡面跑的程式，負責解讀你打的指令。macOS 從 Catalina (10.15) 開始預設用 <strong>zsh</strong>，比較老的 Mac 可能還是 bash。這份教材以 zsh 為主。</p>
-      </details>
-
-      <details>
-        <summary>我卡住了</summary>
+        <summary>🚨 我卡住了</summary>
         <ul>
-          <li><strong><code>xcode-select --install</code> 跳「already installed」</strong> → 表示已經裝過了，跑 <code>git --version</code> 確認即可</li>
-          <li><strong>macOS 版本太舊</strong> → 需要 macOS 11 Big Sur 以上。先升級系統再回來</li>
-          <li><strong>下載超慢</strong> → Apple 伺服器偶爾會慢，等 10 分鐘。可以順手去做下一步（Step 3 申請 OpenRouter）</li>
+          <li><strong>Windows 太舊</strong>（1903 以下）→ 先跑 Windows Update 再回來</li>
+          <li><strong>跳「WSL not enabled」</strong>→ 跑 <code>wsl --install --no-distribution</code> 重啟、再跑 <code>wsl --install -d Ubuntu</code></li>
+          <li><strong>跳「具有所提供名稱的發佈已經存在」</strong>（英文版：<em>A distribution with the supplied name already exists</em>，錯誤碼 <code>Wsl/InstallDistro/ERROR_ALREADY_EXISTS</code>）→ 表示這台機器之前裝過 Ubuntu。
+            <ul>
+              <li>想沿用既有環境：跑 <code>wsl -d Ubuntu</code> 直接啟動，跳到 Step 5。</li>
+              <li>想砍掉重來：<code>wsl --unregister Ubuntu</code> 再 <code>wsl --install -d Ubuntu</code>。<strong>注意：unregister 會清掉舊 Ubuntu 裡的所有檔案，無法還原。</strong></li>
+            </ul>
+          </li>
+          <li><strong>沒有管理員權限</strong>（公司電腦常見）→ 這台機器無法繼續，請改個人電腦</li>
         </ul>
       </details>
     </section>
@@ -159,7 +153,7 @@
     <section class="step" data-step="3" hidden>
       <header>
         <hgroup>
-          <h2>Step 3 / 7 · 申請 OpenRouter API Key</h2>
+          <h2>Step 3 / 9 · 申請 OpenRouter API Key</h2>
           <p>~5 分鐘，純瀏覽器操作</p>
         </hgroup>
       </header>
@@ -172,7 +166,7 @@
         <li>右上角「Sign In」→ 用 email 註冊（Google 登入也可以）</li>
         <li>登入後進入 <strong>Dashboard</strong> → 左側 <strong>Keys</strong></li>
         <li>點「<strong>Create Key</strong>」→ 名稱隨便（例：<code>hermes-course</code>）→ 建立</li>
-        <li>Key 只會顯示一次，<strong>立刻複製</strong>，貼到「備忘錄」或「文字編輯」暫存</li>
+        <li>⚠️ Key 只會顯示一次，<strong>立刻複製</strong>，貼到 Windows 的「記事本」暫存</li>
         <li>（建議）回 Dashboard 左側點 <strong>Credits</strong>（或直接訪 <a href="https://openrouter.ai/credits" target="_blank" rel="noopener">openrouter.ai/credits</a>）→ 選 <code>$5</code>（新手建議起跳金額）→ 信用卡付款 → 餘額立即更新</li>
       </ol>
 
@@ -196,11 +190,11 @@
           <li><strong>速率限制</strong>：每分鐘只能打幾次，課堂中段可能會被擋</li>
           <li><strong>回應較不穩定</strong>：偶爾延遲很高、偶爾跳 error，不適合你想真的拿它做事</li>
         </ul>
-        <p>學會夠用，但<strong>課後想日常使用 hermes 的話，建議儲值 $5 起跳</strong>。OpenRouter 採按量計費（用多少付多少），$5 通常可以撐很久。儲值後就能用 <code>deepseek/deepseek-v4-pro</code>、<code>minimax/minimax-m2.7</code>，或 GPT/Claude/Gemini 等主流付費 model。</p>
+        <p>學會夠用，但**課後想日常使用 hermes 的話，建議儲值 $5 起跳**。OpenRouter 採按量計費（用多少付多少），$5 通常可以撐很久。儲值後就能用 <code>deepseek/deepseek-v4-pro</code>、<code>minimax/minimax-m2.7</code>，或 GPT/Claude/Gemini 等主流付費 model。</p>
       </details>
 
       <details>
-        <summary>我卡住了</summary>
+        <summary>🚨 我卡住了</summary>
         <ul>
           <li><strong>驗證信沒收到</strong> → 等 2–3 分鐘、檢查垃圾信。還是沒有 → 改用 OpenAI 或 Anthropic（要刷卡）</li>
           <li><strong>不小心關掉 Create Key 視窗，key 沒抄到</strong> → 沒救，回 Keys 頁面砍掉重建一支</li>
@@ -211,8 +205,80 @@
     <section class="step" data-step="4" hidden>
       <header>
         <hgroup>
-          <h2>Step 4 / 7 · 安裝 hermes</h2>
-          <p>~10 分鐘（多半在等下載）</p>
+          <h2>Step 4 / 9 · 重啟 Windows</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>WSL 安裝完成後 Windows 會要求重新啟動。重啟後 Linux 子系統才會正式可用。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>回到 PowerShell 視窗，確認看到 <strong>「The requested operation is successful. Changes will not be effective until the system is rebooted.」</strong> 或類似訊息</li>
+        <li>儲存所有開著的工作（重啟後不會自動回來）</li>
+        <li>Windows 開始功能表 → 電源 → <strong>重新啟動</strong></li>
+      </ol>
+
+      <details>
+        <summary>離開頁面也沒關係</summary>
+        <p>這個教學頁會自動記得你看到第幾步。重啟完回來、重新打開這個網址，會自動跳回 Step 4，按下一步繼續。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 9 · Ubuntu 首次啟動</h2>
+          <p>~7 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>重啟後第一次啟動 Ubuntu 會做幾項初始化：建立你的 Linux 帳號、設密碼。這個帳號跟 Windows 帳號完全分開。</p>
+
+      <h3>動作</h3>
+      <ol>
+        <li>開始功能表搜尋「<strong>Ubuntu</strong>」→ 開啟它</li>
+        <li>等待「<code>Installing, this may take a few minutes</code>」訊息消失</li>
+        <li>看到 <code>Enter new UNIX username:</code> → 打一個小寫、無空白的名字（例：<code>lewsi</code>）按 Enter</li>
+        <li>看到 <code>New password:</code> → 打密碼。<strong>螢幕不會顯示任何字元（連點點都沒有），這是正常的</strong>。打完按 Enter</li>
+        <li>再打一次密碼確認 → 看到 <code>$</code> 提示符就完成了</li>
+        <li>試打三個指令熟悉一下</li>
+      </ol>
+
+      <h3>練習指令</h3>
+      <pre data-copy><code>pwd
+ls
+cd ~</code></pre>
+
+      <details>
+        <summary>Linux 終端機三招</summary>
+        <ul>
+          <li><code>pwd</code> = print working directory，告訴你現在在哪個資料夾</li>
+          <li><code>ls</code> = list，列出當前資料夾內容</li>
+          <li><code>cd ~</code> = change directory，<code>~</code> 是你的家目錄（home）</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>Linux 密碼為什麼不顯示</summary>
+        <p>Unix 傳統。打字時不顯示任何字元（不像 Windows 顯示星號），是為了讓旁邊的人連密碼長度都看不到。新手第一次都以為鍵盤壞了。</p>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <ul>
+          <li><strong>Username 顯示 invalid</strong> → 不能有大寫、空白、底線開頭。改成全小寫純字母</li>
+          <li><strong>兩次密碼不一樣</strong> → 它會要你重來，沒事</li>
+          <li><strong>Ubuntu app 一直顯示 Installing</strong> → 等到 5 分鐘以上沒動 → 關掉重開（資料不會丟）</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="step" data-step="6" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 6 / 9 · 安裝 hermes</h2>
+          <p>~15 分鐘（多半在等下載）</p>
         </hgroup>
       </header>
 
@@ -220,8 +286,8 @@
 
       <h3>動作</h3>
       <ol>
-        <li>確認你的 Terminal 視窗還開著、看到 <code>%</code> 或 <code>$</code> 提示符</li>
-        <li>把下面整行貼進去（Mac 終端機用 <strong>Cmd+V</strong> 貼上）</li>
+        <li>確認你還在 Ubuntu 視窗、看到 <code>$</code> 提示符</li>
+        <li>把下面整行貼進去（在 Ubuntu 終端機是 <strong>Ctrl+Shift+V</strong> 貼上）</li>
         <li>按 Enter，看著它跑</li>
         <li>看到 <strong><code>Hermes installed!</code></strong> 訊息就完成（5–10 分鐘）</li>
       </ol>
@@ -236,19 +302,6 @@
       </details>
 
       <details>
-        <summary>安裝腳本會裝哪些東西</summary>
-        <p>hermes 的安裝腳本會自動偵測你的系統，並安裝以下元件（如果還沒有的話）：</p>
-        <ul>
-          <li><strong>uv</strong> — 快速的 Python 套件管理工具</li>
-          <li><strong>Python 3.11</strong> — hermes 的執行環境</li>
-          <li><strong>Node.js 22</strong> — 部分工具需要</li>
-          <li><strong>ripgrep</strong> — 快速檔案搜尋工具</li>
-          <li><strong>ffmpeg</strong> — 音訊/影片處理（語音功能用）</li>
-        </ul>
-        <p>如果你已經有 Homebrew 裝過其中某些，腳本會跳過不重複安裝。</p>
-      </details>
-
-      <details>
         <summary>等下載時可以順便讀：下一步 hermes setup 會問你 4 件事</summary>
         <ol>
           <li><strong>Provider</strong>（供應商）→ 選 OpenRouter</li>
@@ -260,21 +313,20 @@
       </details>
 
       <details>
-        <summary>我卡住了</summary>
+        <summary>🚨 我卡住了</summary>
         <ul>
           <li><strong>下載卡 5 分鐘以上沒動</strong> → 正常，繼續等。網速差可能要 10 分鐘</li>
-          <li><strong>SSL certificate problem</strong>（極少）→ 確認 macOS 版本是最新的，跑一次系統更新</li>
-          <li><strong>結束後跑 <code>hermes</code> 顯示 command not found</strong> → 跑 <code>source ~/.zshrc</code>（如果你用 bash，則跑 <code>source ~/.bash_profile</code>）</li>
-          <li><strong>Permission denied 錯誤</strong> → 可能需要允許終端機存取磁碟：「系統設定 → 隱私權與安全性 → 完整磁碟取用權限」→ 加入 Terminal.app</li>
+          <li><strong>SSL certificate problem</strong>（極少）→ 跑 <code>sudo apt update &amp;&amp; sudo apt install -y ca-certificates</code> 後重試</li>
+          <li><strong>結束後跑 <code>hermes</code> 顯示 command not found</strong> → 跑 <code>source ~/.bashrc</code></li>
         </ul>
       </details>
     </section>
 
-    <section class="step" data-step="5" hidden>
+    <section class="step" data-step="7" hidden>
       <header>
         <hgroup>
-          <h2>Step 5 / 7 · <code>hermes setup</code> 設定精靈</h2>
-          <p>~5 分鐘</p>
+          <h2>Step 7 / 9 · <code>hermes setup</code> 設定精靈</h2>
+          <p>~8 分鐘</p>
         </hgroup>
       </header>
 
@@ -282,12 +334,10 @@
 
       <h3>動作</h3>
       <ol>
-        <li>先 reload shell 環境，讓系統認得新的 <code>hermes</code> 指令</li>
+        <li>先 reload bash 環境，讓系統認得新的 <code>hermes</code> 指令</li>
       </ol>
 
-      <pre data-copy><code>source ~/.zshrc</code></pre>
-
-      <p><em>如果你用 bash（少數情況），改跑 <code>source ~/.bash_profile</code></em></p>
+      <pre data-copy><code>source ~/.bashrc</code></pre>
 
       <ol start="2">
         <li>啟動精靈</li>
@@ -307,7 +357,7 @@
         <tbody>
           <tr><td><strong>Choose your provider</strong></td><td>用方向鍵選 <code>openrouter</code>，Enter</td></tr>
           <tr><td><strong>Choose a model</strong></td><td>免費：挑名稱含 <code>deepseek</code> 且標 <code>:free</code> 的；付費（推薦）：<code>deepseek/deepseek-v4-pro</code> 或 <code>minimax/minimax-m2.7</code>。Enter</td></tr>
-          <tr><td><strong>Enter your API key</strong></td><td>用 <strong>Cmd+V</strong> 貼上你 Step 3 拿到的 key，Enter。Mac 的 Terminal 貼上通常沒問題，不像 Windows WSL 容易截斷</td></tr>
+          <tr><td><strong>Enter your API key</strong></td><td>⚠️ <strong>建議手動 key in</strong>（Ubuntu 終端機 paste 偶爾會把 key 截斷或變空白），或先看下面「補救」section 用 script 把 key 寫進 .env。若還是要 paste：Ctrl+Shift+V，Enter</td></tr>
           <tr><td><strong>Configure tools?</strong></td><td>直接 Enter（預設）</td></tr>
           <tr><td><strong>Configure terminal backend?</strong></td><td>直接 Enter（預設 = local）</td></tr>
         </tbody>
@@ -322,12 +372,12 @@
           <li><strong>Model</strong> = 那家底下的哪個模型</li>
           <li><strong>API key</strong> = 拿來證明「這個請求是我發的」的密碼</li>
           <li><strong>Tools</strong> = hermes 可以用哪些工具（讀檔、寫檔、執行指令等），先用預設安全</li>
-          <li><strong>Terminal backend</strong> = hermes 開新終端的方式（local = 直接在你 Mac 跑）</li>
+          <li><strong>Terminal backend</strong> = hermes 開新終端的方式（local = 直接在你 Ubuntu 跑）</li>
         </ul>
       </details>
 
       <details>
-        <summary>我卡住了</summary>
+        <summary>🚨 我卡住了</summary>
         <ul>
           <li><strong>不小心 Ctrl+C 中斷</strong> → 重跑 <code>hermes setup</code></li>
           <li><strong>API key 貼進去變空白 / 跑 hermes 出 400 error</strong> → 用下面的補救 script 直接改 <code>~/.hermes/.env</code></li>
@@ -337,23 +387,23 @@
 
       <h3>補救：直接改 hermes 的 .env</h3>
       <p>hermes 的 API key 存在 <code>~/.hermes/.env</code>。如果 <code>hermes setup</code> 在 TUI 裡 paste 出問題（截斷、變空白），最快的修法是直接 sed 改這支檔案——<strong>不必重跑整個 setup 精靈</strong>。</p>
-      <p><em>注意：macOS 的 sed 語法跟 Linux 稍有不同，<code>-i</code> 後面必須加一個空字串 <code>''</code>。下面的指令已經幫你處理好了。</em></p>
+      <p><em>此為 hermes 上游官方暫未完全修正 paste 問題的繞行解。下面兩個版本擇一用：</em></p>
 
       <h4>Variant A · 互動腳本（推薦）</h4>
       <p>貼 key 進去後自動寫入 .env，避免在 TUI 裡 paste：</p>
-      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your OpenRouter API key: " KEY &amp;&amp; echo &amp;&amp; sed -i '' "s/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=$KEY/" .env &amp;&amp; unset KEY</code></pre>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; read -sp "Paste your OpenRouter API key: " KEY &amp;&amp; echo &amp;&amp; sed -i "s/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=$KEY/" .env &amp;&amp; unset KEY</code></pre>
 
       <h4>Variant B · 手動範本</h4>
       <p>把 <code>YOUR_API_KEY</code> 替換成你的實際 key 再貼進終端機：</p>
-      <pre data-copy><code>cd ~/.hermes &amp;&amp; sed -i '' 's/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=YOUR_API_KEY/' .env</code></pre>
+      <pre data-copy><code>cd ~/.hermes &amp;&amp; sed -i 's/^OPENROUTER_API_KEY=.*/export OPENROUTER_API_KEY=YOUR_API_KEY/' .env</code></pre>
 
       <p>跑完任一個之後，下一步直接 <code>hermes</code> 就能對話。</p>
     </section>
 
-    <section class="step" data-step="6" hidden>
+    <section class="step" data-step="8" hidden>
       <header>
         <hgroup>
-          <h2>Step 6 / 7 · 第一次對話</h2>
+          <h2>Step 8 / 9 · 第一次對話</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
@@ -377,7 +427,7 @@
       <ol start="4">
         <li>按 Enter，你會看到回應 <strong>一個字一個字浮出來</strong>（streaming）</li>
         <li>多聊幾句也行</li>
-        <li>結束對話 → 打 <code>/exit</code> 按 Enter，或按 <kbd>Ctrl</kbd>+<kbd>D</kbd></li>
+        <li>結束對話 → 打 <code>/exit</code> 按 Enter，或按 Ctrl+D</li>
       </ol>
 
       <details>
@@ -396,28 +446,30 @@
       </details>
 
       <details>
-        <summary>我卡住了</summary>
+        <summary>🚨 我卡住了</summary>
         <ul>
-          <li><strong>跑 <code>hermes</code> 收到 400 / Unauthorized</strong> → API key 沒寫對。最常見原因是 Step 5 在 TUI 裡 paste 時被截斷。回 Step 5 結尾的「補救：直接改 hermes 的 .env」section，跑 Variant A 或 B 任一個，再執行 <code>hermes</code> 即可。<strong>不必重跑 <code>hermes setup</code>。</strong></li>
-          <li><strong>送出後沒回應、卡很久</strong> → 免費模型的速率限制。<kbd>Ctrl</kbd>+<kbd>C</kbd> 中斷，跑 <code>/model</code> 換另一個 free model</li>
+          <li><strong>跑 <code>hermes</code> 收到 400 / Unauthorized</strong> → API key 沒寫對。最常見原因是 Step 7 在 TUI 裡 paste 時被截斷。回 Step 7 結尾的「補救：直接改 hermes 的 .env」section，跑 Variant A 或 B 任一個，再執行 <code>hermes</code> 即可。<strong>不必重跑 <code>hermes setup</code>。</strong></li>
+          <li><strong>送出後沒回應、卡很久</strong> → 免費模型的速率限制。Ctrl+C 中斷，跑 <code>/model</code> 換另一個 free model</li>
+          <li><strong>顯示亂碼或方框</strong> → Windows Terminal 字型問題。設定 → Profile → Ubuntu → 字型改 <code>Cascadia Code</code> 或 <code>Consolas</code></li>
           <li><strong>所有設定看起來都對但跑 hermes 出 error</strong> → 跑 <code>hermes doctor</code>，它會告訴你哪邊配置有問題</li>
         </ul>
       </details>
     </section>
 
-    <section class="step" data-step="7" hidden>
+    <section class="step" data-step="9" hidden>
       <header>
         <hgroup>
-          <h2>Step 7 / 7 · 你做到了 + 下一步</h2>
-          <p>~2 分鐘</p>
+          <h2>Step 9 / 9 · 你做到了 + 下一步</h2>
+          <p>~5 分鐘</p>
         </hgroup>
       </header>
 
-      <p>恭喜，3 個 checkpoints 都完成：</p>
+      <p>恭喜，4 個 checkpoints 都完成：</p>
       <ol>
-        <li>Git 確認安裝</li>
-        <li>OpenRouter API key</li>
-        <li>hermes-agent 安裝 + 第一次對話</li>
+        <li>✓ WSL2 + Ubuntu 安裝</li>
+        <li>✓ OpenRouter API key</li>
+        <li>✓ hermes-agent 安裝</li>
+        <li>✓ 第一次對話</li>
       </ol>
 
       <h3>建議下一步</h3>
@@ -434,9 +486,9 @@
           <li>開 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener">LINE Developers Console</a> → 用 LINE 帳號登入</li>
           <li>Create new provider → Create a Messaging API channel（名稱、icon 隨意）</li>
           <li>進 channel：<strong>Basic settings</strong> 分頁複製 <strong>Channel secret</strong>（32 hex 字元）</li>
-          <li><strong>Messaging API</strong> 分頁 Issue <strong>Channel access token</strong>（~170 字元），複製到備忘錄</li>
+          <li><strong>Messaging API</strong> 分頁 Issue <strong>Channel access token</strong>（~170 字元），複製到記事本</li>
         </ol>
-        <p>兩個都拿到了？接著進 <a href="lesson-4.html"><strong>Lesson 4 · LINE 整合</strong></a>，把這支 channel 接通到 hermes。</p>
+        <p>✓ 兩個都拿到了？接著進 <a href="lesson-4.html"><strong>Lesson 4 · LINE 整合</strong></a>，把這支 channel 接通到 hermes。</p>
       </details>
 
       <details>
@@ -447,9 +499,9 @@
           <li>送 <code>/newbot</code></li>
           <li>依提示填 bot 顯示名稱、username（必須 <code>_bot</code> 結尾）</li>
           <li>BotFather 會回一段話，裡面有 <strong>HTTP API token</strong>（一串長字元）</li>
-          <li>複製到備忘錄</li>
+          <li>複製到記事本</li>
         </ol>
-        <p>拿到 token 了？接著進 <a href="lesson-2.html"><strong>Lesson 2 · Telegram 整合</strong></a>，把這支 bot 接通到 hermes。</p>
+        <p>✓ 拿到 token 了？接著進 <a href="lesson-2.html"><strong>Lesson 2 · Telegram 整合</strong></a>，把這支 bot 接通到 hermes。</p>
       </details>
 
       <p><em>到這邊就是今天的全部內容。下次見。</em></p>
@@ -462,7 +514,7 @@
   </main>
 
   <footer class="container">
-    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="index.html">課程首頁</a> · <a href="lesson-1.html">Windows 版本</a></small>
+    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="index.html">課程首頁</a> · <a href="mac.html">macOS 版本</a></small>
   </footer>
 
   <script src="wizard.js" defer></script>

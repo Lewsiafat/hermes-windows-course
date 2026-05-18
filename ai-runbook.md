@@ -739,7 +739,7 @@ curl -fsI https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scrip
 **FAIL 處理:**
 - 若 404 / 403：去 `https://github.com/NousResearch/hermes-agent` 找新的 install.sh URL（可能在 `scripts/` 或 `docs/` 下）
 - 找到後 → 更新 repo 三處：
-  - `index.html` 的 Step 6 指令塊
+  - `lesson-1.html` 的 Step 6 指令塊
   - `pre-class-checklist.md` Check 1 的 URL
   - 本檔 (`ai-runbook.md`) Stage 6 與 Check 1 的 URL
 - commit、push
@@ -770,7 +770,7 @@ curl -fsI https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scrip
 **FAIL 處理:**
 - 順序變了 → 重跑 Part 1 Stage 7，覆蓋 step-7-*.png 5 張
 - 完全沒有 `:free` deepseek → 找 OpenRouter 上仍存在的任何 `:free` model（用瀏覽器去 https://openrouter.ai/models 過濾 free）
-- 提示數變動（多 / 少於 5）→ 對應更新 `index.html` Step 7 表格（plan §6.2 第 7 task）
+- 提示數變動（多 / 少於 5）→ 對應更新 `lesson-1.html` Step 7 表格（plan §6.2 第 7 task）
 - 完全壞掉、wizard 不啟動 → hermes-agent 大改版，整個課程要重評，**停止其他教學前 smoke test**
 
 ---
@@ -794,9 +794,9 @@ curl -fsI https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scrip
 
 **FAIL 處理:**
 - UI 重大改版 → 重跑 Part 1 Stage 3，覆蓋 step-3-*.png
-- Keys 改名 / 路由變 → 對應更新 `index.html` Step 3 動作清單
+- Keys 改名 / 路由變 → 對應更新 `lesson-1.html` Step 3 動作清單
 - Credits 入口變 → 更新 Step 3 第 6 個動作（儲值）的指路文字
-- 推薦付費 model 任一下架 → **必須**改 `index.html` 中 Step 3 與 Step 7 兩處的 model ID 字串
+- 推薦付費 model 任一下架 → **必須**改 `lesson-1.html` 中 Step 3 與 Step 7 兩處的 model ID 字串
 
 ---
 
@@ -812,7 +812,7 @@ ls ~/.hermes/.env && grep '^OPENROUTER_API_KEY=' ~/.hermes/.env
 **EXPECTED:** 檔案存在、grep 命中 1 行。
 
 **FAIL 處理:**
-- 檔案路徑變了 → 改 `index.html` Step 7 補救 section 的兩段 sed（Variant A / B）的 `cd ~/.hermes` 與 Step 8 的 cross-ref 文字。
+- 檔案路徑變了 → 改 `lesson-1.html` Step 7 補救 section 的兩段 sed（Variant A / B）的 `cd ~/.hermes` 與 Step 8 的 cross-ref 文字。
 - 變數名變了（例如改成 `OPENROUTER_KEY=`）→ 改兩段 sed 的 pattern。
 - 整個 .env 不見了（hermes 改成別的儲存方式）→ 補救 section 整個重寫。
 

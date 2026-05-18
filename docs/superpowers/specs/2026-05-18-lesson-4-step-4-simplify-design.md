@@ -43,23 +43,27 @@ Lesson 4 上線後 review 發現 Step 4 對零技術背景學員 cognitive load 
 
 文案：「下面這段會問你三個值（token / secret / URL），自動寫進 `~/.hermes/.env`。Token / secret 輸入時不會回顯，看不到字也是有打進去。」
 
-互動腳本（語義同原 Variant A，僅用 `\` 斷行成 10 行可讀）：
+互動腳本（**用 `bash <<'BASH' ... BASH` heredoc 強制 fork 進 bash subshell**，read 後加 `</dev/tty` 從終端讀，不管學員 default shell 是 bash / zsh / fish 都能跑）：
 
 ```bash
-cd ~/.hermes && \
-  read -sp "Paste LINE Channel Access Token: " TOKEN && echo && \
-  read -sp "Paste LINE Channel Secret: "        SECRET && echo && \
-  read -p  "Paste ngrok HTTPS URL: "            PUBURL && \
-  { grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' >> .env;
-    grep -q '^LINE_CHANNEL_SECRET='       .env || echo 'LINE_CHANNEL_SECRET='       >> .env;
-    grep -q '^LINE_PUBLIC_URL='           .env || echo 'LINE_PUBLIC_URL='           >> .env;
-    grep -q '^LINE_ALLOWED_USERS='        .env || echo 'LINE_ALLOWED_USERS='        >> .env;
-    grep -q '^LINE_ALLOW_ALL_USERS='      .env || echo 'LINE_ALLOW_ALL_USERS=true'  >> .env; } && \
-  sed -i "s|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=$TOKEN|" .env && \
-  sed -i "s|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=$SECRET|"            .env && \
-  sed -i "s|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=$PUBURL|"                    .env && \
-  unset TOKEN SECRET PUBURL
+bash <<'BASH'
+set -euo pipefail
+cd ~/.hermes
+read -sp "Paste LINE Channel Access Token: " TOKEN </dev/tty && echo
+read -sp "Paste LINE Channel Secret: "        SECRET </dev/tty && echo
+read -p  "Paste ngrok HTTPS URL: "            PUBURL </dev/tty
+grep -q '^LINE_CHANNEL_ACCESS_TOKEN=' .env || echo 'LINE_CHANNEL_ACCESS_TOKEN=' >> .env
+grep -q '^LINE_CHANNEL_SECRET='       .env || echo 'LINE_CHANNEL_SECRET='       >> .env
+grep -q '^LINE_PUBLIC_URL='           .env || echo 'LINE_PUBLIC_URL='           >> .env
+grep -q '^LINE_ALLOWED_USERS='        .env || echo 'LINE_ALLOWED_USERS='        >> .env
+grep -q '^LINE_ALLOW_ALL_USERS='      .env || echo 'LINE_ALLOW_ALL_USERS=true'  >> .env
+sed -i "s|^LINE_CHANNEL_ACCESS_TOKEN=.*|LINE_CHANNEL_ACCESS_TOKEN=$TOKEN|" .env
+sed -i "s|^LINE_CHANNEL_SECRET=.*|LINE_CHANNEL_SECRET=$SECRET|"            .env
+sed -i "s|^LINE_PUBLIC_URL=.*|LINE_PUBLIC_URL=$PUBURL|"                    .env
+BASH
 ```
+
+已實測（2026-05-18，zsh default shell VPS 互動測過）：三個 prompt 依序出現、token / secret 不回顯、URL 回顯、awk redacted verify 長度全對。
 
 保留：「為什麼 `LINE_ALLOWED_USERS=` 留空 + `LINE_ALLOW_ALL_USERS=true`」`<details>` 教育性區塊。
 
@@ -75,7 +79,7 @@ cd ~/.hermes && \
 | `<h3>` 補救：用 sed 直接改 .env（章節標題） | 移除（內容升為主流程）|
 | `<h4>` Variant A · 互動腳本 | 內容升為 Sub-step 2 |
 | `<h4>` Variant B · 手動範本 | 整段移除 |
-| `<details>` 「變數完全沒列出來」troubleshoot | 重寫：移除 nano reference、改成「若腳本中途 Ctrl+C 或網路斷，重跑一次即可」|
+| `<details>` 「變數完全沒列出來」troubleshoot | 重寫：移除 nano reference；改成兩條：(1) 若腳本中途 Ctrl+C 中斷 → 重跑一次即可（idempotent，`set -e` 已避免半寫狀態）；(2) 若看到 `/dev/tty: No such device or address`（罕見，例如 `ssh user@host '...'` 非互動執行）→ 改用互動 ssh `ssh -t user@host` 重連 |
 
 ## 配套更新
 
@@ -88,6 +92,21 @@ cd ~/.hermes && \
 
 ### `pre-class-checklist.md`
 盤點 Lesson 4 必檢項是否引用 Step 4 nano 流程；若有則更新（目前看似只引用 Step 2、Step 3 外部依賴，不引用 Step 4 內部）。
+
+## 設計決策：為什麼用 `bash <<'BASH' ... BASH` heredoc 包裝
+
+| 元素 | 為什麼 |
+|---|---|
+| `bash <<'BASH'` heredoc + single-quoted `'BASH'` delimiter | 強制 fork 進 bash subshell；single quote 阻止外層 shell 展開 `$TOKEN` / `$SECRET` / `$PUBURL`，由 bash 而非 zsh 解釋。zsh 的 `read -p` 是 "read from coprocess" 不是 prompt，原版直接 paste 會壞（已重現 `read: -p: no coprocess`）。 |
+| `</dev/tty` 在每個 read 後面 | heredoc 用掉 stdin，read 不指定來源會把 heredoc 內容當輸入消耗。`</dev/tty` 把 read 改成從終端鍵盤讀。 |
+| `set -euo pipefail` 在 heredoc 開頭 | read 被 Ctrl+C 中斷時整段中止；避免空 `$TOKEN` 跑進後續 sed 把 .env 既有值清掉。 |
+| 拿掉原版的 `unset TOKEN SECRET PUBURL` | 變數在 subshell 結束時自動消失，不需要顯式 unset。 |
+| 拿掉行間 `&&` chaining | `set -e` 已提供同等保護，視覺更乾淨。 |
+
+**為什麼選 heredoc 包裝而非「教學員先打 `bash` 切過去」**：
+- 透明（一段命令解決，學員不用記「我現在在哪個 shell」）
+- 不依賴學員 default shell 設定
+- 跟 lesson 假設「學員照 Lesson 1+2 走過來」一致：Lesson 1+2 是 bash，Lesson 4 的這段也用 bash，但用 heredoc 包起來就**不需要假設**，更穩
 
 ## 不違反的 CLAUDE.md 條款
 
@@ -102,6 +121,7 @@ cd ~/.hermes && \
 2. Step 4 內找不到 `nano` 字串（troubleshoot 提到「以前需要 nano」不算）
 3. Step 4 內找不到 `Variant A` / `Variant B` 文字
 4. 互動腳本以 `<pre data-copy>` 標記，可一鍵複製
-5. Step 6 內部 cross-ref 已改為指向「重跑互動腳本」，不再說「sed 補救」
-6. `ai-runbook.md` Stage 21 命令與主教材對齊
-7. 線上版 deploy 後手動測一次：互動腳本三個 paste → awk verify 長度正確 → Step 5 webhook Verify 通過（課堂 dogfood）
+5. 互動腳本內含 `bash <<'BASH'` 開頭、`set -euo pipefail`、`</dev/tty` 三個關鍵元素（不管 default shell 為何都能跑）
+6. Step 6 內部 cross-ref 已改為指向「重跑互動腳本」，不再說「sed 補救」
+7. `ai-runbook.md` Stage 21 命令與主教材對齊
+8. 線上版 deploy 後手動測一次：在 zsh + bash 兩種 default shell 下分別 paste → 三個 prompt 正常 → awk verify 長度正確 → Step 5 webhook Verify 通過（課堂 dogfood）

@@ -27,6 +27,10 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 
 不需要 `npm install`、不需要起任何 dev server。Pico CSS 從 jsdelivr CDN 載入。
 
+### Release
+
+版本記錄在 `CHANGELOG.md`（Keep a Changelog 格式），對應 git annotated tag `vX.Y.Z`。Semver：lesson 新增 / 大改 = minor，bug fix / 文字修正 = patch。release 時 README.md 的「目前版本」連結要一併更新。
+
 ## 架構重點（big picture）
 
 ### 精靈的運作（Step 0 + 9 個安裝步驟）

@@ -307,12 +307,36 @@
       <pre><code>✓ Skill written to ~/.hermes/skills/productivity/⟨your-skill-name⟩/SKILL.md
 Restart hermes to use it.</code></pre>
 
-      <h3>5. 重啟 gateway 讓新 skill 生效</h3>
-      <p>對 hermes 講：</p>
-      <pre data-copy><code>重啟 gateway 讓新 skill 生效。</code></pre>
+      <h3>5. 讓新 skill 生效</h3>
+      <p>有兩種方式，擇一：</p>
 
-      <p>或直接 WSL 跑：</p>
-      <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+      <table>
+        <thead><tr><th>方式</th><th>指令</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>立即載入</strong>（不重啟）</td>
+            <td><code>/reload-skills</code></td>
+            <td>重新掃描 <code>~/.hermes/skills/</code>，當前 session 馬上可用</td>
+          </tr>
+          <tr>
+            <td><strong>新 session 自動生效</strong></td>
+            <td><code>/new</code></td>
+            <td>開新對話時技能自動載入，無需任何重啟</td>
+          </tr>
+          <tr>
+            <td>載入指定 skill</td>
+            <td><code>/skill &lt;技能名稱&gt;</code></td>
+            <td>只載入單一技能到目前 session</td>
+          </tr>
+          <tr>
+            <td>重啟 gateway（fallback）</td>
+            <td><code>sudo $(which hermes) gateway restart --system</code></td>
+            <td>上面方式都沒用才考慮</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>最快的做法：直接傳 <code>/new</code> 開新對話，skill 就會自動載入。</p>
 
       <h3>6. 用你造的 skill</h3>
       <p>在 hermes CLI 或 Telegram bot 跑：</p>

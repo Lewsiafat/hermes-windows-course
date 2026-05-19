@@ -604,6 +604,43 @@ LINE_ALLOW_ALL_USERS=false</code></pre>
         <pre data-copy><code>tail -f ~/.hermes/logs/gateway.log</code></pre>
       </details>
 
+      <details open>
+        <summary>🌐 哪裡找安全可信的 Skill</summary>
+        <p>hermes skill 就是一份 SKILL.md 文字檔，只要來源可信就安全。以下幾個地方是社群公認靠譜的：</p>
+
+        <table>
+          <thead>
+            <tr><th>來源</th><th>連結</th><th>說明</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🏛️ <strong>Anthropic 官方</strong></td>
+              <td><a href="https://github.com/anthropics/skills" target="_blank" rel="noopener">github.com/anthropics/skills</a></td>
+              <td>skill-creator 就在這裡；官方維護，最安全</td>
+            </tr>
+            <tr>
+              <td>🛒 <strong>agentskills.io</strong></td>
+              <td><a href="https://agentskills.io" target="_blank" rel="noopener">agentskills.io</a></td>
+              <td>社群 skill 市集，可依類別瀏覽、看評分再裝</td>
+            </tr>
+            <tr>
+              <td>🔍 <strong>GitHub Topic</strong></td>
+              <td><a href="https://github.com/topics/hermes-skill" target="_blank" rel="noopener">github.com/topics/hermes-skill</a></td>
+              <td>搜尋 <code>hermes-skill</code> tag，看 star 數 + 最後更新日期判斷品質</td>
+            </tr>
+            <tr>
+              <td>📦 <strong>hermes 內建</strong></td>
+              <td>TUI 跑 <code>/skills list</code></td>
+              <td>hermes 預裝的 bundled skills，不用安裝直接用</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <blockquote>
+          <strong>安全原則</strong>：裝 skill 前先看 SKILL.md 內容——它只是純文字指令，沒有可執行程式碼（除非 <code>scripts/</code> 目錄有 Python helper，看清楚再裝）。不明來源的 skill 建議先在 TUI 測試，確認行為正常再接 Telegram / LINE。
+        </blockquote>
+      </details>
+
       <p><em>到這邊就是 Lesson 4 全部內容。下次見。</em></p>
     </section>
 

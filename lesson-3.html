@@ -60,6 +60,12 @@
       <details>
         <summary>必備：先做完 Lesson 1 + Lesson 2</summary>
         <p>還沒做過？先回 <a href="lesson-1.html">Lesson 1（安裝 hermes）</a> 或 <a href="lesson-2.html">Lesson 2（接 Telegram）</a>。Lesson 3 假設你的 Telegram bot 仍在跑、<code>hermes gateway</code> 也仍在跑、教學場景的 hermes model 是付費的（free model 對話式設定 cron / 裝 skill 可能不會主動推理出該做的動作，得 fallback 到 slash command 手動跑）。</p>
+        <p><strong>切換 provider / model</strong>：在 Telegram bot 或 TUI 傳 <code>/model</code> 查目前模型；傳 <code>/model provider:model-name</code> 切換，例如：</p>
+        <ul>
+          <li><code>/model openrouter:deepseek/deepseek-r1-distill-llama-70b:free</code> → 免費模型</li>
+          <li><code>/model anthropic:claude-sonnet-4</code> → 付費模型（建議用於 cron / skill 設定）</li>
+        </ul>
+        <p>要新增 provider（首次設定 API key）需退出 chat，在 WSL 終端機跑 <code>hermes model</code>。</p>
         <p>不依賴 Lesson 4（LINE）— 想學 LINE 整合可平行另開 <a href="lesson-4.html">Lesson 4</a>，先後順序隨便。</p>
       </details>
     </section>
@@ -116,71 +122,69 @@
         </hgroup>
       </header>
 
-      <p>cron 是 hermes 內建的排程能力，<strong>用對話講要它幾點跑什麼，hermes 自己會把設定寫到 <code>~/.hermes/cron.yaml</code></strong>。這堂用「2 分鐘後一次性測試」先驗一次，看到 Telegram 真的收到，再改成永久排程。</p>
+      <p>cron 是 hermes 內建的排程能力，<strong>用對話講要它幾點跑什麼，hermes 自己會把設定寫到 <code>~/.hermes/cron/jobs.json</code></strong>（在你的 WSL Ubuntu 主機上）。這堂用「5 分鐘後一次性測試」先驗一次，看到 Telegram 真的收到，再改成永久排程。</p>
 
-      <h3>1. 對 hermes 講「2 分鐘後跑這個」</h3>
-      <p>在你的 hermes CLI（或 Telegram bot）貼下面這段：</p>
-      <pre data-copy><code>幫我設一個 cron job，2 分鐘後跑一次，內容：
-- 台北今日天氣
-- 今天台北會下雨嗎
-- 昨天 SP500 收盤指數
-把整理後的結果推到我的 Telegram。</code></pre>
+      <blockquote>
+        <strong>📁 cron 設定檔位置</strong>：<code>~/.hermes/cron/jobs.json</code>（WSL Ubuntu 主機，不在容器內）。hermes 會幫你寫，不用手寫 json。
+      </blockquote>
+
+      <h3>1. 對 hermes 講「5 分鐘後提醒我」</h3>
+      <p>在你的 hermes TUI（或 Telegram bot）貼下面這段：</p>
+      <pre data-copy><code>幫我設一個 cron job，5 分鐘後跑一次，推訊息到 Telegram 說：「該去睡覺了！」</code></pre>
 
       <p>hermes 應該會：</p>
       <ol>
-        <li>幫你算出 2 分鐘後的 cron 表達式</li>
-        <li>把設定寫進 <code>~/.hermes/cron.yaml</code></li>
+        <li>幫你算出 5 分鐘後的 cron 表達式</li>
+        <li>把設定寫進 <code>~/.hermes/cron/jobs.json</code></li>
         <li>重新載入 gateway（或叫你重啟）</li>
-        <li>回覆「已設定，2 分鐘後會自動跑」之類</li>
+        <li>回覆「已設定，5 分鐘後會自動跑」之類</li>
       </ol>
 
-      <h3>2. 等 2 分鐘</h3>
+      <h3>2. 等 5 分鐘</h3>
       <p>等下發送時，順便讀一下「cron 還能做什麼」：</p>
       <ul>
         <li>每天早上 7:00 推今日重點任務（你 Step 4 造的 skill 就可以串進來）</li>
         <li>每週日整理本週開過的 issue 變成 weekly review</li>
         <li>每月 1 號自動列上個月所有日記摘要</li>
       </ul>
-      <p>每一條都是「對 hermes 講一句」就能設定，不用手寫 yaml。</p>
+      <p>每一條都是「對 hermes 講一句」就能設定，不用手寫 json。</p>
 
       <h3>3. Telegram 收到了嗎</h3>
-      <p>2 分鐘到時，看你的 Telegram bot。應該會推一條訊息，內含三件事：</p>
+      <p>5 分鐘到時，看你的 Telegram bot。應該收到：</p>
       <ul>
-        <li>台北今日天氣（溫度 / 狀態）</li>
-        <li>今天會不會下雨</li>
-        <li>昨天 SP500 收盤指數</li>
+        <li>「該去睡覺了！」</li>
       </ul>
 
-      <p>✓ Telegram 收到 ⟨天氣 + 降雨 + SP500⟩ 推送 → <strong>checkpoint 2 完成</strong>。</p>
+      <p>✓ Telegram 收到推送 → <strong>checkpoint 2 完成</strong>。</p>
 
       <h3>4. 改成永久排程：每天 7:00 自動跑</h3>
       <p>對 hermes 再講一句：</p>
       <pre data-copy><code>把剛剛那個 cron 改成每天早上 7:00 跑，永久排程。</code></pre>
 
-      <p>hermes 會更新 <code>~/.hermes/cron.yaml</code>。明天 7:00 你的 Telegram bot 就會主動傳這份摘要過來。</p>
+      <p>hermes 會更新 <code>~/.hermes/cron/jobs.json</code>。明天 7:00 你的 Telegram bot 就會主動傳訊息過來。</p>
 
       <h3>5. 驗證設定真的存在</h3>
       <p>對 hermes 講：</p>
       <pre data-copy><code>列出我目前的 cron 排程。</code></pre>
 
       <p>應該看到剛剛設的 daily 7:00 job。也可以 WSL 直接看：</p>
-      <pre data-copy><code>cat ~/.hermes/cron.yaml</code></pre>
+      <pre data-copy><code>cat ~/.hermes/cron/jobs.json</code></pre>
 
       <details>
         <summary>🚨 我卡住了</summary>
-        <h4>2 分鐘到了 Telegram 沒收到</h4>
+        <h4>5 分鐘到了 Telegram 沒收到</h4>
         <p>多半是 gateway 沒拿到新 cron。處置：</p>
         <ol>
           <li><code>sudo $(which hermes) gateway restart --system</code> 重啟</li>
           <li><code>tail -n 50 ~/.hermes/logs/gateway.log</code> 看有沒有錯誤</li>
-          <li>確認 <code>~/.hermes/cron.yaml</code> 真的有內容（<code>cat ~/.hermes/cron.yaml</code>）</li>
+          <li>確認 <code>~/.hermes/cron/jobs.json</code> 真的有內容（<code>cat ~/.hermes/cron/jobs.json</code>）</li>
         </ol>
 
-        <h4>hermes 沒主動寫 cron.yaml</h4>
-        <p>免費 model 推理力可能不足，沒推出該寫檔。處置：對它講更明確「<strong>請編輯 <code>~/.hermes/cron.yaml</code>，加入剛才那條 cron job</strong>」，把 file path 直接點出來。</p>
+        <h4>hermes 沒主動寫 jobs.json</h4>
+        <p>免費 model 推理力可能不足，沒推出該寫檔。處置：對它講更明確「<strong>請編輯 <code>~/.hermes/cron/jobs.json</code>，加入剛才那條 cron job</strong>」，把 file path 直接點出來。</p>
 
-        <h4>收到的內容很奇怪（缺資料、數字錯）</h4>
-        <p>那是 hermes 的 web / tool use 議題、不是 cron 議題。可以接受、或對 hermes 講「再跑一次剛才那個 cron 內容，這次補上 SP500 的數字」。</p>
+        <h4>收到的內容很奇怪</h4>
+        <p>那是 hermes 的 tool use 議題、不是 cron 議題。對 hermes 講「再跑一次剛才那個 cron 內容」即可。</p>
       </details>
     </section>
 
@@ -369,7 +373,7 @@ Restart hermes to use it.</code></pre>
         <p>對 hermes 講：</p>
         <pre data-copy><code>把剛才造的 ⟨your-skill-name⟩ 串到 cron，每天早上 7:00 自動跑、結果推到 Telegram。</code></pre>
 
-        <p>hermes 會更新 <code>~/.hermes/cron.yaml</code> 加新 job。明天 7:00 看 Telegram 應該主動推 skill 輸出。</p>
+        <p>hermes 會更新 <code>~/.hermes/cron/jobs.json</code> 加新 job。明天 7:00 看 Telegram 應該主動推 skill 輸出。</p>
       </details>
 
       <details>

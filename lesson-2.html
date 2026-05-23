@@ -418,13 +418,107 @@
       </ul>
 
       <details>
-        <summary>加碼 1：把 bot 加到 Telegram 群組</summary>
-        <p>讓多人都能跟同一支 hermes 講話：</p>
+        <summary>加碼 1：私訊（DM）vs 群組——兩種模式比較</summary>
+        <p>hermes bot 支援兩種對話情境，行為稍有不同：</p>
+        <table>
+          <thead><tr><th>項目</th><th>DM（私訊）</th><th>群組（Group）</th></tr></thead>
+          <tbody>
+            <tr><td>觸發方式</td><td>直接傳訊即可</td><td>預設需要 @ 提及 bot（見加碼 3）</td></tr>
+            <tr><td>Context</td><td>每個人獨立 session</td><td>同一群組 session，大家共用</td></tr>
+            <tr><td>隱私</td><td>只有你跟 hermes 看得到</td><td>所有群組成員都看得到</td></tr>
+            <tr><td>適合情境</td><td>個人助理、私人任務</td><td>團隊協作、共同查詢</td></tr>
+            <tr><td>allowlist</td><td>要填 → 只有名單內的人可對話</td><td>要填 → 群組每個人都要加進名單</td></tr>
+          </tbody>
+        </table>
+        <p>💡 建議先用 DM 熟悉 hermes，再把 bot 加進群組——群組 context 共用，一個人 <code>/new</code> 會清掉所有人的記憶。</p>
+      </details>
+
+      <details>
+        <summary>加碼 2：把 bot 加到 Telegram 群組</summary>
+        <p>讓群組成員都能跟同一支 hermes 講話。</p>
+
+        <h4>Step A · 確認 Group Privacy 已關</h4>
+        <p>你在 Step 2 應該已經做過，保險起見再確認：</p>
         <ol>
-          <li>Telegram 開群組 → 加成員 → 搜你 bot 的 username → 加入</li>
-          <li>BotFather <code>/mybots</code> → 選你的 bot → <code>Bot Settings</code> → <code>Group Privacy</code> → <code>Disable</code>（這樣 bot 才看得到群組裡所有訊息，而不是只 @ 它的）</li>
-          <li>群組裡每個要用 bot 的人都要把自己 user_id 加進 <code>TELEGRAM_ALLOWED_USERS=</code>，逗號分隔。改完 <code>hermes gateway restart</code>。</li>
+          <li>開 <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a>，送 <code>/mybots</code></li>
+          <li>選你的 bot → <strong>Bot Settings</strong> → <strong>Group Privacy</strong></li>
+          <li>確認顯示 <em>Privacy mode is disabled</em>。如果是 enabled，點 <strong>Turn off</strong></li>
         </ol>
+        <div class="notice">⚠️ Group Privacy 不關，bot 在群組裡只看得到 <code>/指令</code>，一般訊息和 @ 提及全看不到。</div>
+
+        <h4>Step B · 加 bot 進群組</h4>
+        <ol>
+          <li>進到你的 Telegram 群組</li>
+          <li>點群組名稱 → <strong>Add Members</strong>（或 Edit → Members）</li>
+          <li>搜尋你 bot 的 username（例如 <code>@my_hermes_bot</code>）→ 加入</li>
+          <li>群組裡送 <code>/start</code> 測試（如果沒回，先看加碼 4 的 allowlist）</li>
+        </ol>
+
+        <h4>Step C · 把群組成員加進 allowlist</h4>
+        <ol>
+          <li>請每個要用 bot 的成員去 <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a> 查自己的 user_id</li>
+          <li>收集完後，在 terminal 跑：</li>
+        </ol>
+        <pre data-copy><code>sed -i "s/^export TELEGRAM_ALLOWED_USERS=.*/export TELEGRAM_ALLOWED_USERS=USER1,USER2,USER3/" ~/.hermes/.env</code></pre>
+        <p>把 <code>USER1,USER2,USER3</code> 換成實際數字 id（逗號分隔，不能有空格）。</p>
+        <ol start="3">
+          <li>重啟 gateway 讓設定生效：</li>
+        </ol>
+        <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+      </details>
+
+      <details>
+        <summary>加碼 3：群組 @ Mention 觸發機制</summary>
+        <p>hermes bot 在群組裡有兩種觸發模式，依你的群組使用情境選一個。</p>
+
+        <h4>預設模式（每則都回）</h4>
+        <p>只要發訊人在 allowlist 裡，群組裡每則訊息 bot 都會回應。適合小群或整群都是 hermes 使用者的情境。不需要設定，bot 加進群組就是這樣跑的。</p>
+
+        <h4>Mention-only 模式（只回 @bot）</h4>
+        <p>開啟後，群組裡只有明確 @ 你 bot 才會觸發回應，一般閒聊不理。適合混合群組（hermes 使用者跟非使用者都在）。</p>
+        <p>在 <code>~/.hermes/.env</code> 加一行：</p>
+        <pre data-copy><code>echo "export TELEGRAM_REQUIRE_MENTION=true" >> ~/.hermes/.env</code></pre>
+        <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+
+        <h4>Mention 的正確語法</h4>
+        <table>
+          <thead><tr><th>寫法</th><th>有效？</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td><code>@my_hermes_bot 問題</code></td><td>✓</td><td>標準觸發，@ 放最前面</td></tr>
+            <tr><td><code>問題 @my_hermes_bot</code></td><td>✓</td><td>@ 放後面也可以</td></tr>
+            <tr><td><code>問題</code>（沒有 @）</td><td>✗</td><td>Mention-only 模式下不觸發</td></tr>
+            <tr><td>Reply 到 bot 的訊息</td><td>✓</td><td>直接 reply 不需要 @</td></tr>
+          </tbody>
+        </table>
+        <div class="notice">💡 混合群組建議開 Mention-only——避免 bot 打斷閒聊，只在有人需要時才出聲。</div>
+      </details>
+
+      <details>
+        <summary>加碼 4：多人 Pairing — allowlist 管理</summary>
+        <p>隨使用情境變化，你可能需要新增或移除有權限用 bot 的人。</p>
+
+        <h4>查看目前 allowlist</h4>
+        <pre data-copy><code>grep TELEGRAM_ALLOWED_USERS ~/.hermes/.env</code></pre>
+
+        <h4>新增一個人</h4>
+        <p>假設要加入 user_id <code>987654321</code>：</p>
+        <pre data-copy><code>sed -i "s/export TELEGRAM_ALLOWED_USERS=\(.*\)/export TELEGRAM_ALLOWED_USERS=\1,987654321/" ~/.hermes/.env
+sudo $(which hermes) gateway restart --system</code></pre>
+
+        <h4>完全重設名單</h4>
+        <pre data-copy><code>sed -i "s/^export TELEGRAM_ALLOWED_USERS=.*/export TELEGRAM_ALLOWED_USERS=ID1,ID2,ID3/" ~/.hermes/.env
+sudo $(which hermes) gateway restart --system</code></pre>
+
+        <h4>確認某人是否在名單裡</h4>
+        <p>請那個人傳訊給 bot：有回 = 在名單；完全沒回 = 不在。進一步確認：</p>
+        <pre data-copy><code>tail -n 30 ~/.hermes/logs/gateway.log | grep -i "unauthorized\|allowed\|rejected"</code></pre>
+
+        <h4>安全注意事項</h4>
+        <ul>
+          <li>allowlist 控制誰能消耗你的 AI API 額度，<strong>不要加不認識的人</strong></li>
+          <li>bot username 公開時，不在名單的人傳訊會被靜默忽略（不報錯、不回應）</li>
+          <li>定期跑 <code>/usage</code> 或上 OpenRouter Dashboard 確認用量沒有異常</li>
+        </ul>
       </details>
 
       <details>

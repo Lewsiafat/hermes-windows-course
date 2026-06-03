@@ -238,6 +238,60 @@ npm update -g @nousresearch/hermes && hermes --version
 
 升級後仍沒有 → 暫緩開課。
 
+## Lesson 5 必檢項（進階使用：每日晨報自動化）
+
+每次教學前若會教 Lesson 5，這幾條一起跑（前提：Lesson 3 的 `skill-creator` 已裝、Telegram bot 在跑）。**3 個最容易壞的地方**：
+
+### 1. skill-creator 造得出 morning-brief（Step 2 主要依賴）
+
+進 hermes TUI，跑 `/skill-creator`，貼：
+
+```
+幫我造一個叫 morning-brief 的 skill。工作是：抓台北今天的天氣和降雨機率，整理成一則簡短的早安晨報訊息。
+```
+
+對「evaluation」那題回「不用 eval、只 vibe 就好」。
+
+預期：
+- [ ] skill 落地（`ls ~/.hermes/skills/*/` 看到 `morning-brief`，記下實際類別路徑）
+- [ ] `/new` 或 `/reload-skills` 後 `/morning-brief` 手動跑有產出（天氣+降雨）
+
+若訪談流程跟教材差很多、或造不出來：對照 plan §Dogfood 1 → 更新 lesson-5.html Step 2 字眼。
+
+### 2. cron 觸發 skill → channel 仍通（Step 3 主要依賴）
+
+在 **Telegram bot** 貼：
+
+```
+5 分鐘後跑一次 morning-brief，把結果推到 Telegram。
+```
+
+預期：
+- [ ] cron 寫入 `~/.hermes/cron/jobs.json`（`cat ~/.hermes/cron/jobs.json` 確認，**注意是 `cron/jobs.json` 不是 `cron.yaml`**）
+- [ ] 5 分鐘後 Telegram 真的收到天氣晨報
+- [ ] job 的 `deliver` 欄位自動帶上你建 cron 的 channel（驗「投遞跟著 channel 走」這個 callout 還成立）
+
+收尾：對 hermes 講「刪掉 morning-brief 排程」。
+
+若沒收到：gateway 可能沒重載 → `sudo $(which hermes) gateway restart --system`、看 `~/.hermes/logs/gateway.log`。
+
+### 3. 新聞 web-fetch 當天抓得到（Step 4 主風險）
+
+重跑 `/skill-creator` 修訂既有 skill：
+
+```
+幫我把 morning-brief 加兩件事：(1) 今天 3 條重點新聞頭條 (2) 結尾加一句今日提醒語。順序：天氣 → 新聞 → 提醒。
+```
+
+`/reload-skills` 後 `/morning-brief`，看輸出。
+
+預期：
+- [ ] skill-creator 修訂的是**同一個** morning-brief（非另造新 skill）
+- [ ] 輸出天氣、新聞、提醒三段俱全
+- [ ] 3 條新聞是**當天真實**頭條、含出處
+
+若新聞抓不到/品質差：**晨報以「天氣+提醒」仍成立**（lesson-5.html Step 4「我卡住了」`<details>` 就是 fallback）。不可為了湊新聞把晨報降成單一 source。若連天氣都抓不到 → hermes 上游 web/tool-use 可能變動，整段 Step 2–4 要重驗。
+
 ## 截圖檢查
 
 依 spec §8.1 走過 `assets/screenshots/`：

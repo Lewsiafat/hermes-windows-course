@@ -122,8 +122,21 @@
 
 > Task 0 執行後在此記錄實測（特別是：morning-brief skill 落地路徑、cron 設定檔實際路徑/檔名、新聞 source 當天抓取品質、skill-creator 修訂既有 skill 的行為）。
 
-- **Dogfood 1（造 v1 skill）：** _待填_
-- **Dogfood 2（cron→Telegram 管線）：** _待填_
-- **Dogfood 3（cron 管理三式）：** _待填_
-- **Dogfood 4（skill-creator 修訂既有 skill）：** _待填_
-- **Dogfood 5（新聞 web-fetch 品質）：** _待填_
+實測日期：2026-06-03。**5 條全過。**
+
+- **Dogfood 1（造 v1 skill）：** ✅ skill 落地 `~/.hermes/skills/productivity/morning-brief/SKILL.md`（類別 = `productivity`）。
+- **Dogfood 2（cron→channel 管線）：** ✅ cron 設定檔確認為 **`~/.hermes/cron/jobs.json`**（敲定，非 draft 的 `cron.yaml`）。
+  - **重要發現 A — 投遞 channel 自動綁定，prompt 不需寫「推到 X」**：job 的 `prompt` 只寫「依照 morning-brief skill 的步驟，抓取台北今日天氣，生成早安晨報訊息。」完全沒提 channel，但 `"deliver": "line:U..."` 自動帶上了學員當前作用中的 channel。⇒ Step 3 教材的 cron prompt 不必硬塞「推到 Telegram」，投遞跟著「你在哪個 channel 建這個 cron」走。
+  - **重要發現 B — 實測機投遞到 LINE 不是 Telegram**：dogfood 環境 `deliver=line:U...`。設計原訂「只用 Telegram」，但維護機是 LINE 線。待與 user 確認課程 channel 方向（見下方未解項）。
+  - job 摘要：`name=早安晨報`、`schedule=0 7 * * *`、`skill=morning-brief`、`enabled=true`、`next_run=2026-06-04T07:00`。
+- **Dogfood 3（cron 管理三式）：** ✅ 已成功設成 `0 7 * * *`（每天 07:00）。
+- **Dogfood 4（skill-creator 修訂既有 skill）：** ✅ 重跑 skill-creator 乾淨修訂同一個 morning-brief（非另造），加入新聞 + 提醒，輸出三段俱全。
+- **Dogfood 5（新聞 web-fetch 品質）：** ✅ **品質佳**——3 條真實頭條含出處（東森／Yahoo／ETtoday）。⇒ Step 4 新聞段可正常寫，不需降級成「加分」。範例輸出：
+
+  > 早安！台北今天 🌧️ 毛毛雨，25.1°C ~ 35.7°C，降雨機率 76%。記得帶傘喔 ☔，天氣熱，多喝水 💧
+  > 📰 今日頭條 ·（3 條含出處）
+  > 💬 好事會發生在努力的人身上 🌟
+
+### channel 方向（已定 2026-06-03）
+
+**Telegram 主線 + callout「跟 channel 走」**（user 拍板）。教材主線示範 Telegram（L2 是前置、人人都有），用一句 callout 點明「投遞跟著你建 cron 的 channel 走，做過 LINE 的人會收到 LINE」（發現 A）。前置維持 **L1+2+3**。**Step 3 的 cron prompt 不需寫「推到 Telegram」**——投遞自動綁定當前 channel。

@@ -144,13 +144,13 @@ hermes --version
 幫我設一個 cron job，2 分鐘後跑一次，內容：台北今日天氣，把結果推到我的 Telegram。
 ```
 
-預期：hermes 主動寫入 `~/.hermes/cron.yaml`（`cat ~/.hermes/cron.yaml` 確認）+ 2 分鐘後 Telegram 真的收到推送。
+預期：hermes 主動寫入 `~/.hermes/cron/jobs.json`（`cat ~/.hermes/cron/jobs.json` 確認）+ 2 分鐘後 Telegram 真的收到推送。
 
-若 hermes 沒主動寫 cron.yaml：
+若 hermes 沒主動寫 cron/jobs.json：
 - 學員場景免費 model 也可能不會 —— lesson-3.html Step 2「我卡住了」`<details>` 已給 fallback（更明確要求編輯 file path）。教學場景假設付費 model，此 fallback 仍要保留。
 - 若付費 model 也不寫：hermes 上游可能改了 cron 介面 —— 整段 Step 2 要重新驗證教材。
 
-收尾：對 hermes 講「刪掉剛才那個 2 分鐘 cron」或直接編輯 `~/.hermes/cron.yaml` 移除。
+收尾：對 hermes 講「刪掉剛才那個 2 分鐘 cron」或直接編輯 `~/.hermes/cron/jobs.json` 移除。
 
 ### 4. 對話式裝 skill-creator 仍可用（Step 3 主要依賴）
 

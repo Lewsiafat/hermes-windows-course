@@ -667,15 +667,15 @@ Window C 重啟 gateway，手機再送一句 → 仍收到回應。
 
 1. 點「下一步 →」進 Step 2
 2. Copy 「2 分鐘後跑 ⟨天氣+降雨+SP500⟩」prompt block、貼到 hermes CLI / Telegram
-3. hermes 應主動把 cron job 寫進 `~/.hermes/cron.yaml`，回覆「已設定，2 分鐘後會自動跑」
-4. 在 WSL terminal 看：`cat ~/.hermes/cron.yaml` 確認 job 在
+3. hermes 應主動把 cron job 寫進 `~/.hermes/cron/jobs.json`，回覆「已設定，2 分鐘後會自動跑」
+4. 在 WSL terminal 看：`cat ~/.hermes/cron/jobs.json` 確認 job 在
 5. 等 2 分鐘，Telegram 收到 ⟨天氣+降雨預報+SP500⟩ 三件事
-6. Copy「把剛剛那個改成每天早上 7:00 跑」prompt、貼，hermes 更新 cron.yaml
+6. Copy「把剛剛那個改成每天早上 7:00 跑」prompt、貼，hermes 更新 cron/jobs.json
 7. Copy「列出我目前的 cron 排程」prompt、確認 daily 7:00 job 在
 
-預期：Telegram 收到推送、cron.yaml 確實被更新兩次。**Checkpoint 2 在此 stage 達成。**
+預期：Telegram 收到推送、cron/jobs.json 確實被更新兩次。**Checkpoint 2 在此 stage 達成。**
 
-若 hermes 沒主動寫 cron.yaml：執行 lesson-3.html Step 2「我卡住了」`<details>` 的 fallback（更明確要求編輯 file path）。
+若 hermes 沒主動寫 cron/jobs.json：執行 lesson-3.html Step 2「我卡住了」`<details>` 的 fallback（更明確要求編輯 file path）。
 
 ## Stage 27 · 進 Step 3 探索 hermes + 對話式裝 skill-creator
 
@@ -711,7 +711,7 @@ Window C 重啟 gateway，手機再送一句 → 仍收到回應。
 1. 點「下一步 →」進 Step 5
 2. 確認 4 個 ✓ checkmark 都顯示、文字跟 Stage 25 看到的 Step 0 一致
 3. 點開加碼 A/B/C/D 四個 `<details>`，每個收起再展開一次（**新版加碼 D 沒有巢狀 `<details>`**）
-4. （選做）加碼 A：對 hermes 講「把 ⟨skill-name⟩ 串到 cron 每天 7:00」→ 看 `~/.hermes/cron.yaml` 是否多一條 job
+4. （選做）加碼 A：對 hermes 講「把 ⟨skill-name⟩ 串到 cron 每天 7:00」→ 看 `~/.hermes/cron/jobs.json` 是否多一條 job
 5. （選做）加碼 D：`cat ~/.hermes/skills/*/⟨your-skill-name⟩/SKILL.md` → 看 frontmatter + markdown 結構
 
 預期：所有 `<details>` 可開可收。
@@ -984,15 +984,15 @@ hermes -z "/skills list --source local" 2>&1 | head -10
 ```
 
 預期：
-- hermes 主動寫入 `~/.hermes/cron.yaml`
-- `cat ~/.hermes/cron.yaml` 看到剛才那條 job
+- hermes 主動寫入 `~/.hermes/cron/jobs.json`
+- `cat ~/.hermes/cron/jobs.json` 看到剛才那條 job
 - 2 分鐘後 Telegram 收到推送
 
-若 hermes 沒主動寫 cron.yaml：教學場景免費 model 也可能會這樣，但 lesson-3.html Step 2「我卡住了」`<details>` 已給 fallback（更明確指 file path）。
+若 hermes 沒主動寫 cron/jobs.json：教學場景免費 model 也可能會這樣，但 lesson-3.html Step 2「我卡住了」`<details>` 已給 fallback（更明確指 file path）。
 
 若付費 model 也不寫：hermes 上游可能改了 cron 介面 → 整段 Step 2 重新驗證教材後再教學。
 
-收尾：對 hermes 講「刪掉剛才那個 2 分鐘 cron」或編輯 `~/.hermes/cron.yaml` 移除。
+收尾：對 hermes 講「刪掉剛才那個 2 分鐘 cron」或編輯 `~/.hermes/cron/jobs.json` 移除。
 
 ---
 

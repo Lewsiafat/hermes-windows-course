@@ -14,10 +14,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **原本範圍**：60 分鐘從零裝好 [hermes-agent](https://github.com/NousResearch/hermes-agent)、完成第一次對話。
 - **現在走向**：擴展成 **「如何使用 hermes-agent 的完整教材」**，安裝只是其中一塊。新增內容時要意識到：這不再只是「安裝精靈」，而是 hermes 的整體入門教材，未來會涵蓋使用層面的章節。
 
+### Lesson／頁面地圖
+
+- `index.html` — 課程目錄（landing hub）
+- `lesson-1.html` — **Windows 安裝**（9 步，storage key `hermes-course-step`）
+- `mac.html` — **macOS 安裝**，lesson-1 的平行版（7 步，`hermes-mac-course-step`），從 index/lesson-1 的「macOS 版本」連入
+- `lesson-2.html` — **Telegram 整合**（7 步）
+- `lesson-3.html` — **日常使用 / cron + tool-use**（5 步，假設 Lesson 1+2 已完成）
+- `lesson-4.html` — **LINE 整合**（7 步）
+
 ## 開發指令
 
 ```bash
 # 本地預覽（無 server，直接用瀏覽器開）
+open index.html          # macOS（本 repo 維護機）
 xdg-open index.html      # Linux
 # 或瀏覽器手動開啟此檔
 
@@ -61,6 +71,10 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 - `ai-runbook.md` — AI 工具版（Computer Use / Skyvern 等）的完整螢幕控制 runbook，分 Part 1 (Full Capture Run, 60–90 min) 和 Part 2 (Quick Smoke Test, 10–15 min)。
 
 > **變更教材時的隱性合約**：如果你改了 `lesson-1.html`（或任何 lesson）的步驟順序、指令、或 `hermes setup` 流程，必須對應檢查這兩份 runbook 的 stage 是否還對得上。它們之間沒有自動 lint。
+
+### `mac.html` ↔ `lesson-1.html` 平行維護合約
+
+`mac.html` 是 lesson-1（Windows 安裝）的 macOS 對應版，兩者走同一條旅程（裝 hermes → OpenRouter key → `hermes setup` → 首次對話）。改 lesson-1 的安裝步驟、hermes 版本、`hermes setup` 提示順序或 OpenRouter UI 描述時，**必須檢查 `mac.html` 是否要同步**。`pre-class-checklist.md` 列的 3 個最易壞點對兩頁都適用。兩頁之間沒有自動 lint。
 
 ### 設計與實作文件
 

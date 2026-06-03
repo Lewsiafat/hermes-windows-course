@@ -4,17 +4,34 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-03
+
+新增 Lesson 5（進階使用 / 每日晨報自動化）與 course hub landing page，並擴充 / 修正 Lesson 2–4 多處。
+
 ### Added
 
-- **Course hub landing page (`index.html`)**：列出所有 lesson 的目錄頁，Pico grid 卡片版面（上 2 下 3），不載入 `wizard.js`。學員第一次訪站可直接挑路徑（Windows / macOS / 進階整合）。
+- **Lesson 5** — `lesson-5.html`：進階使用 / 每日晨報自動化（Step 0 + 5 步，30–40 分鐘）。cron 觸發自製 `morning-brief` skill，把天氣 + 新聞頭條 + 今日提醒整理成晨報推到 Telegram。skill 為 channel-agnostic，投遞跟著「你建 cron 的 channel」走（dogfood 實證）。前置 Lesson 1+2+3；常駐維運（`gateway install`）留給 Lesson 6。
+- **Course hub landing page (`index.html`)**：列出所有 lesson 的目錄頁，Pico grid 卡片版面，不載入 `wizard.js`。學員第一次訪站可直接挑路徑（Windows / macOS / 進階整合）。
 - 每個 lesson 與 macOS 頁的 footer 新增「課程首頁」連結，可從任一頁回到 hub。
+- **Lesson 2 擴充**：group / DM / mention / pairing 章節 + 對應 smoke test 條目。
+- **Lesson 3**：skill 載入方法表（`reload-skills` / `/new` / `/skill`）、針對未知來源 skill 的安全警告、安全 skill 探索資源區。
+- **CLAUDE.md**：Lesson／頁面地圖、`mac.html ↔ lesson-1` 平行維護合約、macOS `open` 本地預覽指令。
+- Lesson 5 設計與實作文件（`docs/superpowers/specs/` + `plans/`）。
 
 ### Changed
 
 - **`index.html` 變成 landing hub，原 Lesson 1 內容搬到 `lesson-1.html`**（內容完全不動，含 `<body data-storage-key>` 不變，學員既有 localStorage 進度仍對得上）。
 - 舊 deep link `index.html#step-N` 由新 `index.html` 的 inline `<script>` 重導到 `lesson-1.html#step-N`，舊書籤不會壞。
 - `lesson-2.html` / `lesson-3.html` / `lesson-4.html` / `mac.html` 內所有 `href="index.html"` cross-ref 改為 `lesson-1.html`（含 `#step-7` 補救連結）。
-- README / CLAUDE.md 同步更新檔案結構描述。
+- `lesson-3.html` 的 provider / model 切換說明與 cron 範例。
+- README / CLAUDE.md 同步更新檔案結構與 Lesson 地圖。
+
+### Fixed
+
+- `/skills list` 系列指令標明 **TUI-only**、Telegram bot 不支援。
+- `lesson-3.html` cron 設定檔路徑 `cron.yaml` → `cron/jobs.json`。
+- 兩份 runbook（`pre-class-checklist.md` / `ai-runbook.md`）Lesson 3 段殘留的 `~/.hermes/cron.yaml` → `~/.hermes/cron/jobs.json`（dogfood 證實）。
+- skill 資源區從 `lesson-4.html` 移到 `lesson-3.html`（位置更合理）。
 
 ## [1.0.0] - 2026-05-18
 
@@ -42,4 +59,5 @@
 - `docs/superpowers/specs/` — 各 lesson 設計規格。
 - `docs/superpowers/plans/` — 實作計畫。
 
+[1.1.0]: https://github.com/lewsiafat/hermes-windows-course/releases/tag/v1.1.0
 [1.0.0]: https://github.com/lewsiafat/hermes-windows-course/releases/tag/v1.0.0

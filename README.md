@@ -3,7 +3,7 @@
 教 Windows 使用者在 60 分鐘內裝好 [hermes-agent](https://github.com/NousResearch/hermes-agent) 並完成第一次對話。配套教學頁部署於 GitHub Pages。
 
 🔗 **教學頁**：https://lewsiafat.github.io/hermes-windows-course/  
-📦 **目前版本**：[v1.0.0](CHANGELOG.md)（2026-05-18）
+📦 **目前版本**：[v1.1.0](CHANGELOG.md)（2026-06-03）
 
 ## 結構
 
@@ -13,6 +13,7 @@
 - `lesson-2.html` — **Lesson 2**：把 hermes 接到 Telegram（Step 0 + 7 步，30–45 分鐘）
 - `lesson-3.html` — **Lesson 3**：hermes 日常使用入門（Step 0 + 5 步，45–55 分鐘，對話式 cron + 用 skill-creator 造你自己的 skill）
 - `lesson-4.html` — **Lesson 4**：把 hermes 接到 LINE（Step 0 + 7 步，60 分鐘，含 ngrok）
+- `lesson-5.html` — **Lesson 5**：進階使用 / 每日晨報自動化（Step 0 + 5 步，30–40 分鐘，cron 觸發自製 skill 推晨報，前置 Lesson 1+2+3）
 - `style.css` / `wizard.js` — 共用樣式與導覽邏輯（`wizard.js` 從 `<body data-*>` 讀步數與 storage key，landing 不載入）
 - `assets/screenshots/` — 各步截圖（每次驗證後可能更新）
 - `pre-class-checklist.md` — **每次教學前必跑**的 smoke test 流程（人類版，簡潔）

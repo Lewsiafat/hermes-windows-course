@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Lesson 5 · 進階使用：每日晨報自動化</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-total-steps="5" data-storage-key="hermes-lesson5-step">
+  <header class="container">
+    <hgroup>
+      <h1>Lesson 5 · 進階使用：每日晨報自動化</h1>
+      <p>把 cron + 自製 skill 串成「每天早上自動發晨報」的真實 workflow，30–40 分鐘</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼學「自動化 workflow」</h2>
+          <p>~2 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Lesson 3 你學會了 cron 排程跟用 skill-creator 造 skill——但那是<strong>兩個分開的能力</strong>。這堂課把它們<strong>串成一條真實的 workflow</strong>：一個你自己造的 <code>morning-brief</code> skill，每天早上由 cron 自動觸發，把今天的天氣、新聞、提醒整理成一則晨報，推到你的手機。</p>
+
+      <h3>★ 心智模型：每個自動化都是這四段</h3>
+      <p>學會這條，你之後能自己設計任何自動化，不只晨報：</p>
+      <ol>
+        <li><strong>trigger</strong>（觸發）— 什麼時候跑？這堂用 <em>cron</em>：每天 7:00。</li>
+        <li><strong>gather</strong>（蒐集）— 去哪拿資料？這堂用 hermes 內建 tool-use 抓<em>天氣 + 新聞</em>。</li>
+        <li><strong>compose</strong>（組裝）— 怎麼整理成人看的？這堂組成<em>晨報格式</em>。</li>
+        <li><strong>deliver</strong>（投遞）— 送到哪？這堂推到<em>你的 channel</em>（Telegram）。</li>
+      </ol>
+      <p>關鍵設計：<strong>gather + compose 包進一個 skill</strong>（可重用、跟 channel 無關），<strong>trigger 跟 deliver 交給 cron</strong>。這就是為什麼一個 skill 能同時服務 Telegram 跟 LINE。</p>
+
+      <h3>今天會做什麼</h3>
+      <ol>
+        <li><strong>Step 1</strong>：確認前置（hermes 在跑、Telegram 通、玩過 Lesson 3 的 cron）</li>
+        <li><strong>Step 2</strong>：用 skill-creator 造一個 <code>morning-brief</code> skill（v1：先只抓天氣）</li>
+        <li><strong>Step 3</strong>：用 cron 觸發這個 skill，5 分鐘後先看手機收到，再改成每天 7:00</li>
+        <li><strong>Step 4</strong>：重跑 skill-creator 把 skill 養大——加新聞頭條 + 今日提醒語</li>
+        <li><strong>Step 5</strong>：收尾 + 加碼（換 source / 多城市 / 換時間）+ 下次預告</li>
+      </ol>
+
+      <h3>4 個 checkpoints</h3>
+      <ol>
+        <li><code>/morning-brief</code> skill 造得出來、手動跑有產出（天氣）</li>
+        <li>cron 5 分鐘測試 → 手機收到天氣晨報</li>
+        <li>改成每天 7:00、列得出這個 cron job</li>
+        <li>skill 養大後 → 手機收到 ⟨天氣 + 新聞3條 + 提醒⟩ 完整晨報</li>
+      </ol>
+
+      <details>
+        <summary>必備：先做完 Lesson 1 + Lesson 2 + Lesson 3</summary>
+        <p>這堂直接接在 Lesson 3 之後。還沒做過先回 <a href="lesson-1.html">Lesson 1（安裝 hermes）</a>、<a href="lesson-2.html">Lesson 2（接 Telegram）</a>、<a href="lesson-3.html">Lesson 3（cron + 造 skill）</a>。本堂假設你的 Telegram bot 仍在跑、<code>hermes gateway</code> 也仍在跑、教學場景的 hermes model 是付費的（free model 對話式設定 cron / 造 skill 可能不會主動推理出該做的動作，得 fallback 到 slash command 手動跑）。</p>
+        <p><strong>切換 provider / model</strong>：在 Telegram bot 或 TUI 傳 <code>/model</code> 查目前模型；傳 <code>/model provider:model-name</code> 切換，建議造 skill / 設 cron 時用付費 model（例 <code>/model anthropic:claude-sonnet-4</code>）。</p>
+      </details>
+
+      <blockquote>
+        <strong>⏰ 本堂假設你的機器是醒著的。</strong>「每天 7:00 自動發」只有在那個時間點 hermes gateway 還在跑時才會觸發。本堂聚焦 workflow 本身，<strong>「讓 hermes 24/7 常駐（開機自啟、systemd 服務）」是下一課的主題</strong>——這堂先用「機器醒著」當前提。
+      </blockquote>
+    </section>
+
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 5 · 開始之前</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>動手前花一分鐘確認三件事都還活著——這堂全部建立在它們之上：</p>
+
+      <h3>1. hermes gateway 在跑</h3>
+      <p>WSL Ubuntu 終端機跑：</p>
+      <pre data-copy><code>sudo $(which hermes) gateway status --system</code></pre>
+      <p>看到 <code>running</code> 就好。沒在跑就 <code>sudo $(which hermes) gateway restart --system</code>。</p>
+
+      <h3>2. Telegram bot 通</h3>
+      <p>打開手機 Telegram，找你 Lesson 2 接好的 bot，隨便傳一句 <code>hi</code>，確認它有回。這堂的晨報最後會推到這裡。</p>
+
+      <h3>3. 你玩過 Lesson 3 的 cron + skill-creator</h3>
+      <p>這堂不重教 cron 跟 skill-creator 的基本操作——如果 Lesson 3 的「5 分鐘後推 Telegram」跟「用 skill-creator 造 skill」你都做過一次，就可以往下。沒做過先回 <a href="lesson-3.html">Lesson 3</a>。</p>
+
+      <p>三項都 OK → 往 Step 2 造你的第一個 skill。</p>
+    </section>
+
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 5 · 造 morning-brief skill（v1：先只抓天氣）</h2>
+          <p>~8 分鐘（★ 先把 skill 本體打通）</p>
+        </hgroup>
+      </header>
+
+      <p>漸進堆疊的第一步：<strong>先做最小可行版本</strong>——skill 先只做「抓台北天氣、組成一則早安訊息」。等下 Step 3 確認「cron 觸發 → 推手機」這條管線通了，Step 4 再把新聞、提醒加進來。一次只解一個風險。</p>
+
+      <h3>1. 用 skill-creator 開造</h3>
+      <p>在 hermes TUI 跑 <code>/skill-creator</code>，給這顆種子 prompt：</p>
+      <pre data-copy><code>幫我造一個叫 morning-brief 的 skill。工作是：抓台北今天的天氣和降雨機率，整理成一則簡短的早安晨報訊息。</code></pre>
+
+      <h3>2. 看到「evaluation / benchmarks / test cases」就講「不用」</h3>
+      <p>跟 Lesson 3 一樣，skill-creator 中途會問要不要設 evaluation。直接回：</p>
+      <pre data-copy><code>不用 eval，只 vibe 就好。</code></pre>
+
+      <h3>3. skill 寫完、讓它生效</h3>
+      <p>skill-creator 會把檔案寫到類似 <code>~/.hermes/skills/productivity/morning-brief/SKILL.md</code>（類別可能不同）。讓它生效最快的方式：傳 <code>/new</code> 開新對話，或 <code>/reload-skills</code>。</p>
+
+      <h3>4. 手動跑一次驗證</h3>
+      <p>在 hermes CLI 或 Telegram bot 跑：</p>
+      <pre data-copy><code>/morning-brief</code></pre>
+      <p>應該吐回一則「早安！台北今天…」帶天氣 + 降雨機率的訊息。</p>
+
+      <p>✓ skill 造得出來、手動跑有天氣產出 → <strong>checkpoint 1 完成</strong>。skill 本體打通，下一步交給 cron 自動跑。</p>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <h4>講「幫我造」之後 hermes 沒主動動作</h4>
+        <p>免費 model 推理力可能不足。fallback 直接在 TUI 打 <code>/skill-creator</code> 進訪談模式，再貼上面那段需求。</p>
+
+        <h4>造完 <code>/morning-brief</code> 認不出來</h4>
+        <ol>
+          <li>傳 <code>/new</code> 或 <code>/reload-skills</code> 重載一次</li>
+          <li>還不行：<code>ls ~/.hermes/skills/*/</code> 看 morning-brief 是否真的落地、實際在哪個類別</li>
+          <li>確認 gateway running：<code>sudo $(which hermes) gateway status --system</code></li>
+        </ol>
+
+        <h4>天氣抓不到 / 數字怪怪的</h4>
+        <p>那是 hermes 的 web / tool-use 議題、不是 skill 本身的問題。對它講「再跑一次 morning-brief」通常就好。天氣是 Lesson 3 已驗證能穩定抓的，多試一次。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 5 · 用 cron 觸發這個 skill</h2>
+          <p>~8 分鐘（★ 打通「自動跑 → 推手機」管線）</p>
+        </hgroup>
+      </header>
+
+      <p>skill 本體有了，現在讓它<strong>自動跑</strong>。先用「5 分鐘後一次性測試」確認管線通，再改成每天 7:00 永久排程。</p>
+
+      <h3>1. 對 hermes 講「5 分鐘後跑 morning-brief」</h3>
+      <p>在你的 <strong>Telegram bot</strong>（或 TUI）貼：</p>
+      <pre data-copy><code>5 分鐘後跑一次 morning-brief，把結果推到 Telegram。</code></pre>
+
+      <blockquote>
+        <strong>💡 其實「推到 Telegram」可以不寫。</strong>hermes 的 cron 投遞會<strong>自動跟著「你在哪個 channel 建這個 cron」走</strong>——你從 Telegram bot 設，它就推 Telegram；做過 Lesson 4 的人從 LINE 設，它就推 LINE。同一個 skill、同一條 cron，channel 跟著你走。寫上「推到 Telegram」只是更保險。
+      </blockquote>
+
+      <p>hermes 會把設定寫進 <code>~/.hermes/cron/jobs.json</code>（WSL Ubuntu 主機，hermes 幫你寫，不用手寫 json）。</p>
+
+      <h3>2. 等 5 分鐘，看手機</h3>
+      <p>5 分鐘到時，你的 Telegram bot 應該主動推一則天氣晨報過來。</p>
+      <p>✓ 手機收到 cron 推送的天氣晨報 → <strong>checkpoint 2 完成</strong>。<strong>cron → skill → 手機</strong>這條管線打通了，剩下就是把它變每天、把 skill 養大。</p>
+
+      <h3>3. 改成每天 7:00 永久排程</h3>
+      <p>對 hermes 再講一句：</p>
+      <pre data-copy><code>把 morning-brief 改成每天早上 7:00 跑。</code></pre>
+      <p>明天 7:00（只要那時 gateway 還在跑）手機就會自動收到。</p>
+
+      <h3>4. cron 管理三式</h3>
+      <p>之後想調整，都是對 hermes 講一句話：</p>
+      <pre data-copy><code>列出我現在所有 cron 排程。</code></pre>
+      <pre data-copy><code>把 morning-brief 改成每天早上 7:30。</code></pre>
+      <pre data-copy><code>刪掉 morning-brief 的排程。</code></pre>
+      <p>也可以 WSL 直接看設定檔：</p>
+      <pre data-copy><code>cat ~/.hermes/cron/jobs.json</code></pre>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <h4>5 分鐘到了手機沒收到</h4>
+        <p>多半是 gateway 沒拿到新 cron：</p>
+        <ol>
+          <li><code>sudo $(which hermes) gateway restart --system</code> 重啟</li>
+          <li><code>tail -n 50 ~/.hermes/logs/gateway.log</code> 看有沒有錯誤</li>
+          <li>確認 <code>~/.hermes/cron/jobs.json</code> 真的有那條 job（<code>cat ~/.hermes/cron/jobs.json</code>）</li>
+        </ol>
+
+        <h4>推錯 channel / 沒推到 Telegram</h4>
+        <p>投遞跟著「你建 cron 的 channel」走。如果你是在 TUI 設的，它可能推到別處。<strong>從 Telegram bot 裡重設一次</strong>這條 cron，投遞就會綁定 Telegram。Telegram bot 本身沒回應的話，先回 <a href="lesson-2.html">Lesson 2</a> 確認 bot 還活著。</p>
+
+        <h4>hermes 沒主動寫 jobs.json</h4>
+        <p>免費 model 推理力可能不足。對它講更明確：「<strong>請編輯 <code>~/.hermes/cron/jobs.json</code>，加入一條每天 7:00 跑 morning-brief 的 job</strong>」，把 file path 直接點出來。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 5 · 把 skill 養大：加新聞 + 提醒</h2>
+          <p>~8 分鐘（★ 漸進堆疊最後一層）</p>
+        </hgroup>
+      </header>
+
+      <p>管線通了、skill 也跑得起來，現在<strong>回去把同一個 skill 養大</strong>。不重造、不手寫 SKILL.md——一樣用 skill-creator，叫它修訂既有的 morning-brief。</p>
+
+      <h3>1. 重跑 skill-creator 修訂既有 skill</h3>
+      <p>在 hermes TUI 跑 <code>/skill-creator</code>，講：</p>
+      <pre data-copy><code>幫我把 morning-brief 加兩件事：(1) 今天 3 條重點新聞頭條 (2) 結尾加一句今日提醒語。順序：天氣 → 新聞 → 提醒。</code></pre>
+      <p>它會訪談一次（比第一次短）、改寫同一份 SKILL.md。</p>
+
+      <h3>2. 重載 + 手動跑看完整版</h3>
+      <p>傳 <code>/new</code> 或 <code>/reload-skills</code> 重載，再跑一次 <code>/morning-brief</code>。這次應該天氣、新聞、提醒三段都在，像這樣：</p>
+      <blockquote>
+        早安！台北今天 🌧️ 毛毛雨，25.1°C ~ 35.7°C，降雨機率 76%。記得帶傘喔 ☔，天氣熱，多喝水 💧<br><br>
+        📰 今日頭條<br>
+        • 台灣也被點名！川普擬重築關稅壁壘 恐課徵至少10% — 東森新聞<br>
+        • 把握好天氣！6/5 起迎「梅雨旺盛期」全台防致災雨 — Yahoo新聞<br>
+        • 船身炸大洞！伊朗官媒公布「貨輪遇襲片」 — ETtoday新聞雲<br><br>
+        💬 好事會發生在努力的人身上 🌟
+      </blockquote>
+
+      <h3>3. 不用再碰 cron</h3>
+      <p>注意——你<strong>沒有動 cron</strong>。Step 3 那條 cron 只是說「跑 morning-brief」，skill 改了，它每天 7:00 跑的內容就自動變完整版。這就是「skill 負責內容、cron 負責觸發＋投遞」分工的好處。</p>
+
+      <p>✓ 手機收到 ⟨天氣 + 新聞3條 + 提醒⟩ 完整晨報 → <strong>checkpoint 4 完成。Lesson 5 全部 4 checkpoints 達標。</strong></p>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+        <h4>新聞抓不到 / 內容怪怪的</h4>
+        <p>那是 hermes 的 web / tool-use 議題、不是 cron 也不是 skill 結構的問題。處置：對它講「<strong>再跑一次 morning-brief，這次補上 3 條真實新聞頭條</strong>」。真的當天抓不到也沒關係——<strong>晨報以「天氣 + 提醒」就成立</strong>，新聞當加分。不要為了湊新聞把晨報改成只有新聞一項。</p>
+
+        <h4>skill-creator 另造了一個新 skill、沒改到舊的</h4>
+        <p>它有時會搞混。fallback：明確講「<strong>修改既有的 morning-brief skill，不要新建</strong>」。真的多造了就把多餘的刪掉：<code>rm -rf ~/.hermes/skills/*/⟨多餘的名字⟩</code>。</p>
+
+        <h4>改完沒生效</h4>
+        <p>傳 <code>/new</code> 重開對話（最快），或 <code>/reload-skills</code>，再跑一次 <code>/morning-brief</code>。</p>
+      </details>
+    </section>
+
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 5 · 完成 + 加碼</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>恭喜，你把 cron + skill 串成了第一條真實自動化 workflow。4 個 checkpoints 都完成：</p>
+      <ol>
+        <li>✓ <code>/morning-brief</code> skill 造得出來、手動跑有產出（天氣）</li>
+        <li>✓ cron 5 分鐘測試 → 手機收到天氣晨報</li>
+        <li>✓ 改成每天 7:00、列得出這個 cron job</li>
+        <li>✓ skill 養大後 → 手機收到 ⟨天氣 + 新聞3條 + 提醒⟩ 完整晨報</li>
+      </ol>
+
+      <h3>你剛剛串起來的這條鏈</h3>
+      <p><strong>cron（每天 7:00 觸發）→ morning-brief skill（抓天氣+新聞、組裝、加提醒）→ 投遞到你的 channel → 手機。</strong>記住這四段（trigger / gather+compose / deliver），任何自動化都是這個形狀。</p>
+
+      <details>
+        <summary>加碼 A · 換 source，做你自己的晨報</summary>
+        <p>晨報內容是 skill 決定的，再跑一次 skill-creator 就能換。例：</p>
+        <pre data-copy><code>幫我改 morning-brief：把新聞換成「今天台股加權指數 + 美元台幣匯率」，其他不變。</code></pre>
+        <p>（財經數字 hermes 不一定每次抓得到，抓不到就退回新聞或天氣——保持「多 source 一次」的精神，別降成單一項。）</p>
+      </details>
+
+      <details>
+        <summary>加碼 B · 多城市天氣</summary>
+        <p>常出差或關心親友所在地：</p>
+        <pre data-copy><code>幫我改 morning-brief：天氣改成台北、東京、舊金山三個城市一起報。</code></pre>
+      </details>
+
+      <details>
+        <summary>加碼 C · 換時間 / 加一條晚報</summary>
+        <p>cron 那條隨時可調：</p>
+        <pre data-copy><code>把 morning-brief 改成每天 6:30 跑。</code></pre>
+        <p>想要晚上也來一份？再設一條 cron 指到同一個 skill 即可：</p>
+        <pre data-copy><code>再設一條 cron，每天晚上 21:00 也跑一次 morning-brief。</code></pre>
+      </details>
+
+      <h3>下次預告</h3>
+      <ul>
+        <li><strong>Lesson 6（待開）· 讓 hermes 24/7 常駐</strong>：這堂的晨報只在「7:00 時你的機器醒著」才會發。下一課教 <code>hermes gateway install</code>（systemd 服務 / 開機自啟），讓 hermes 真的全天候在跑、晨報每天準時自動發——把本堂唯一的前提（機器醒著）補上。</li>
+      </ul>
+
+      <p><em>到這邊就是 Lesson 5 全部內容。下次見。</em></p>
+    </section>
+
+    <nav id="step-nav" class="container">
+      <button id="prev-btn" type="button">← 上一步</button>
+      <button id="next-btn" type="button" class="primary">下一步 →</button>
+    </nav>
+  </main>
+
+  <footer class="container">
+    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="index.html">課程首頁</a></small>
+  </footer>
+
+  <script src="wizard.js" defer></script>
+</body>
+</html>

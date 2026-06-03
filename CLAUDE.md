@@ -22,6 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `lesson-2.html` — **Telegram 整合**（7 步）
 - `lesson-3.html` — **日常使用 / cron + tool-use**（5 步，假設 Lesson 1+2 已完成）
 - `lesson-4.html` — **LINE 整合**（7 步）
+- `lesson-5.html` — **進階使用 / 每日晨報自動化**（5 步，`hermes-lesson5-step`，假設 Lesson 1+2+3 已完成）
 
 ## 開發指令
 
@@ -97,15 +98,20 @@ git push                 # GitHub Pages 自動發佈，10–30s 生效
 - **Step 7「補救：直接改 hermes 的 .env」section（Variant A / B 兩個 sed 腳本）** ← 被 Step 8「我卡住了」的 400 error 條目直接引用。改寫或搬位置時必須同步更新 Step 8 的指路文字。
 - 該 sed 腳本（含 `export` 前綴的替換寫法）是 hermes 上游官方暫未修正 paste 問題的**繞行解**，**寫法原樣引用、不可擅自簡化**（例如不要拿掉 `export`、不要改 sed delimiter）。
 
-### Lesson 之間（lesson-1.html ↔ lesson-2.html / lesson-3.html / lesson-4.html）
+### Lesson 之間（lesson-1.html ↔ lesson-2.html / lesson-3.html / lesson-4.html / lesson-5.html）
 
 - **Lesson 1 `lesson-1.html` Step 9 加碼 A 末段** → 連到 `lesson-4.html`。改寫加碼 A 時必須保留這個出口（與加碼 B → Lesson 2 對稱）。
 - **Lesson 1 `lesson-1.html` Step 9 加碼 B 末段** → 連到 `lesson-2.html`。改寫加碼 B 時必須保留這個出口。
 - **Lesson 2 `lesson-2.html` Step 7「下次預告」第一條** → 連到 `lesson-3.html`。改寫 Step 7 預告區時必須保留這個出口（與 Lesson 1 加碼 B → Lesson 2 對稱）。
 - **Lesson 3 `lesson-3.html` Step 0 「必備：先做完 Lesson 1 + Lesson 2」`<details>`** → fallback 連到 `lesson-1.html` + `lesson-2.html`、並 call out 教學場景假設付費 model。改 Step 0 文案時保留這兩個 fallback 連結（Lesson 3 假設 Lesson 1+2 已完成）+ 付費 model call out（spec 2026-05-14 §1 audience 假設）。
 - **Lesson 3 Step 2「2 分鐘後跑 ⟨天氣+降雨+SP500⟩」cron prompt** 是學員第一次接觸 cron + tool-use 組合的範本。**不可任意換成簡單範例**（換掉就失去「cron + 多 tool 一次 demo」的 hands-on 價值）。若 dogfood 階段發現 hermes 拿不到 SP500（缺財經 skill），可改其他「多 source 一次」組合（例如 SP500 → 鴻海昨日收盤、或加一條台北空氣品質），但不可降級成單一資訊。
+- **Lesson 3 `lesson-3.html` Step 5「下次預告」** → 連到 `lesson-5.html`（與 Lesson 4 並列）。改寫 Step 5 預告區時必須保留這個出口（Lesson 5 接在「日常使用」之後）。注意：該處原本的「Lesson 5（待開）= 進階 skill 寫法」舊預告已改寫成真 Lesson 5（晨報自動化），skill-authoring 主題降級為「更之後」無編號；加碼 D 末段同步去除舊 Lesson 5 指向。
+- **Lesson 5 `lesson-5.html` Step 0「必備：先做完 Lesson 1+2+3」`<details>`** → fallback 連到 `lesson-1/2/3.html`（Lesson 5 假設 1+2+3 已完成、教學場景付費 model）。改 Step 0 文案時保留這三個 fallback 連結 + 付費 model call out。
+- **Lesson 5 Step 2/4 `morning-brief` skill 的多 source 組合（天氣+新聞+提醒）不可降級成單一資訊**（同 Lesson 3 Step 2 cron prompt 守護精神）。新聞當天抓不到時 fallback 成「天氣+提醒」，但不可砍到只剩一項。
+- **Lesson 5 Step 3 cron 投遞「跟著 channel 走」** 是 dogfood 實證機制：cron prompt 不需寫「推到 X」，投遞自動綁定建 cron 的 channel。這是 channel-agnostic skill 架構的關鍵賣點，改 Step 3 時保留這個 callout。cron 設定檔路徑 `~/.hermes/cron/jobs.json` 與 Lesson 3 一致。
+- **Lesson 5 Step 5「下次預告」→ Lesson 6（待開）gateway install 24/7 常駐**。這是 Lesson 2 Step 5 / 下方 gateway install「留給後續課程」伏筆的正式落點（Lesson 5 明確假設「機器醒著」，把常駐維運外推給 Lesson 6）。
 - **Lesson 2 `lesson-2.html` Step 0 / Step 1** → 提到沒做過 Lesson 1 請先去 `lesson-1.html`。改 Step 0 / Step 1 文案時保留這個 fallback 連結。
 - **Lesson 2 Step 4 補救 section** → cross-ref `lesson-1.html#step-7`，提示是同根因（hermes 上游 paste 雷）。Lesson 1 Step 7 搬位置或 anchor 改名時，Lesson 2 Step 4 的連結要對應改。
 - Lesson 2 Step 4 的兩段 sed 補救（Variant A 互動 + Variant B 手動範本）跟 Lesson 1 Step 7 同模式但操作不同變數（`TELEGRAM_BOT_TOKEN` / `TELEGRAM_ALLOWED_USERS`，含 `export`）—— **寫法原樣引用、不可擅自簡化**。
-- **Lesson 2 Step 5 用 hermes 原生 lifecycle**（`hermes gateway run` / `status` / `stop` / `restart`，log 路徑 `~/.hermes/logs/gateway.log`），`pkill` 只當 fallback。`hermes gateway install`（systemd 24/7 服務）是「out of scope, 留給後續課程」——加碼 5 提及但不展開。
+- **Lesson 2 Step 5 用 hermes 原生 lifecycle**（`hermes gateway run` / `status` / `stop` / `restart`，log 路徑 `~/.hermes/logs/gateway.log`），`pkill` 只當 fallback。`hermes gateway install`（systemd 24/7 服務）是「out of scope, 留給後續課程」——加碼 5 提及但不展開。此伏筆的正式落點是 **Lesson 6（待開）**，由 `lesson-5.html` Step 5 預告指向。
 - **Lesson 2 Variant A sed 用 `USER_ID` 變數名**（不是 `UID`，因為 `UID` 是 bash readonly built-in，會靜默賦值失敗導致 .env 寫入學員的系統 UID 數字）。修補救腳本時切勿改回 `UID`。

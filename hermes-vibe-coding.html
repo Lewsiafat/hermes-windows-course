@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Vibe Coding 實戰</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-total-steps="5" data-storage-key="hermes-vibe-coding-step">
+  <header class="container">
+    <hgroup>
+      <h1>Vibe Coding 實戰</h1>
+      <p>用 hermes + SDD（規格驅動開發）跑完「idea → 規格 → 實作 → 部署」完整一輪，90 分鐘</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Step 0: 前言 -->
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 什麼是 Vibe Coding？</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Vibe Coding 不是「用 AI 偷懶」——它是一種<strong>你主導、AI 執行</strong>的開發節奏。你決定要做什麼、定義品質標準；hermes 負責寫程式、跑程式、改程式。</p>
+
+      <p>但大多數人第一次嘗試都遇到同樣的問題：說了一半 hermes 就偏掉了，或者做到一半才發現需求沒講清楚。</p>
+
+      <h3>★ 解法：SDD（規格驅動開發）</h3>
+      <p>SDD 的核心只有一句話：<strong>先把你想要的東西寫成文件，再叫 AI 實作。</strong></p>
+      <ol>
+        <li><strong>Spec first</strong>：花 10 分鐘把「做什麼 / 輸入輸出 / 不做什麼」寫清楚</li>
+        <li><strong>Implement by spec</strong>：把 spec 餵給 hermes，叫它完全按規格來</li>
+        <li><strong>Review ≠ rubber stamp</strong>：hermes 做完你要看一遍，確認跟 spec 吻合</li>
+        <li><strong>Iterate with context</strong>：要改需求，先改 spec，再叫 hermes 重跑</li>
+      </ol>
+
+      <h3>今天會做什麼</h3>
+      <ol>
+        <li><strong>Step 1</strong>：確認 hermes 的程式碼能力，安裝並設定 superpower skill</li>
+        <li><strong>Step 2</strong>：SDD 流程—先寫規格（hermes 陪你寫）</li>
+        <li><strong>Step 3</strong>：技術操作實作—把規格交給 hermes，迭代到符合預期</li>
+        <li><strong>Step 4</strong>：用 git 做版本控管，留下乾淨的紀錄</li>
+        <li><strong>Step 5</strong>：收尾—部署上線與後續維護提醒</li>
+      </ol>
+
+      <h3>3 個 checkpoints</h3>
+      <ol>
+        <li>superpower skill 安裝好、hermes 能生成並執行程式碼</li>
+        <li>spec 文件寫完、hermes 按 spec 實作出一個可跑的版本</li>
+        <li>git commit 完成，程式可部署</li>
+      </ol>
+
+      <details>
+        <summary>前置條件</summary>
+        <p>這堂課假設你已完成 <a href="lesson-1.html">Lesson 1（安裝 hermes）</a>，hermes 可以在你的機器上正常對話。不需要做過 Lesson 2–5。</p>
+        <p>本堂是<strong>實作課</strong>，hermes 在課堂中會幫你寫程式——建議用付費 model（<code>/model anthropic:claude-sonnet-4</code> 或同等），免費 model 完成複雜實作的能力受限。</p>
+      </details>
+    </section>
+
+    <!-- Step 1: 安裝 superpower skill -->
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 5 · 安裝 superpower skill</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Vibe Coding 需要 hermes 能夠：寫程式、執行程式、讀寫檔案、看執行結果。這些能力打包在 <strong>superpower skill</strong> 裡——本步驟把它裝好。</p>
+
+      <h3>1. 確認 hermes 目前的 skill 列表</h3>
+      <p>在 hermes TUI 輸入：</p>
+      <pre data-copy><code>/list-skills</code></pre>
+      <p>確認輸出裡有沒有 <code>superpower</code> 或 <code>code-runner</code> 類的 skill。</p>
+
+      <h3>2. 安裝 superpower skill</h3>
+      <p>沒有的話，請 hermes 幫你裝：</p>
+      <pre data-copy><code>幫我安裝 superpower skill，讓你可以幫我寫 Python 或 shell script、在我的機器上執行、看輸出結果。</code></pre>
+      <p>hermes 會引導你完成安裝（類似 Lesson 3 的 skill-creator 流程）。</p>
+
+      <h3>3. 驗證：請 hermes 做一件小事</h3>
+      <p>安裝後，先用一個簡單指令確認能力正常：</p>
+      <pre data-copy><code>幫我用 Python 印出今天的日期和時間，然後直接執行給我看。</code></pre>
+      <p>hermes 應該能寫出程式並跑出結果（例：<code>2026-06-04 10:30:15</code>）。</p>
+
+      <p>✓ hermes 能生成並執行程式碼 → <strong>checkpoint 1 完成</strong>。</p>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+
+        <h4>hermes 說「我沒有辦法執行程式」</h4>
+        <p>試著說更明確：「<strong>用 skill-creator 幫我建一個 code-runner skill，讓你能執行 Python 腳本並回傳 stdout</strong>」，讓它自行造出需要的能力。</p>
+
+        <h4>安裝後 <code>/list-skills</code> 還是沒出現</h4>
+        <p>傳 <code>/new</code> 重開對話再查一次。如果 gateway 在跑：</p>
+        <pre data-copy><code>sudo $(which hermes) gateway restart --system</code></pre>
+
+        <h4>執行失敗 / 有報錯</h4>
+        <p>直接把錯誤訊息貼給 hermes：「剛才執行失敗，錯誤是 ⟨貼上錯誤⟩，幫我修。」迭代修正是 vibe coding 的日常，不是問題。</p>
+      </details>
+    </section>
+
+    <!-- Step 2: SDD 先寫規格 -->
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 5 · SDD 流程—先寫規格</h2>
+          <p>~15 分鐘（★ 這是整堂最重要的一步）</p>
+        </hgroup>
+      </header>
+
+      <p>很多人 vibe coding 失敗，都在這一步——<strong>直接叫 AI 做，沒有先說清楚</strong>。規格不清楚，hermes 就只能猜，猜錯了你還得解釋半天。花 10–15 分鐘把規格寫好，後面兩步會快很多。</p>
+
+      <h3>1. 決定今天要做什麼</h3>
+      <p>挑一個你真的想要的小工具（不要太大，30–60 分鐘的實作量）。例：</p>
+      <ul>
+        <li>每天把指定資料夾的新檔案整理成日誌</li>
+        <li>讀一個 CSV，算出幾個統計數字，存成報告</li>
+        <li>一個簡單的 CLI 工具，幫你做某件重複的事</li>
+        <li>一個小爬蟲，抓某個頁面的資料存起來</li>
+      </ul>
+
+      <blockquote>
+        <strong>第一次建議選「你現在就知道輸入長什麼樣」的工具。</strong>能說清楚「輸入是 X，我要 Y」，hermes 成功率最高。
+      </blockquote>
+
+      <h3>2. 請 hermes 幫你把規格寫成文件</h3>
+      <p>你不用自己從頭打，把需求說給 hermes 聽，它會幫你整理成結構化的 spec：</p>
+      <pre data-copy><code>我想做一個 [描述你的工具]。幫我把這個需求整理成一份 spec.md，包含：功能描述、輸入、輸出、不在範圍內的事、成功標準。整理完先給我看，我確認後再開始實作。</code></pre>
+
+      <h3>3. 看 spec、修改直到你認可</h3>
+      <p>hermes 給你初稿後：</p>
+      <ul>
+        <li>有漏掉的需求？直接說「加上 ⟨XX⟩」</li>
+        <li>有寫錯的？「第 2 點改成 ⟨YY⟩」</li>
+        <li>確認沒問題後：「好，就按這份 spec 開始實作。」</li>
+      </ul>
+      <p>hermes 應該把 spec 存成 <code>spec.md</code>（在你的 WSL home 或指定路徑）。</p>
+
+      <blockquote>
+        <strong>★ 這份 spec.md 是整個專案的 source of truth。</strong>之後要改需求，先改 spec，再叫 hermes 按新 spec 更新實作——永遠不要跳過 spec 直接叫它改程式。
+      </blockquote>
+
+      <p>✓ spec 文件確認完成，準備實作 → 進 Step 3。</p>
+    </section>
+
+    <!-- Step 3: 實作 -->
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 5 · 技術操作實作</h2>
+          <p>~30 分鐘（★ 主場）</p>
+        </hgroup>
+      </header>
+
+      <p>規格確認了，現在把它交給 hermes 實作。這步的節奏是：<strong>hermes 做 → 你看 → 有問題就說 → hermes 修 → 你看 → repeat</strong>。</p>
+
+      <h3>1. 叫 hermes 按 spec 開始實作</h3>
+      <pre data-copy><code>開始按 spec.md 實作。先把主要邏輯寫出來，寫完後執行一次給我看結果。</code></pre>
+
+      <h3>2. 看它做的東西，檢查是否符合 spec</h3>
+      <p>hermes 完成後，回頭對照你的 spec.md：</p>
+      <ul>
+        <li>每個「成功標準」都有達到嗎？</li>
+        <li>「不在範圍內」的事它有沒有多做？</li>
+        <li>輸出格式符合預期嗎？</li>
+      </ul>
+
+      <h3>3. 迭代修正</h3>
+      <p>有任何不符合的地方，直接說：</p>
+      <pre data-copy><code>目前輸出的格式不對，我要的是 [描述正確格式]，幫我修。</code></pre>
+      <p>或者發現需求有漏：</p>
+      <pre data-copy><code>先暫停，我要更新 spec：加上「[新需求]」。幫我先把 spec.md 更新，再按新 spec 修程式。</code></pre>
+
+      <h3>4. 確認最終版本可以正常執行</h3>
+      <p>在 WSL 跑一次完整流程，確認沒有 error、輸出是你要的。</p>
+
+      <p>✓ 程式可以跑、輸出符合 spec → <strong>checkpoint 2 完成</strong>。進 Step 4。</p>
+
+      <details>
+        <summary>★ 實作節奏提醒</summary>
+        <ul>
+          <li><strong>不要一次叫它做太多</strong>：「先做 A 功能，做完給我看」比「把整個程式都做完」成功率高很多</li>
+          <li><strong>有錯直接貼錯誤訊息</strong>：比「有 bug 你修一下」精確 10 倍</li>
+          <li><strong>不確定時問 hermes</strong>：「這段 code 在做什麼，用一句話說明」——你要能看懂主要流程</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>🚨 我卡住了</summary>
+
+        <h4>hermes 一直修但都沒修好</h4>
+        <p>試著換個方向：「先忘掉剛才寫的，從頭重新實作這一段——[描述清楚那一段要做什麼]。」重置上下文有時比繼續修更快。</p>
+
+        <h4>程式太長，不知道哪裡出問題</h4>
+        <p>縮小範圍：「幫我先獨立測試 ⟨哪個函式 / 哪個步驟⟩，寫一個小測試腳本跑看看。」把問題範圍縮小再修。</p>
+
+        <h4>hermes 開始偏離 spec</h4>
+        <p>直接說：「停，你偏掉了。回去看 spec.md，按照上面的 [第幾條] 做。」明確引導比繼續讓它猜更有效率。</p>
+      </details>
+    </section>
+
+    <!-- Step 4: git -->
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 5 · 用 git 做版本控管</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>程式做好了。現在花 10 分鐘把它存起來——不是備份心態，而是<strong>「可以回頭」的安全網</strong>。下次你改壞了、或者想看三個版本前的狀態，git 讓這件事變成一行指令。</p>
+
+      <h3>1. 初始化並做第一個 commit</h3>
+      <p>請 hermes 幫你做：</p>
+      <pre data-copy><code>幫我在這個專案資料夾裡初始化 git，把 spec.md 跟程式碼都加進去，commit message 寫「initial: [你的工具名稱] 第一版」。</code></pre>
+
+      <h3>2. 確認 commit 成功</h3>
+      <pre data-copy><code>git log --oneline</code></pre>
+      <p>看到剛才的 commit 就好。</p>
+
+      <h3>3. 養成這個習慣：每次「這個版本能跑了」就 commit 一下</h3>
+      <p>簡單的規則：</p>
+      <ul>
+        <li>功能跑通一個段落 → commit（例：「feat: 加上 CSV 輸出功能」）</li>
+        <li>改了 spec → commit spec 文件（「spec: 加上 X 需求」）</li>
+        <li>修好一個 bug → commit（「fix: 修正空白行報錯問題」）</li>
+      </ul>
+      <p>不需要很頻繁，但每次「hermes 幫你跑通一個功能」都值得一個 commit。</p>
+
+      <p>✓ git init 完成、有第一個 commit → <strong>checkpoint 3 完成</strong>。</p>
+
+      <details>
+        <summary>要不要推到 GitHub？</summary>
+        <p>要的話請 hermes：「幫我在 GitHub 建一個 private repo，然後把這個專案推上去。」它會引導你完成（需要 GitHub token 或 SSH key 已設定）。</p>
+        <p>GitHub 遠端有了之後，之後每次 commit 完就：</p>
+        <pre data-copy><code>git push origin main</code></pre>
+      </details>
+    </section>
+
+    <!-- Step 5: 收尾 -->
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 5 · 收尾：部署上線與後續維護</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>恭喜，3 個 checkpoints 全部完成：</p>
+      <ol>
+        <li>✓ superpower skill 安裝好、hermes 能生成並執行程式碼</li>
+        <li>✓ spec 文件寫完、hermes 按 spec 實作出可跑的版本</li>
+        <li>✓ git commit 完成，版本留存</li>
+      </ol>
+
+      <h3>部署（如果你的工具需要上線）</h3>
+      <p>說清楚你要部署到哪，hermes 會幫你整理步驟：</p>
+      <pre data-copy><code>幫我把這個工具部署到 [目標環境，例：VPS、Vercel、Raspberry Pi]，列出部署步驟後我來確認。</code></pre>
+
+      <blockquote>
+        建議：<strong>不要叫 hermes 直接跑部署指令</strong>（特別是遠端 server），讓它列出步驟、你來下決定。降低把 production 弄壞的機率。
+      </blockquote>
+
+      <h3>後續維護的三個提醒</h3>
+
+      <details>
+        <summary>提醒 1 · spec 是活文件</summary>
+        <p>之後要加功能或改行為，先去改 spec.md，再叫 hermes「按最新 spec 更新實作」。不要讓程式跑在 spec 前面——那是 spec 失去意義的開始。</p>
+      </details>
+
+      <details>
+        <summary>提醒 2 · 不懂的 code 要問清楚</summary>
+        <p>你不需要每行都看懂，但<strong>主要流程要能用自己的話說明</strong>。不懂的地方問 hermes：「這段在做什麼，用一句話說」。你能解釋這段 code，才算真的擁有它。</p>
+      </details>
+
+      <details>
+        <summary>提醒 3 · 出問題不要直接改 code，先說需求</summary>
+        <p>「這個功能壞了，幫我修」比「把第 42 行改成 X」更容易讓 hermes 理解脈絡。讓它理解問題再想解法，勝過直接命令它改哪裡。</p>
+      </details>
+
+      <h3>你剛剛學到的工作流程</h3>
+      <p><strong>Idea → Spec（hermes 陪你寫）→ Implement（hermes 執行）→ Review（你對照 spec）→ Iterate → Commit。</strong></p>
+      <p>這個流程可以重複用在任何工具、任何規模的專案。差別只在 spec 的深度和迭代次數。</p>
+
+      <p><em>這就是 Vibe Coding 實戰的全部。祝你打造出好工具。</em></p>
+    </section>
+
+    <nav id="step-nav" class="container">
+      <button id="prev-btn" type="button">← 上一步</button>
+      <button id="next-btn" type="button" class="primary">下一步 →</button>
+    </nav>
+  </main>
+
+  <footer class="container">
+    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="index.html">課程首頁</a></small>
+  </footer>
+
+  <script src="wizard.js" defer></script>
+</body>
+</html>

@@ -32,11 +32,14 @@ open index.html          # macOS（本 repo 維護機）
 xdg-open index.html      # Linux
 # 或瀏覽器手動開啟此檔
 
-# 部署
-git push                 # GitHub Pages 自動發佈，10–30s 生效
+# 部署（⚠️ Pages auto-deploy 自 2026-05-23 失效，push 後「不會」自動上線）
+git push --follow-tags
+gh api --method POST repos/Lewsiafat/hermes-windows-course/pages/builds   # 手動觸發 build，約 30–60s 上線
 ```
 
 不需要 `npm install`、不需要起任何 dev server。Pico CSS 從 jsdelivr CDN 載入。
+
+> **⚠️ 部署陷阱**：GitHub Pages 的 push 後自動 build 從 2026-05-23 起就沒再觸發（root cause 未修，維護者更新不頻繁、選擇手動）。**光 `git push` 不會讓網站更新**，必須接著手動 `gh api --method POST .../pages/builds`。驗證上線：`curl -sI https://lewsiafat.github.io/hermes-windows-course/<page>.html` 看是否 200。
 
 ### Release
 

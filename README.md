@@ -34,8 +34,11 @@
 
 ## 部署
 
+> ⚠️ GitHub Pages 的 push 後自動 build 自 2026-05-23 起失效，**光 `git push` 不會更新網站**，需手動觸發一次 build。
+
 ```bash
-git push    # GitHub Pages 自動發佈，10-30 秒生效
+git push --follow-tags
+gh api --method POST repos/Lewsiafat/hermes-windows-course/pages/builds   # 約 30–60 秒上線
 ```
 
 ## License

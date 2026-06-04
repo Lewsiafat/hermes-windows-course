@@ -3,7 +3,7 @@
 教 Windows 使用者在 60 分鐘內裝好 [hermes-agent](https://github.com/NousResearch/hermes-agent) 並完成第一次對話。配套教學頁部署於 GitHub Pages。
 
 🔗 **教學頁**：https://lewsiafat.github.io/hermes-windows-course/  
-📦 **目前版本**：[v1.1.0](CHANGELOG.md)（2026-06-03）
+📦 **目前版本**：[v1.1.1](CHANGELOG.md)（2026-06-04）
 
 ## 結構
 

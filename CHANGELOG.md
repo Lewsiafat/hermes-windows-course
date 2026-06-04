@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-06-04
+
+### Fixed
+
+- **部署流程修正**：GitHub Pages 的 push 後自動 build 自 2026-05-23 起失效，`git push` 不再自動更新網站。CLAUDE.md 與 README 的「部署」段改為「push 後手動觸發 `gh api --method POST .../pages/builds`」並標註以 `curl -sI` 驗證上線。
+
 ## [1.1.0] - 2026-06-03
 
 新增 Lesson 5（進階使用 / 每日晨報自動化）與 course hub landing page，並擴充 / 修正 Lesson 2–4 多處。
@@ -59,5 +65,6 @@
 - `docs/superpowers/specs/` — 各 lesson 設計規格。
 - `docs/superpowers/plans/` — 實作計畫。
 
+[1.1.1]: https://github.com/lewsiafat/hermes-windows-course/releases/tag/v1.1.1
 [1.1.0]: https://github.com/lewsiafat/hermes-windows-course/releases/tag/v1.1.0
 [1.0.0]: https://github.com/lewsiafat/hermes-windows-course/releases/tag/v1.0.0

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-total-steps="7" data-storage-key="hermes-lesson2-step">
+<body data-total-steps="8" data-storage-key="hermes-lesson2-step">
   <header class="container">
     <hgroup>
       <h1>Lesson 2 · Telegram 整合</h1>
@@ -54,7 +54,7 @@
     <section class="step" data-step="1" hidden>
       <header>
         <hgroup>
-          <h2>Step 1 / 7 · 開始之前</h2>
+          <h2>Step 1 / 8 · 開始之前</h2>
           <p>~2 分鐘</p>
         </hgroup>
       </header>
@@ -68,7 +68,7 @@
         <li>✓ <strong>記事本開著</strong>（任何純文字編輯器都行）。等下要暫存 token 跟 user_id 兩個東西。</li>
       </ul>
 
-      <h3>這 7 步在做什麼</h3>
+      <h3>這 8 步在做什麼</h3>
       <ol>
         <li><strong>Step 2</strong>：跟 Telegram 申請一支 bot，拿到 token</li>
         <li><strong>Step 3</strong>：拿你自己的 Telegram user_id（讓 bot 只回你）</li>
@@ -76,6 +76,7 @@
         <li><strong>Step 5</strong>：把 gateway 跑成背景程式</li>
         <li><strong>Step 6</strong>：從手機傳訊息給 bot，確認 hermes 有回</li>
         <li><strong>Step 7</strong>：收尾、加碼玩法、下一堂預告</li>
+        <li><strong>Step 8</strong>：附錄——進階 Telegram 設定（Observer 模式、Home Channel、群組白名單、多 bot 並存）</li>
       </ol>
 
       <details>
@@ -94,7 +95,7 @@
     <section class="step" data-step="2" hidden>
       <header>
         <hgroup>
-          <h2>Step 2 / 7 · 申請 Telegram bot</h2>
+          <h2>Step 2 / 8 · 申請 Telegram bot</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
@@ -157,7 +158,7 @@
     <section class="step" data-step="3" hidden>
       <header>
         <hgroup>
-          <h2>Step 3 / 7 · 拿你的 Telegram user_id</h2>
+          <h2>Step 3 / 8 · 拿你的 Telegram user_id</h2>
           <p>~2 分鐘</p>
         </hgroup>
       </header>
@@ -189,7 +190,7 @@
     <section class="step" data-step="4" hidden>
       <header>
         <hgroup>
-          <h2>Step 4 / 7 · <code>hermes gateway setup</code></h2>
+          <h2>Step 4 / 8 · <code>hermes gateway setup</code></h2>
           <p>~8 分鐘</p>
         </hgroup>
       </header>
@@ -252,7 +253,7 @@
     <section class="step" data-step="5" hidden>
       <header>
         <hgroup>
-          <h2>Step 5 / 7 · 啟動 hermes gateway（背景）</h2>
+          <h2>Step 5 / 8 · 啟動 hermes gateway（背景）</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
@@ -310,7 +311,7 @@
     <section class="step" data-step="6" hidden>
       <header>
         <hgroup>
-          <h2>Step 6 / 7 · 第一次手機 ↔ hermes</h2>
+          <h2>Step 6 / 8 · 第一次手機 ↔ hermes</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
@@ -358,7 +359,7 @@
     <section class="step" data-step="7" hidden>
       <header>
         <hgroup>
-          <h2>Step 7 / 7 · 完成 + 加碼 + 下一步</h2>
+          <h2>Step 7 / 8 · 完成 + 加碼 + 下一步</h2>
           <p>~5 分鐘</p>
         </hgroup>
       </header>
@@ -556,7 +557,124 @@ sudo $(which hermes) gateway restart --system</code></pre>
         <li><strong><a href="lesson-4.html">Lesson 4 · LINE gateway 設定</a></strong>：把同一支 hermes 也接到 LINE，讓 LINE 朋友也能用（已上線）</li>
       </ul>
 
-      <p><em>到這邊就是 Lesson 2 的全部內容。下次見。</em></p>
+      <p><em>到這邊就是 Lesson 2 的核心課程內容。進階設定請見 Step 8 附錄。下次見。</em></p>
+    </section>
+
+
+    <section class="step" data-step="8" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 8 / 8 · 附錄：進階 Telegram 設定</h2>
+          <p>依需求選讀</p>
+        </hgroup>
+      </header>
+
+      <p>這個附錄收錄 4 個進階情境，<strong>不需要全部設定</strong>——有需要時再來查即可。</p>
+
+      <details>
+        <summary>附錄 A · Observer 模式：讀取群組訊息但不主動回覆</summary>
+        <p>預設情況下，bot 看到訊息就回。Observer 模式讓 bot 靜靜讀取群組對話、把它當 context，只在被明確 @ 到才開口——特別適合「多數時候只是在旁邊聽，偶爾被叫才回話」的群組場景。</p>
+
+        <h4>設定方式（兩擇一）</h4>
+        <p><strong>方式 A · 寫進 <code>~/.hermes/.env</code></strong></p>
+        <pre data-copy><code>echo "export TELEGRAM_OBSERVE_UNMENTIONED_GROUP_MESSAGES=true" >> ~/.hermes/.env
+echo "export TELEGRAM_REQUIRE_MENTION=true" >> ~/.hermes/.env
+sudo $(which hermes) gateway restart --system</code></pre>
+
+        <p><strong>方式 B · 寫進 <code>~/.hermes/config.yaml</code></strong></p>
+        <pre data-copy><code>telegram:
+  require_mention: true
+  observe_unmentioned_group_messages: true</code></pre>
+
+        <h4>行為說明</h4>
+        <ul>
+          <li><strong>沒有 @ bot</strong>：訊息被讀入 context，bot 不回覆</li>
+          <li><strong>有 @ bot</strong>（或直接回覆 bot 的訊息）：bot 用完整的對話 context 來回應</li>
+        </ul>
+
+        <div class="notice">💡 建議搭配 <code>TELEGRAM_GROUP_ALLOWED_CHATS</code> 指定哪個群組可用，避免 bot 讀入不相關群組的 context。</div>
+      </details>
+
+      <details>
+        <summary>附錄 B · Home Channel：讓 hermes 主動發通知到指定頻道 / 群組</summary>
+        <p>Hermes 的 cron 排程（自動任務）需要一個地方回報結果。Home Channel 就是那個地方——你設定好之後，排程任務跑完會把輸出送到這個 chat。</p>
+
+        <h4>方式一：用指令設定（推薦）</h4>
+        <p>在你想設為 Home Channel 的 Telegram 對話（DM 或群組）傳送：</p>
+        <pre data-copy><code>/sethome</code></pre>
+        <p>Bot 會回覆確認，之後所有排程輸出都會送到這裡。</p>
+
+        <h4>方式二：寫死進 .env</h4>
+        <p>群組 ID 是<strong>負數</strong>（Telegram 規格），可從 bot log 裡看到。</p>
+        <pre data-copy><code>echo "export TELEGRAM_HOME_CHANNEL=-1001234567890" >> ~/.hermes/.env
+sudo $(which hermes) gateway restart --system</code></pre>
+
+        <h4>Forum 頻道（有 Topics）</h4>
+        <p>如果你的群組開了 Topics，想把排程通知送到特定 topic：</p>
+        <pre data-copy><code>echo "export TELEGRAM_CRON_THREAD_ID=&lt;topic_thread_id&gt;" >> ~/.hermes/.env
+sudo $(which hermes) gateway restart --system</code></pre>
+        <p><code>topic_thread_id</code> 可在 Telegram 網頁版的 URL 看到（格式 <code>?thread=123</code>）。</p>
+      </details>
+
+      <details>
+        <summary>附錄 C · 群組進階設定（白名單、觸發詞、忽略 Thread）</summary>
+
+        <h4>整個群組授權（不用逐人加 user_id）</h4>
+        <p>如果群組很大、成員常換，與其維護一份 user_id 名單，不如直接授權整個群組 chat：</p>
+        <pre data-copy><code>echo "export TELEGRAM_GROUP_ALLOWED_CHATS=-1001234567890" >> ~/.hermes/.env
+sudo $(which hermes) gateway restart --system</code></pre>
+        <p>群組 ID 是負數，可在 bot log 或 Telegram 網頁版 URL 找到。</p>
+
+        <h4>自訂觸發詞（mention_patterns）</h4>
+        <p>除了 @ bot 之外，也可以設定一組關鍵字來觸發 bot——例如讓群組裡輸入「nano」就等同 @bot：</p>
+        <pre data-copy><code>telegram:
+  mention_patterns:
+    - "^\\s*nano\\b"</code></pre>
+        <p>支援正規表示式，不分大小寫。<code>^\s*</code> 代表從訊息開頭開始，<code>\b</code> 確保整詞匹配。</p>
+
+        <h4>忽略特定 Thread（ignored_threads）</h4>
+        <p>Forum 群組裡有些 topic 不想讓 bot 介入（例如公告、閒聊頻道）：</p>
+        <pre data-copy><code>telegram:
+  ignored_threads:
+    - 31
+    - 42</code></pre>
+
+        <div class="notice">⚠️ <strong>重要：改 Group Privacy 後要重新加 bot</strong><br>
+        如果你在 BotFather 修改了 Group Privacy 設定，必須把 bot <strong>踢出群組再重新加入</strong>，設定才會生效。直接重啟 gateway 無效。</div>
+      </details>
+
+      <details>
+        <summary>附錄 D · 同一個群組多支 bot 並存</summary>
+        <p>想在同一個 Telegram 群組裡跑多個功能各異的 hermes bot（例如一支研究、一支記帳）？用 <strong>profile</strong> 機制。</p>
+
+        <h4>核心規則</h4>
+        <ul>
+          <li>每個 bot 需要自己獨立的 Telegram bot token（去 BotFather 申請）</li>
+          <li>每個 profile 跑一個獨立的 gateway 實例</li>
+          <li><strong>絕對不要</strong>讓兩個 gateway 同時使用同一個 token</li>
+        </ul>
+
+        <h4>建立 profile 並啟動各自的 gateway</h4>
+        <pre data-copy><code># 設定 research profile 的 gateway（問你 token 等）
+hermes -p research gateway setup
+# 啟動
+hermes -p research gateway start</code></pre>
+
+        <pre data-copy><code># 第二支 bot（ops）
+hermes -p ops gateway setup
+hermes -p ops gateway start</code></pre>
+
+        <h4>防止 bot 互相觸發（exclusive_bot_mentions）</h4>
+        <p>群組裡同時有多支 hermes bot 時，要避免一則訊息同時觸發全部 bot。在每個 profile 的 <code>config.yaml</code> 加上：</p>
+        <pre data-copy><code>telegram:
+  require_mention: true
+  exclusive_bot_mentions: true</code></pre>
+        <p>效果：<code>@research_bot 分析這份報告</code> 只觸發 research bot，其他 bot 靜默。</p>
+
+        <div class="notice">💡 各 profile 的 config 在 <code>~/.hermes/profiles/&lt;name&gt;/config.yaml</code>，token 在各自的 <code>.env</code> 裡。</div>
+      </details>
+
+      <p><em>附錄到此結束。日常使用不需要這些設定——需要時再回來查就好。</em></p>
     </section>
 
     <nav id="step-nav" class="container">

@@ -13,11 +13,11 @@
 ### 1. install.sh URL 還活著
 
 ```bash
-curl -I https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh
+curl -I https://hermes-agent.nousresearch.com/install.sh
 ```
 
 預期：`HTTP/2 200`。  
-若 404：Nous Research 可能改了 repo 結構 → 找新 URL，更新 Step 6 的指令。
+若 404：去官方安裝文件 <https://hermes-agent.nousresearch.com/docs/getting-started/installation> 確認現行 URL，更新 Step 6 的指令。
 
 ### 2. `hermes setup` 提示順序與選項
 

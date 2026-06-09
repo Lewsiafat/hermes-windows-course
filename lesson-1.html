@@ -77,9 +77,44 @@
         </hgroup>
       </header>
 
-      <p>這份教材會帶你從零安裝好 <strong>hermes-agent</strong>——一個可以在你筆電裡跟你聊天、執行任務、甚至自己學東西的 AI agent。Hermes 不支援原生 Windows，所以我們會先在 Windows 裡裝一個 Linux 子系統 (WSL2)，再把 hermes 裝進那個 Linux 裡。</p>
+      <p>這份教材會帶你從零安裝好 <strong>hermes-agent</strong>——一個可以在你筆電裡跟你聊天、執行任務、甚至自己學東西的 AI agent。</p>
 
-      <h3>今天要走完 4 個 checkpoints</h3>
+      <h3>安裝有兩條路線，先挑一條</h3>
+      <p>新版 hermes 提供官方<strong>桌面安裝程式</strong>，Windows 可以不碰終端機就裝好。先看這兩條路差在哪，挑一條走：</p>
+
+      <div class="grid">
+        <article>
+          <header><strong>🟢 簡單路線</strong>（推薦給只想趕快用起來的人）</header>
+          <p>下載官方桌面安裝程式（Windows <code>.exe</code>），雙擊安裝，<strong>全程圖形介面、不需要 WSL、不碰終端機</strong>。約 10–15 分鐘。</p>
+          <p>往下看本頁「<strong>簡單路線：下載桌面安裝程式</strong>」照做即可，<strong>不必走 Step 2 之後的步驟</strong>。</p>
+        </article>
+        <article>
+          <header><strong>🔧 完整路線</strong>（本頁預設帶你走）</header>
+          <p>在 Windows 裡裝一個 Linux 子系統 (WSL2)，再把 hermes 裝進那個 Linux 裡。會用到終端機，但全程有指令可複製。約 60 分鐘。</p>
+          <p>適合<strong>想順便了解 WSL／終端機</strong>，或<strong>桌面安裝程式在你電腦上裝不起來</strong>的人。直接按頁面底部「下一步」開始 Step 2。</p>
+        </article>
+      </div>
+
+      <h3>簡單路線：下載桌面安裝程式</h3>
+      <ol>
+        <li><strong>先拿一把 OpenRouter API key</strong>：hermes 要靠它才能呼叫 AI 模型。取得方式（免費、純瀏覽器、~5 分鐘）與完整路線相同，見 <a href="#step-3">Step 3</a>，把 key 複製到記事本備用。</li>
+        <li><strong>下載安裝程式</strong>：開 <a href="https://hermes-agent.nousresearch.com/desktop" target="_blank" rel="noopener">hermes-agent.nousresearch.com/desktop</a>，下載 <strong>Windows (.exe)</strong> 安裝檔。</li>
+        <li><strong>執行安裝</strong>：雙擊 <code>.exe</code>，照安裝精靈按下一步。它會自動把 hermes 的指令列工具、桌面 App 與需要的元件一次裝好。</li>
+        <li><strong>開啟 Hermes 桌面 App</strong>：依畫面指示完成設定 → provider 選 <code>OpenRouter</code>、model 挑一個（免費可選名稱含 <code>:free</code> 的 deepseek；付費推薦 <code>deepseek/deepseek-v4-pro</code>）、貼上剛剛那把 API key。</li>
+        <li><strong>開始對話</strong>：在 App 的輸入框打第一句話試試（例：<code>介紹一下你自己</code>）。對話技巧與常用指令可參考 <a href="#step-8">Step 8</a>。</li>
+      </ol>
+      <p>✓ 能對話了？你已經完成安裝，<strong>不需要再走 Step 2 之後的 WSL 步驟</strong>。想接著把 hermes 接到手機（Telegram / LINE），看 <a href="#step-9">Step 9</a> 的下一步建議。</p>
+
+      <details>
+        <summary>關於簡單路線的提醒（請先讀）</summary>
+        <ul>
+          <li>桌面安裝程式是 hermes 官方<strong>目前推薦</strong>的安裝法（<a href="https://hermes-agent.nousresearch.com/desktop" target="_blank" rel="noopener">下載頁</a>標示 v0.16.0），Windows 為原生程式、不需要 WSL2。</li>
+          <li>本段依官方安裝文件撰寫，<strong>桌面 App 的實際畫面與按鈕文字可能與此處描述略有出入</strong>；遇到對不上的地方，照 App 畫面的指示走即可。</li>
+          <li><strong>裝不起來 / 卡關？</strong>改走下面的完整路線（WSL2）一樣能完成，按頁面底部「下一步」開始 Step 2。</li>
+        </ul>
+      </details>
+
+      <h3>完整路線：今天要走完 4 個 checkpoints</h3>
       <ol>
         <li>☐ 安裝 WSL2 + Ubuntu</li>
         <li>☐ 申請 OpenRouter（免費 LLM API 入口，不需要刷卡）</li>
@@ -98,7 +133,7 @@
       <h3>加碼預告（時間夠才會講）</h3>
       <p>如果安裝順利、有時間剩，會帶你看 <strong>LINE Messaging API</strong> 或 <strong>Telegram bot</strong> 的申請流程，這樣下一堂課就能直接接通讓你從手機跟 hermes 講話。</p>
 
-      <p><em>右下角「下一步」按鈕在頁面底部，本頁不需要做任何事，準備好就往下走。</em></p>
+      <p><em>挑好路線了嗎？走簡單路線就照上面做；走完整路線按頁面底部「下一步」開始 Step 2。</em></p>
     </section>
 
     <section class="step" data-step="2" hidden>
@@ -293,7 +328,7 @@ cd ~</code></pre>
       </ol>
 
       <h3>指令</h3>
-      <pre data-copy><code>curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash</code></pre>
+      <pre data-copy><code>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code></pre>
 
       <details>
         <summary><code>curl | bash</code> 在做什麼？這安全嗎？</summary>

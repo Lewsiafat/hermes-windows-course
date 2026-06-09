@@ -241,7 +241,7 @@
 2. 鍵盤輸入或 Ctrl+Shift+V 貼上：
 
 ```
-curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 ```
 
 3. 按 Enter
@@ -782,7 +782,7 @@ Window C 重啟 gateway，手機再送一句 → 仍收到回應。
 **ACTION:** 在任意機器（Linux/Mac/WSL2/macOS Terminal）跑：
 
 ```bash
-curl -fsI https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh
+curl -fsI https://hermes-agent.nousresearch.com/install.sh
 ```
 
 **EXPECTED:**
@@ -790,9 +790,10 @@ curl -fsI https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scrip
 - exit code 0（沒輸出錯誤）
 
 **FAIL 處理:**
-- 若 404 / 403：去 `https://github.com/NousResearch/hermes-agent` 找新的 install.sh URL（可能在 `scripts/` 或 `docs/` 下）
-- 找到後 → 更新 repo 三處：
+- 若 404 / 403：去官方安裝文件 `https://hermes-agent.nousresearch.com/docs/getting-started/installation` 確認現行 URL（舊備援 raw URL：`https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh`）
+- 找到後 → 更新 repo 四處：
   - `lesson-1.html` 的 Step 6 指令塊
+  - `mac.html` 的 Step 4 指令塊
   - `pre-class-checklist.md` Check 1 的 URL
   - 本檔 (`ai-runbook.md`) Stage 6 與 Check 1 的 URL
 - commit、push

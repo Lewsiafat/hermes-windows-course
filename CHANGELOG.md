@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-09
+
+新增「桌面安裝程式」簡單路線（Hermes Desktop Installer），並把安裝指令的 install.sh 改用官方現行 vanity URL。
+
+### Added
+
+- **Lesson 1 / macOS 頁新增「簡單路線」分岔**：`lesson-1.html`、`mac.html` 的 Step 1 新增「安裝有兩條路線」雙欄卡片 + 桌面安裝程式流程（Windows `.exe` / macOS `.dmg`，下載頁 https://hermes-agent.nousresearch.com/desktop 標示 v0.16.0）。推薦給只想趕快用起來、不想碰終端機的非開發者；既有 WSL2／終端機路線原樣保留為「完整路線」，`wizard.js` 與 `TOTAL_STEPS`（9 / 7）不變。簡單路線含誠實揭露摺疊（依官方文件撰寫、未經 smoke test、裝不起來可改走完整路線）。
+
+### Changed
+
+- **install.sh 改用官方 vanity URL**：`lesson-1.html` Step 6 與 `mac.html` Step 4 的安裝指令由 `raw.githubusercontent.com/.../scripts/install.sh` 改為 `https://hermes-agent.nousresearch.com/install.sh`（舊 URL 仍回 200，屬現代化、非修壞）。`pre-class-checklist.md`、`ai-runbook.md` 的 URL 檢查段與 404 fallback 指引同步更新。
+
 ## [1.1.1] - 2026-06-04
 
 ### Fixed

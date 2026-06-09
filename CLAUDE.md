@@ -80,6 +80,8 @@ gh api --method POST repos/Lewsiafat/hermes-windows-course/pages/builds   # 手�
 
 `mac.html` 是 lesson-1（Windows 安裝）的 macOS 對應版，兩者走同一條旅程（裝 hermes → OpenRouter key → `hermes setup` → 首次對話）。改 lesson-1 的安裝步驟、hermes 版本、`hermes setup` 提示順序或 OpenRouter UI 描述時，**必須檢查 `mac.html` 是否要同步**。`pre-class-checklist.md` 列的 3 個最易壞點對兩頁都適用。兩頁之間沒有自動 lint。
 
+兩頁的 **Step 1 都有「簡單路線（桌面安裝程式）↔ 完整路線（WSL2／終端機）」分岔**（雙欄卡片 + 簡單路線清單），改其中一頁的分岔文案時另一頁要同步。簡單路線用的是官方 Hermes Desktop Installer（Windows `.exe` / macOS `.dmg`，需 macOS 12+），**此路線無法在維護機 smoke test、內容依官方文件撰寫**——頁面已有誠實揭露摺疊，修改時保留該揭露、且**不要**因為它而更新 README「上次驗證」或 footer 版本（那兩處只反映 WSL2／終端機路線的實測結果）。簡單路線靠 `#step-N` 跨步連結導航（拿 key / 看對話技巧），不用自訂頁內錨點（`wizard.js` hashchange 會 `scrollTo top`，自訂錨點會被打回頂端）。
+
 ### 設計與實作文件
 
 - `docs/superpowers/specs/` — 課程設計規格（學員定位、時間表、教學原則）

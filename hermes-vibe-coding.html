@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Vibe Coding 實戰 · superpowers + Git</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-total-steps="5" data-storage-key="hermes-vibe-coding-step">
+  <header class="container">
+    <hgroup>
+      <h1>Vibe Coding 實戰 · superpowers + Git</h1>
+      <p>用 hermes + superpowers 走一輪完整的 AI 驅動開發流程，學會 git 基礎 + 每階段自動 commit，60–90 分鐘</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- ===================== Step 0: 前言 ===================== -->
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 什麼是 Vibe Coding？什麼是 Superpowers？</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>Vibe Coding 是什麼</h3>
+      <p>Vibe Coding 是一種<strong>你主導方向、AI 執行實作</strong>的開發方式。你不需要一行一行寫程式——你描述你要什麼，AI agent 幫你寫。但「叫 AI 寫 code」跟「AI 寫出好 code」中間差很遠。大多數人第一次嘗試都遇到同樣的問題：AI 跳過設計直接亂寫、沒有測試、改到一半偏離需求。</p>
+
+      <h3>Superpowers 是什麼</h3>
+      <p><a href="https://github.com/obra/superpowers">Superpowers</a> 是一套<strong>給 coding agent 用的完整開發方法論</strong>，打包成一組 skills。它不是一個「能讓 AI 跑程式碼」的工具——hermes 本身就有 tool-use（shell、檔案讀寫等）。Superpowers 的價值是：<strong>自動在正確的時機觸發正確的工作流程</strong>，而且每個階段都會用 git commit 留下紀錄。</p>
+
+      <p>裝好之後，你只要說「幫我做一個 X」，superpowers 就會自動走過這些階段：</p>
+      <ol>
+        <li><strong>Brainstorming</strong>——先問你需求、釐清設計，不會直接跳進寫 code</li>
+        <li><strong>Git Worktree</strong>——建立隔離的開發環境（一條新的 branch）</li>
+        <li><strong>Writing Plans</strong>——把設計拆成一個個 2~5 分鐘的小任務</li>
+        <li><strong>Subagent-Driven Development</strong>——每個任務派一個子 agent 執行，搭配 TDD（先寫測試再寫 code）</li>
+        <li><strong>Code Review</strong>——對照計畫逐項檢查</li>
+        <li><strong>Finishing</strong>——merge 或 PR，收尾</li>
+      </ol>
+      <p>每個階段都會自動 commit——所以你回頭看 git log，就能看到整個開發歷程，一步一步清清楚楚。</p>
+
+      <h3>今天會做什麼</h3>
+      <ol>
+        <li><strong>Step 1</strong>：在 hermes TUI 安裝 superpowers（用 URL 安裝）</li>
+        <li><strong>Step 2</strong>：建立專案資料夾 + 初始化 git</li>
+        <li><strong>Step 3</strong>：簡短認識 git——什麼是版本控管、為什麼要用</li>
+        <li><strong>Step 4</strong>：用 superpowers 走完開發流程——看每個階段怎麼自動 commit</li>
+        <li><strong>Step 5</strong>：收尾——回顧成果、下次預告</li>
+      </ol>
+
+      <h3>3 個 checkpoints</h3>
+      <ol>
+        <li>Superpowers 安裝成功、<code>/skills</code> 列表看得到</li>
+        <li>專案資料夾建好、git init 完成</li>
+        <li>Superpowers 跑完整輪、git log 看到各階段的 commit</li>
+      </ol>
+
+      <details>
+        <summary>前置條件</summary>
+        <p>這堂課假設你已完成 <a href="lesson-1.html">Lesson 1（安裝 hermes）</a>，hermes 可以在你的機器上正常對話。不需要做過 Lesson 2–5。</p>
+        <p>本堂是<strong>實作課</strong>，hermes 在課堂中會幫你寫程式——<strong>需要付費 model</strong>（<code>/model anthropic:claude-sonnet-4</code> 或同等）。Superpowers 的 SDD 流程會派子 agent，免費 model 幾乎無法完成。</p>
+        <p>你的 WSL Ubuntu 需要有 <code>git</code>。大部分 Ubuntu 預裝了，確認一下：</p>
+        <pre data-copy><code>git --version</code></pre>
+        <p>如果沒有，裝一下：</p>
+        <pre data-copy><code>sudo apt install git -y</code></pre>
+      </details>
+    </section>
+
+    <!-- ===================== Step 1: 安裝 superpowers ===================== -->
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 5 · 安裝 superpowers</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Superpowers 是一組遵循 <a href="https://agentskills.io">agentskills.io</a> 開放標準的 skills。hermes 的 TUI 內建了 Skills Hub，可以直接用 URL 安裝——不需要手動 clone。</p>
+
+      <h3>在 hermes TUI 輸入安裝指令</h3>
+      <p>打開 hermes TUI，輸入：</p>
+      <pre data-copy><code>/skills install https://github.com/obra/superpowers</code></pre>
+      <p>hermes 會從 GitHub 抓取 superpowers 的所有 skills，安裝到 <code>~/.hermes/skills/</code> 目錄下。</p>
+
+      <p>安裝完成後，你會擁有這些 skills：</p>
+      <ul>
+        <li><code>using-superpowers</code>——核心 bootstrap，讓所有 skills 自動觸發</li>
+        <li><code>brainstorming</code>——需求釐清 + 設計</li>
+        <li><code>writing-plans</code>——把設計拆成可執行任務</li>
+        <li><code>executing-plans</code>——照計畫一步步實作</li>
+        <li><code>subagent-driven-development</code>——派子 agent + 兩階段 review</li>
+        <li><code>test-driven-development</code>——TDD 循環</li>
+        <li><code>using-git-worktrees</code>——隔離開發環境</li>
+        <li><code>requesting-code-review</code> / <code>receiving-code-review</code>——code review 流程</li>
+        <li><code>finishing-a-development-branch</code>——收尾 merge/PR</li>
+        <li><code>systematic-debugging</code>——系統化除錯</li>
+        <li><code>verification-before-completion</code>——完成前最終驗證</li>
+      </ul>
+
+      <h3>驗證安裝</h3>
+      <p>在 hermes TUI 輸入：</p>
+      <pre data-copy><code>/skills</code></pre>
+      <p>確認列表裡看到 <code>using-superpowers</code>、<code>brainstorming</code>、<code>writing-plans</code> 等 skills。有看到就代表安裝成功。</p>
+
+      <p>✓ <code>/skills</code> 列表看到 superpowers 的 skills → <strong>checkpoint 1 完成</strong>。</p>
+
+      <details>
+        <summary>我卡住了</summary>
+
+        <h4><code>/skills</code> 沒列出 superpowers</h4>
+        <ol>
+          <li>傳 <code>/new</code> 重開對話——superpowers 的 bootstrap 是在對話開始時觸發的，重開可以讓 hermes 重新掃描 skills</li>
+          <li>如果 URL 安裝有問題，可以改用 git clone 手動安裝：</li>
+        </ol>
+        <pre data-copy><code>git clone https://github.com/obra/superpowers.git ~/.hermes/skills/superpowers</code></pre>
+        <p>然後再 <code>/new</code> 重開對話。</p>
+
+        <h4>安裝時出現安全掃描警告</h4>
+        <p>hermes 對所有從外部安裝的 skills 會做安全掃描。如果看到 CAUTION 但你信任 superpowers（它是開源且被廣泛使用的），可以加 <code>--force</code> 重試：</p>
+        <pre data-copy><code>/skills install https://github.com/obra/superpowers --force</code></pre>
+      </details>
+    </section>
+
+    <!-- ===================== Step 2: 建立專案 + git init ===================== -->
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 5 · 建立專案資料夾 + 初始化 git</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Superpowers 的核心流程需要 git——它會在每個開發階段自動 commit，幫你留下完整紀錄。所以在開始之前，我們先建好專案資料夾並初始化 git。</p>
+
+      <h3>1. 建立專案資料夾</h3>
+      <p>想一個你想做的小工具名稱。開一個 WSL 終端機（不是 hermes TUI），建立資料夾：</p>
+      <pre data-copy><code>mkdir ~/my-first-project
+cd ~/my-first-project</code></pre>
+      <p>（把 <code>my-first-project</code> 換成你想要的名字，例如 <code>csv-analyzer</code>、<code>todo-cli</code> 等。）</p>
+
+      <h3>2. 初始化 git</h3>
+      <p>在專案資料夾裡：</p>
+      <pre data-copy><code>git init</code></pre>
+      <p>你會看到類似這樣的訊息：</p>
+      <pre><code>Initialized empty Git repository in /home/你的名字/my-first-project/.git/</code></pre>
+      <p>這代表 git 已經開始追蹤這個資料夾了。</p>
+
+      <h3>3. 設定 git 的名字和 email（第一次用 git 才需要）</h3>
+      <p>如果你從來沒設定過 git，它會在第一次 commit 時報錯。先設好：</p>
+      <pre data-copy><code>git config --global user.name "你的名字"
+git config --global user.email "你的email"</code></pre>
+      <p>這只是 commit 紀錄上會顯示的名字，不需要是真實 email。</p>
+
+      <h3>4. 確認 git 狀態</h3>
+      <pre data-copy><code>git status</code></pre>
+      <p>應該看到：</p>
+      <pre><code>On branch main
+No commits yet
+nothing to commit</code></pre>
+      <p>空的、乾淨的——正是我們要的起點。</p>
+
+      <p>✓ 專案資料夾建好、<code>git init</code> 完成、<code>git status</code> 正常 → <strong>checkpoint 2 完成</strong>。</p>
+
+      <details>
+        <summary>我卡住了</summary>
+
+        <h4><code>git init</code> 說找不到 git</h4>
+        <p>WSL Ubuntu 需要安裝 git：</p>
+        <pre data-copy><code>sudo apt install git -y</code></pre>
+
+        <h4>branch 名稱是 <code>master</code> 不是 <code>main</code></h4>
+        <p>舊版 git 預設 branch 叫 <code>master</code>，不影響操作。想改成 <code>main</code>：</p>
+        <pre data-copy><code>git branch -m master main</code></pre>
+      </details>
+    </section>
+
+    <!-- ===================== Step 3: Git 是什麼 ===================== -->
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 5 · Git 是什麼？為什麼 Vibe Coding 需要它？</h2>
+          <p>~5 分鐘（讀完就好，不用動手）</p>
+        </hgroup>
+      </header>
+
+      <p>上一步你已經跑了 <code>git init</code>。在讓 superpowers 開始大展身手之前，花幾分鐘了解 git 在幹什麼——不用精通，知道三件事就夠了。</p>
+
+      <h3>1. Git 是「版本控管」工具</h3>
+      <p>想像你在寫一篇很長的報告。每寫完一段，你存一個版本：<code>報告v1.docx</code>、<code>報告v2.docx</code>、<code>報告v3-最終版.docx</code>、<code>報告v3-最終版-真的最終.docx</code>……</p>
+      <p>Git 做的就是這件事，但更聰明：</p>
+      <ul>
+        <li>它不需要你手動存不同檔案——每次「commit」就是一個存檔點</li>
+        <li>每個存檔點都有一行訊息描述「這次改了什麼」</li>
+        <li>你隨時可以回到任何一個存檔點</li>
+        <li>它只存「改動」，不會佔一堆空間</li>
+      </ul>
+
+      <h3>2. 為什麼 Vibe Coding 特別需要 git</h3>
+      <p>當 AI 幫你寫 code 時，它一次可能改動十幾個檔案。如果改壞了，沒有 git 你就只能從頭來過。有了 git：</p>
+      <ul>
+        <li><strong>每個階段自動存檔</strong>——superpowers 會在 brainstorm 完、plan 完、每個任務實作完時自動 commit。壞了就回到上一個好的存檔點。</li>
+        <li><strong>Branch（分支）= 安全的實驗空間</strong>——superpowers 會開一條新的 branch 來寫 code，主線（main）不受影響。滿意了再合併，不滿意就丟掉。</li>
+        <li><strong>看得到 AI 做了什麼</strong>——<code>git log</code> 列出每一步的 commit 訊息，<code>git diff</code> 看改了哪些行。AI 不再是黑箱。</li>
+      </ul>
+
+      <h3>3. 你只需要記住這幾個指令</h3>
+      <p>Superpowers 會自動幫你 commit，你不太需要手動操作。但知道怎麼「看」很重要：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>指令</th>
+            <th>作用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>git status</code></td><td>看目前有哪些檔案被改了</td></tr>
+          <tr><td><code>git log --oneline</code></td><td>看所有 commit 的一行摘要</td></tr>
+          <tr><td><code>git diff</code></td><td>看目前還沒 commit 的改動</td></tr>
+          <tr><td><code>git branch</code></td><td>看目前有哪些 branch</td></tr>
+        </tbody>
+      </table>
+      <p>接下來 Step 4 跑完 superpowers 之後，你會用 <code>git log --oneline</code> 親眼看到每個階段的 commit——那時候這些指令就會變得很具體。</p>
+
+      <details>
+        <summary>想學更多 git？</summary>
+        <p>這堂課只教 git 最核心的概念，夠你配合 superpowers 使用。如果想深入學：</p>
+        <ul>
+          <li><a href="https://git-scm.com/book/zh-tw/v2">Pro Git（繁體中文版）</a>——免費線上教材，從基礎到進階都有</li>
+          <li>GitHub 的 <a href="https://docs.github.com/en/get-started/getting-started-with-git">Getting Started with Git</a>——簡短、實用</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- ===================== Step 4: Superpowers 各階段 + commit ===================== -->
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 5 · Superpowers 各階段 + 自動 commit</h2>
+          <p>~40 分鐘（★ 主場——看 superpowers 驅動整個開發流程）</p>
+        </hgroup>
+      </header>
+
+      <p>現在 superpowers 裝好了、git 也初始化了。打開 hermes TUI，<code>cd</code> 到你的專案資料夾，然後告訴 hermes 你想做什麼。Superpowers 會<strong>自動驅動整個開發流程</strong>，每個階段都會留下 commit。</p>
+
+      <h3>0. 進入專案目錄、開新對話</h3>
+      <p>在 hermes TUI 裡：</p>
+      <pre data-copy><code>/new</code></pre>
+      <p>重開一個新對話讓 superpowers 的 bootstrap 生效。然後確認你在專案目錄裡（hermes 有 shell 工具，它可以 <code>cd</code>）。</p>
+
+      <h3>1. 說出你想做的東西</h3>
+      <p>挑一個你真的想要的小工具（不要太大，30~60 分鐘的實作量）。直接跟 hermes 說：</p>
+      <pre data-copy><code>幫我在這個資料夾做一個 [描述你的工具]</code></pre>
+      <p>例如：</p>
+      <ul>
+        <li>「幫我做一個 CLI 工具，讀取一個 CSV 檔案，算出每欄的平均值和最大值」</li>
+        <li>「幫我做一個 Python 腳本，把一個資料夾裡所有圖片轉成 webp 格式」</li>
+        <li>「幫我做一個簡單的 todo list 網頁，可以新增和刪除待辦事項」</li>
+      </ul>
+
+      <blockquote>
+        <strong>第一次建議選「你知道輸入長什麼樣」的工具。</strong>能說清楚「輸入是 X，我要 Y」，superpowers 的 brainstorming 會更有效率。
+      </blockquote>
+
+      <h3>階段 A：Brainstorming（自動觸發）</h3>
+      <p><code>using-superpowers</code> 這個 bootstrap skill 會在對話開始時自動載入。當你說「幫我做一個 X」，它不會直接寫 code——而是觸發 <code>brainstorming</code> skill：</p>
+      <ul>
+        <li><strong>提問</strong>——問你需求上模糊的地方（「輸入如果有空行怎麼辦？」「要支援哪些格式？」）</li>
+        <li><strong>探索替代方案</strong>——「用 pandas 還是純 Python？」</li>
+        <li><strong>分段呈現設計</strong>——不會一次丟一大塊，而是短到你真的會看完的段落</li>
+      </ul>
+      <p>你的工作就是<strong>看它的問題、給明確答案</strong>。不確定的地方講「你決定」也行。Brainstorm 結束時，hermes 會呈現一份完整設計摘要——你說「好，按這個做」就進入下一階段。</p>
+
+      <h3>階段 B：Git Worktree（自動觸發）</h3>
+      <p>設計確認後，superpowers 的 <code>using-git-worktrees</code> skill 會自動建立一個 <strong>git worktree</strong>——在一條新的 branch 上工作，不會弄髒你的 main branch。</p>
+      <p>你會在終端看到類似：</p>
+      <pre><code>Switched to a new branch 'feature/csv-analyzer'</code></pre>
+      <p>這就是 Step 3 說的「branch = 安全的實驗空間」——所有接下來的開發都在這條 branch 上進行。</p>
+
+      <h3>階段 C：Writing Plans（自動觸發）</h3>
+      <p><code>writing-plans</code> skill 會把設計拆成具體的任務清單：</p>
+      <ul>
+        <li>每個任務 2~5 分鐘可完成</li>
+        <li>每個任務附上確切的檔案路徑、程式碼範圍、驗證步驟</li>
+        <li>計畫會呈現給你看——確認後才開始實作</li>
+      </ul>
+
+      <h3>階段 D：Subagent-Driven Development + TDD（自動觸發）</h3>
+      <p>這是 superpowers 最強大的部分。<code>subagent-driven-development</code> skill 會：</p>
+      <ol>
+        <li><strong>對每個任務派一個子 agent</strong>——子 agent 只專注於這個任務</li>
+        <li><strong>TDD 循環</strong>——先寫一個會 fail 的測試（RED），再寫實作讓它通過（GREEN），最後重構（REFACTOR）</li>
+        <li><strong>每完成一個 RED-GREEN-REFACTOR 循環就 commit</strong>——你的 git log 會看到一步一步的進度</li>
+        <li><strong>兩階段自動 review</strong>——第一階段檢查「有沒有按規格做」，第二階段檢查「程式碼品質」</li>
+        <li><strong>繼續下一個任務</strong>——直到計畫裡所有任務完成</li>
+      </ol>
+      <p>這個過程可能需要 10~30 分鐘。你主要是<strong>看它跑</strong>，在關鍵節點確認。</p>
+
+      <details>
+        <summary>實作過程提醒</summary>
+        <ul>
+          <li><strong>別急著打斷</strong>：SDD 設計上就是讓 agent 自主跑完一連串任務。中途打斷會讓上下文混亂</li>
+          <li><strong>有 error 不等於失敗</strong>：TDD 的 RED 階段本來就會有 test failure——那是正常的。等它自己修到 GREEN</li>
+          <li><strong>真的卡住才介入</strong>：如果同一個 error 反覆出現超過 3 次，才需要你說「試試另一個方向」</li>
+        </ul>
+      </details>
+
+      <h3>階段 E：Code Review（自動觸發）</h3>
+      <p>SDD 跑完後，<code>requesting-code-review</code> skill 會自動啟動最終 review：</p>
+      <ul>
+        <li><strong>Critical</strong>——必須修，會擋住進度</li>
+        <li><strong>Major</strong>——強烈建議修</li>
+        <li><strong>Minor</strong>——改了更好，不改也行</li>
+      </ul>
+      <p>如果有 Critical issue，hermes 會自動修正然後重新 review。修完也會 commit。</p>
+
+      <h3>看看 git log</h3>
+      <p>Superpowers 跑完後，回到 WSL 終端機，在專案目錄裡跑：</p>
+      <pre data-copy><code>git log --oneline</code></pre>
+      <p>你會看到一連串 commit——每一行就是開發過程中的一步。從最早的設計到最後的 review，superpowers 幫你留下了完整的開發歷程。</p>
+
+      <p>也可以看更詳細的版本：</p>
+      <pre data-copy><code>git log --oneline --graph --all</code></pre>
+      <p>這會顯示 branch 的分支圖——你的 feature branch 從 main 分出去的樣子一目了然。</p>
+
+      <p>✓ Superpowers 跑完整輪、<code>git log</code> 看到各階段的 commit → <strong>checkpoint 3 完成</strong>。</p>
+
+      <details>
+        <summary>我卡住了</summary>
+
+        <h4>hermes 沒跑 brainstorming、直接開始寫 code</h4>
+        <ol>
+          <li>傳 <code>/new</code> 重開對話——superpowers 的 bootstrap 是在對話開始時觸發的</li>
+          <li>確認 <code>/skills</code> 列表有 <code>using-superpowers</code></li>
+          <li>如果用免費 model，它可能推理力不足以遵循 skill 指令——請切換到付費 model（<code>/model anthropic:claude-sonnet-4</code>）</li>
+        </ol>
+
+        <h4>hermes 沒有自動派子 agent</h4>
+        <p>SDD 需要 model 支援子 agent 功能。確認你用的是付費 model。免費 model 不支援子 agent dispatch。</p>
+
+        <h4>子 agent 一直 fail</h4>
+        <p>先看 review 結果——如果是「規格不符」，可能是 brainstorming 的設計不夠清楚。直接說：「這個任務的需求其實是 [更清楚的描述]，重跑這個任務。」</p>
+
+        <h4>跑太久 / 無限迴圈</h4>
+        <p>在 hermes TUI 按 <code>Ctrl+C</code> 中斷，然後說：「跳過這個任務，先做下一個。」</p>
+
+        <h4><code>git log</code> 沒看到 commit</h4>
+        <p>確認你在正確的 branch 上。跑 <code>git branch</code> 看看——superpowers 可能在 feature branch 上工作。切換過去：</p>
+        <pre data-copy><code>git branch</code></pre>
+        <pre data-copy><code>git checkout feature/你的分支名</code></pre>
+        <p>然後再跑 <code>git log --oneline</code>。</p>
+      </details>
+    </section>
+
+    <!-- ===================== Step 5: 收尾 ===================== -->
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 5 · 收尾</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>恭喜，3 個 checkpoints 全部完成：</p>
+      <ol>
+        <li>✓ Superpowers 安裝成功、<code>/skills</code> 列表看得到</li>
+        <li>✓ 專案資料夾建好、git init 完成</li>
+        <li>✓ Superpowers 跑完整輪、git log 看到各階段的 commit</li>
+      </ol>
+
+      <h3>Finishing：merge 或 PR</h3>
+      <p>Superpowers 的 <code>finishing-a-development-branch</code> skill 會在最後呈現選項：</p>
+      <ol>
+        <li><strong>Merge</strong>——把 feature branch 合併到 main</li>
+        <li><strong>PR</strong>——開一個 Pull Request（需要 remote repo）</li>
+        <li><strong>Discard</strong>——丟棄這次實作</li>
+      </ol>
+      <p>第一次做，直接選 merge 就好。hermes 會幫你處理 git 操作。</p>
+
+      <h3>回顧：你剛剛走過的完整流程</h3>
+      <p><strong>Brainstorming → Git Worktree → Writing Plans → SDD + TDD（自動實作 + 自動 commit）→ Code Review → Finishing</strong></p>
+      <p>這就是 superpowers 帶來的 Vibe Coding 流程。你只需要在關鍵節點做決定（確認設計、確認計畫、確認 merge），其餘交給 skills 自動驅動。而 git 忠實記錄了每一步——你隨時可以回頭看、回頭改。</p>
+
+      <h3>你學到的 git 概念</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>概念</th>
+            <th>你體驗到了什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>commit</strong>（存檔點）</td><td>Superpowers 在每個 TDD 循環、每次 review 修正後自動 commit</td></tr>
+          <tr><td><strong>branch</strong>（分支）</td><td>Superpowers 用 git worktree 在 feature branch 上開發，main 不受影響</td></tr>
+          <tr><td><strong>merge</strong>（合併）</td><td>Finishing 階段把 feature branch 合併回 main</td></tr>
+          <tr><td><strong>git log</strong></td><td>你用它看到了整個開發歷程的每一步</td></tr>
+        </tbody>
+      </table>
+
+      <details>
+        <summary>加碼 A · 用 superpowers 除錯</summary>
+        <p>之後程式出了 bug，不要直接叫 hermes 修——讓它觸發 <code>systematic-debugging</code> skill。Superpowers 的除錯流程是 4 階段 root cause analysis：先重現、再縮小範圍、找到根因、最後修。比「你修一下」精確得多。</p>
+      </details>
+
+      <details>
+        <summary>加碼 B · 寫自己的 skills</summary>
+        <p>Superpowers 裡有一個 <code>writing-skills</code> skill，教你怎麼寫自己的 SKILL.md。如果你有重複性的工作流程，可以把它包成 skill：</p>
+        <pre data-copy><code>/writing-skills</code></pre>
+      </details>
+
+      <details>
+        <summary>加碼 C · 更新 superpowers</summary>
+        <p>Superpowers 持續更新。如果你是用 URL 安裝的，重新跑一次安裝指令即可。如果是 git clone 的：</p>
+        <pre data-copy><code>cd ~/.hermes/skills/superpowers && git pull</code></pre>
+        <p>然後 <code>/new</code> 重開對話。</p>
+      </details>
+
+      <h3>Superpowers skills 速查表</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>用途</th>
+            <th>觸發時機</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>using-superpowers</code></td><td>Bootstrap，讓其他 skills 自動觸發</td><td>每次對話開始</td></tr>
+          <tr><td><code>brainstorming</code></td><td>需求釐清 + 設計</td><td>你說「做一個 X」</td></tr>
+          <tr><td><code>writing-plans</code></td><td>拆任務、寫實作計畫</td><td>設計核可後</td></tr>
+          <tr><td><code>executing-plans</code></td><td>按計畫逐步執行</td><td>計畫確認後</td></tr>
+          <tr><td><code>subagent-driven-development</code></td><td>子 agent 實作 + 雙重 review</td><td>執行計畫時</td></tr>
+          <tr><td><code>test-driven-development</code></td><td>RED-GREEN-REFACTOR 循環</td><td>寫程式時</td></tr>
+          <tr><td><code>using-git-worktrees</code></td><td>隔離開發環境</td><td>開始實作前</td></tr>
+          <tr><td><code>requesting-code-review</code></td><td>發起 code review</td><td>實作完成後</td></tr>
+          <tr><td><code>receiving-code-review</code></td><td>處理 review 回饋</td><td>收到 review 時</td></tr>
+          <tr><td><code>finishing-a-development-branch</code></td><td>merge / PR / discard</td><td>review 通過後</td></tr>
+          <tr><td><code>systematic-debugging</code></td><td>4 階段除錯</td><td>遇到 bug 時</td></tr>
+          <tr><td><code>verification-before-completion</code></td><td>完成前最終驗證</td><td>宣告完成前</td></tr>
+        </tbody>
+      </table>
+
+      <h3>下次可以做什麼</h3>
+      <ul>
+        <li>如果你還沒做過 <a href="lesson-2.html">Lesson 2（接 Telegram）</a>——讓你在手機上也能跟 hermes 對話</li>
+        <li><a href="lesson-5.html">Lesson 5（自動化 workflow）</a>——用 cron + skill 做自動排程</li>
+        <li>用同樣的 superpowers 流程做第二個專案——熟悉了之後會越來越快</li>
+      </ul>
+
+      <p><em>這就是 Vibe Coding 實戰的全部。Superpowers 讓你的 coding agent 從「聽指令做事」變成「自主遵循完整工程方法論」——你只需要把握方向，git 幫你記錄一切。祝你打造出好工具。</em></p>
+    </section>
+
+    <nav id="step-nav" class="container">
+      <button id="prev-btn" type="button">← 上一步</button>
+      <button id="next-btn" type="button" class="primary">下一步 →</button>
+    </nav>
+  </main>
+
+  <footer class="container">
+    <small>對應 hermes-agent + <a href="https://github.com/obra/superpowers">superpowers</a> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="index.html">課程首頁</a></small>
+  </footer>
+
+  <script src="wizard.js" defer></script>
+</body>
+</html>

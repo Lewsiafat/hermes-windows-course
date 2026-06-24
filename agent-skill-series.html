@@ -625,7 +625,7 @@
       <div class="persona-card">
         <h4>📦 輕量入門包（推薦 80% 的 Vibe Coder）</h4>
         <p><strong>🔵 Agent Skills</strong> via Plugin marketplace</p>
-        <pre><code data-copy>/plugin install agent-skills@addy-agent-skills</code></pre>
+        <pre data-copy><code>/plugin install agent-skills@addy-agent-skills</code></pre>
         <ul>
           <li>8 個 slash 指令覆蓋完整開發週期</li>
           <li>Token 開銷可控，不影響現有工作流</li>
@@ -648,7 +648,7 @@ cd ~/.claude/plugins/gstack && bun run setup</code></pre>
       <div class="persona-card">
         <h4>📦 大型專案包（認真做長期專案）</h4>
         <p><strong>🔴 GSD Core</strong> via npx</p>
-        <pre><code data-copy>npx @opengsd/gsd-core@latest</code></pre>
+        <pre data-copy><code>npx @opengsd/gsd-core@latest</code></pre>
         <ul>
           <li>單一系統即可，不需要疊加其他</li>
           <li><code>.planning/</code> 提供完整的專案記憶</li>
@@ -707,26 +707,11 @@ cd ~/.claude/plugins/gstack && bun run setup</code></pre>
   </main>
 
   <footer id="step-nav" class="container">
-    <button id="btn-prev" class="secondary outline" disabled>← 上一步</button>
-    <button id="btn-next">下一步 →</button>
+    <button id="prev-btn" class="secondary outline" disabled>← 上一步</button>
+    <button id="next-btn">下一步 →</button>
   </footer>
 
   <script src="wizard.js"></script>
-  <script>
-    // copy buttons
-    document.querySelectorAll('pre').forEach(pre => {
-      const code = pre.querySelector('[data-copy]');
-      if (!code) return;
-      const btn = document.createElement('button');
-      btn.className = 'copy-btn';
-      btn.textContent = '複製';
-      btn.onclick = () => {
-        navigator.clipboard.writeText(code.textContent.trim());
-        btn.textContent = '✓';
-        setTimeout(() => btn.textContent = '複製', 1500);
-      };
-      pre.appendChild(btn);
-    });
-  </script>
+
 </body>
 </html>

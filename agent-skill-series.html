@@ -123,7 +123,7 @@
     }
   </style>
 </head>
-<body data-total-steps="5" data-storage-key="agent-skill-series-step">
+<body data-total-steps="6" data-storage-key="agent-skill-series-step">
   <header class="container">
     <hgroup>
       <h1>AI Agent Skill 系列比較</h1>
@@ -700,7 +700,224 @@ cd ~/.claude/plugins/gstack && bun run setup</code></pre>
 
       <p>沒有「最好的」——只有「最適合你的」。建議從 <strong>Agent Skills</strong> 入門，遇到瓶頸後根據具體痛點選擇升級路徑。</p>
 
-      <p>👏 恭喜完成 AI Agent Skill 系列比較指南！</p>
+      <p>👏 恭喜完成 AI Agent Skill 系列比較指南！接下來可以閱讀附錄的完整深度報告。</p>
+    </section>
+
+
+    <!-- ── Step 6: 附錄 深度研究報告 ─────────────────── -->
+    <section class="step" data-step="6" hidden>
+      <header>
+        <hgroup>
+          <h2>附錄 · Opus 4.8 深度研究完整報告</h2>
+          <p>由 Claude Opus 4.8 實際抓取四個 GitHub Repo 後撰寫</p>
+        </hgroup>
+      </header>
+
+      <blockquote>
+        <p>調查日期：2026-06-24<br>
+        調查對象：addyosmani/agent-skills、obra/Superpowers、garrytan/gstack、open-gsd/gsd-core<br>
+        研究方式：直接讀取各 repo 的 README、SKILL.md、目錄結構</p>
+      </blockquote>
+
+      <hr>
+
+      <h2>一、各系列摘要</h2>
+
+      <h3>1. 🔵 Agent Skills（addyosmani/agent-skills）</h3>
+      <p><strong>開發者：</strong> Addy Osmani（前 Google Chrome 工程總監、知名前端效能專家）</p>
+      <p><strong>核心哲學：</strong> 將資深工程師的最佳實踐編碼為「流程而非文章」（Process, not prose），讓 AI agent 能夠一致性地遵循軟體工程全生命週期的品質標準。每個技能都包含反合理化表（Anti-rationalization tables），防止 AI 跳過步驟時自圓其說。</p>
+      <p><strong>技能數量：</strong> 24 個技能 + 8 個 slash command + 4 個 agent persona + 7 份參考清單</p>
+
+      <p><strong>技能清單（按階段）：</strong></p>
+      <ul>
+        <li><strong>Define：</strong> <code>interview-me</code>、<code>idea-refine</code>、<code>spec-driven-development</code></li>
+        <li><strong>Plan：</strong> <code>planning-and-task-breakdown</code></li>
+        <li><strong>Build：</strong> <code>incremental-implementation</code>、<code>test-driven-development</code>、<code>context-engineering</code>、<code>source-driven-development</code>、<code>doubt-driven-development</code>、<code>frontend-ui-engineering</code>、<code>api-and-interface-design</code></li>
+        <li><strong>Verify：</strong> <code>browser-testing-with-devtools</code>、<code>debugging-and-error-recovery</code></li>
+        <li><strong>Review：</strong> <code>code-review-and-quality</code>、<code>code-simplification</code>、<code>security-and-hardening</code>、<code>performance-optimization</code></li>
+        <li><strong>Ship：</strong> <code>git-workflow-and-versioning</code>、<code>ci-cd-and-automation</code>、<code>deprecation-and-migration</code>、<code>documentation-and-adrs</code>、<code>observability-and-instrumentation</code>、<code>shipping-and-launch</code></li>
+      </ul>
+      <p><strong>Slash 指令：</strong> <code>/spec</code>、<code>/plan</code>、<code>/build</code>、<code>/build auto</code>、<code>/test</code>、<code>/review</code>、<code>/webperf</code>、<code>/code-simplify</code>、<code>/ship</code></p>
+
+      <p><strong>優點：</strong></p>
+      <ul>
+        <li>覆蓋面最完整，從構想到上線 24 個技能涵蓋全生命週期</li>
+        <li>「反合理化」機制獨特，防止 AI 偷懶</li>
+        <li>漸進式資訊揭露（Progressive disclosure），只在需要時載入參考文件</li>
+        <li>跨平台支援最廣（Claude Code、Cursor、Gemini CLI、Windsurf、OpenCode、Copilot、Kiro）</li>
+        <li>單個 SKILL.md 約 8-15KB，token 開銷適中</li>
+      </ul>
+      <p><strong>缺點：</strong></p>
+      <ul>
+        <li>偏重「檢查清單」風格，對 vibe coding 場景可能過於嚴謹</li>
+        <li>缺少 sub-agent 驅動開發等進階自動化流程</li>
+        <li>沒有專案狀態管理機制（無 STATE.md 等持久化記憶）</li>
+      </ul>
+      <p><strong>Token 開銷：</strong> 中等。單技能 8-15KB（約 2k-4k tokens），因為漸進式載入，實際每次對話只會啟用相關技能。</p>
+
+      <hr>
+
+      <h3>2. 🟡 Superpowers（obra/Superpowers）</h3>
+      <p><strong>開發者：</strong> Jesse Vincent / Prime Radiant Inc.（知名開源開發者，RT/Perl 等專案的創建者）</p>
+      <p><strong>核心哲學：</strong> 完整的軟體開發方法論，而非單純的技能集合。強調「agent 不該直接寫程式，而是先規劃再執行」。以 Sub-agent Driven Development（SDD）為核心，讓 AI 能自主運行數小時而不偏離計畫。特別重視 TDD 和 YAGNI 原則。</p>
+      <p><strong>技能數量：</strong> 14 個技能（精簡但完整的流程鏈）</p>
+
+      <p><strong>技能清單：</strong></p>
+      <ul>
+        <li><strong>測試：</strong> <code>test-driven-development</code>（RED-GREEN-REFACTOR 循環）</li>
+        <li><strong>除錯：</strong> <code>systematic-debugging</code>（四階段根因分析）、<code>verification-before-completion</code></li>
+        <li><strong>協作：</strong> <code>brainstorming</code>、<code>writing-plans</code>、<code>executing-plans</code>、<code>dispatching-parallel-agents</code>、<code>requesting-code-review</code>、<code>receiving-code-review</code>、<code>using-git-worktrees</code>、<code>finishing-a-development-branch</code>、<code>subagent-driven-development</code></li>
+        <li><strong>Meta：</strong> <code>writing-skills</code>、<code>using-superpowers</code></li>
+      </ul>
+
+      <p><strong>優點：</strong></p>
+      <ul>
+        <li>SDD 是最成熟的 sub-agent 自動化流程</li>
+        <li>自動觸發機制——技能不需手動呼叫，agent 根據情境自動啟用</li>
+        <li>雙階段審查（規格合規 + 程式碼品質）確保產出品質</li>
+        <li>嚴格的 PR 審查文化（94% PR 拒絕率）</li>
+        <li><code>brainstorming</code> 技能有視覺化伴侶功能（HTML 即時預覽）</li>
+        <li>零依賴設計</li>
+      </ul>
+      <p><strong>缺點：</strong></p>
+      <ul>
+        <li>技能數量少（14 個），缺少安全審計、效能優化等專項技能</li>
+        <li>學習曲線較陡，方法論驅動而非指令驅動</li>
+        <li>不接受社區新增技能，擴展性受限</li>
+        <li>缺少專案級狀態管理</li>
+      </ul>
+      <p><strong>Token 開銷：</strong> 中等偏高。核心 SKILL.md 單檔約 10-22KB（<code>subagent-driven-development</code> 達 21KB）。</p>
+
+      <hr>
+
+      <h3>3. 🟢 GStack（garrytan/gstack）</h3>
+      <p><strong>開發者：</strong> Garry Tan（Y Combinator 總裁兼 CEO、前 Palantir 工程師、Posterous 共同創辦人）</p>
+      <p><strong>核心哲學：</strong> 「一個人配合 AI 能做到二十人團隊的產出」。將 Claude Code 打造為虛擬工程團隊——包含 CEO 審查者、工程經理、設計師、QA 主管、安全官員、發布工程師等角色。核心信念是「Boil the Ocean」——在 AI 時代完整實作的邊際成本趨近於零。</p>
+      <p><strong>技能數量：</strong> 58 個 SKILL.md（含 iOS 系列、OpenClaw 系列、瀏覽器技能等）</p>
+
+      <p><strong>主要 Slash 指令：</strong></p>
+      <ul>
+        <li><strong>規劃審查：</strong> <code>/office-hours</code>、<code>/plan-ceo-review</code>、<code>/plan-eng-review</code>、<code>/plan-design-review</code>、<code>/plan-devex-review</code></li>
+        <li><strong>設計：</strong> <code>/design-consultation</code>、<code>/design-shotgun</code>、<code>/design-html</code>、<code>/design-review</code></li>
+        <li><strong>QA：</strong> <code>/qa</code>、<code>/qa-only</code>、<code>/review</code>、<code>/cso</code>（OWASP + STRIDE）</li>
+        <li><strong>交付：</strong> <code>/ship</code>、<code>/land-and-deploy</code>、<code>/canary</code>、<code>/benchmark</code></li>
+        <li><strong>工具：</strong> <code>/browse</code>（Playwright）、<code>/investigate</code>、<code>/codex</code>（OpenAI 第二意見）、<code>/autoplan</code>、<code>/retro</code></li>
+        <li><strong>狀態管理：</strong> <code>/context-save</code>、<code>/context-restore</code>、<code>/learn</code>、<code>/freeze</code>、<code>/guard</code></li>
+      </ul>
+
+      <p><strong>優點：</strong></p>
+      <ul>
+        <li>技能數量最多（58 個），覆蓋從產品策略到安全審計</li>
+        <li><code>/office-hours</code> 是獨一無二的創業診斷工具</li>
+        <li>內建 Playwright 瀏覽器（<code>/browse</code>）可做真實 QA</li>
+        <li>多 AI 交叉驗證（<code>/codex</code> 調用 OpenAI 做第二意見）</li>
+        <li><code>/autoplan</code> 自動化管線（CEO 審查 → 設計審查 → 工程審查）</li>
+        <li>iOS 專用技能系列（<code>/ios-qa</code>、<code>/ios-design-review</code>、<code>/ios-fix</code>）</li>
+        <li>ETHOS.md 注入每個技能的 preamble，確保一致的建構哲學</li>
+      </ul>
+      <p><strong>缺點：</strong></p>
+      <ul>
+        <li>主 SKILL.md 達 50KB（約 12k tokens），token 開銷高</li>
+        <li>安裝需要 Bun + Git clone，不如 plugin marketplace 便利</li>
+        <li>Garry Tan 個人色彩極強，不一定適合所有開發者</li>
+        <li>160KB token ceiling 警告存在，大型技能可能觸發</li>
+      </ul>
+      <p><strong>Token 開銷：</strong> 高。主 SKILL.md 約 50KB（~12k tokens），prompt caching 可緩解成本，但注意力預算（attention budget）仍是問題。</p>
+
+      <hr>
+
+      <h3>4. 🔴 GSD Core（open-gsd/gsd-core）</h3>
+      <p><strong>開發者：</strong> 社區驅動的開源專案</p>
+      <p><strong>核心哲學：</strong> 「Context Engineering（上下文工程）」——解決 AI 在長對話中品質退化（context rot）的根本問題。透過在全新上下文的 sub-agent 中執行所有重度工作，保持主 session 精簡。五步驟 phase loop（Discuss → Plan → Execute → Verify → Ship）配合檔案系統狀態管理（<code>.planning/</code>）。</p>
+      <p><strong>指令數量：</strong> 69 個 commands + 34 個 agent 定義 + 多層 workflow</p>
+
+      <p><strong>六大命名空間路由：</strong></p>
+      <ul>
+        <li><strong>核心工作流：</strong> <code>/gsd-new-project</code>、<code>/gsd-spec-phase</code>、<code>/gsd-plan-phase</code>、<code>/gsd-execute-phase</code>、<code>/gsd-verify-work</code>、<code>/gsd-ship</code>、<code>/gsd-autonomous</code></li>
+        <li><strong>品質門控：</strong> <code>/gsd-code-review</code>、<code>/gsd-debug</code>、<code>/gsd-secure-phase</code>、<code>/gsd-eval-review</code>、<code>/gsd-ui-review</code></li>
+        <li><strong>上下文智慧：</strong> <code>/gsd-map-codebase</code>、<code>/gsd-mempalace-capture</code>、<code>/gsd-mempalace-recall</code>、<code>/gsd-extract-learnings</code></li>
+        <li><strong>專案管理：</strong> <code>/gsd-workspace</code>、<code>/gsd-workstreams</code>、<code>/gsd-progress</code>、<code>/gsd-stats</code></li>
+      </ul>
+      <p><strong>34 個 Agent 定義（部分）：</strong> <code>gsd-planner</code>、<code>gsd-executor</code>、<code>gsd-code-reviewer</code>、<code>gsd-debugger</code>、<code>gsd-security-auditor</code>、<code>gsd-verifier</code>、<code>gsd-domain-researcher</code>、<code>gsd-codebase-mapper</code>、<code>gsd-mempalace-curator</code> 等</p>
+
+      <p><strong>優點：</strong></p>
+      <ul>
+        <li>上下文工程理論最成熟，從根本解決 context rot 問題</li>
+        <li>每個 sub-agent 啟動時有全新的 200K token 上下文</li>
+        <li><code>.planning/</code> 目錄：<code>STATE.md</code>、<code>CONTEXT.md</code>、<code>ROADMAP.md</code>、<code>PLAN.md</code> 等人類可讀的持久化狀態</li>
+        <li>兩階段層級路由讓 eager listing 成本極低（~120 tokens vs ~2,150）</li>
+        <li><code>effort: max</code> / <code>effort: low</code> 精細化 token 預算控制</li>
+        <li><code>npx</code> 一鍵安裝</li>
+        <li>Edge coverage probe 和 Prohibition coverage 等深度規格分析</li>
+      </ul>
+      <p><strong>缺點：</strong></p>
+      <ul>
+        <li>學習曲線最陡，概念和指令數量龐大</li>
+        <li>對小專案或快速原型過於 heavyweight</li>
+        <li>命名慣例冗長（所有指令以 <code>/gsd-</code> 開頭）</li>
+        <li>社區生態尚在發展中</li>
+      </ul>
+      <p><strong>Token 開銷：</strong> 中低到高（取決於使用模式）。命名空間路由設計讓 idle 成本極低，但執行重度 workflow 時 orchestrator + agent 各自消耗大量 token。</p>
+
+      <hr>
+
+      <h2>二、完整比較表</h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>特性</th>
+              <th>🔵 Agent Skills</th>
+              <th>🟡 Superpowers</th>
+              <th>🟢 GStack</th>
+              <th>🔴 GSD Core</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>開發者</td><td>Addy Osmani (Google)</td><td>Jesse Vincent / Prime Radiant</td><td>Garry Tan (YC CEO)</td><td>社區驅動</td></tr>
+            <tr><td>核心定位</td><td>最佳實踐百科</td><td>SDD 完整方法論</td><td>虛擬工程團隊</td><td>上下文工程框架</td></tr>
+            <tr><td>技能/指令數</td><td>24 + 8</td><td>14</td><td>58</td><td>69 + 34 agent</td></tr>
+            <tr><td>自動觸發</td><td>部分</td><td>✅ 完全自動</td><td>手動</td><td>手動</td></tr>
+            <tr><td>Sub-agent</td><td>❌</td><td>✅ 核心</td><td>部分</td><td>✅ 架構核心</td></tr>
+            <tr><td>狀態持久化</td><td>❌</td><td>❌</td><td>基本</td><td>✅ 完整</td></tr>
+            <tr><td>瀏覽器 QA</td><td>❌</td><td>❌</td><td>✅ Playwright</td><td>❌</td></tr>
+            <tr><td>TDD</td><td>有（獨立技能）</td><td>✅ 核心要求</td><td>無專項</td><td>有（--tdd flag）</td></tr>
+            <tr><td>安全審計</td><td>OWASP Top 10</td><td>❌</td><td>✅ OWASP + STRIDE</td><td>有</td></tr>
+            <tr><td>Idle Token</td><td>低 (~2-4k)</td><td>中</td><td>高 (~12k)</td><td>極低 (~120)</td></tr>
+            <tr><td>安裝難度</td><td>極簡</td><td>極簡</td><td>中 (需 Bun)</td><td>簡單 (npx)</td></tr>
+            <tr><td>獨家功能</td><td>反合理化表</td><td>SDD 雙階段審查</td><td>YC Office Hours</td><td>MemPalace 記憶宮殿</td></tr>
+            <tr><td>授權</td><td>MIT</td><td>MIT</td><td>MIT</td><td>MIT</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr>
+
+      <h2>三、Vibe Coding 選用建議摘要</h2>
+      <ul>
+        <li><strong>快速原型 / Side Project</strong> → Agent Skills（<code>/build auto</code>）</li>
+        <li><strong>個人全端產品 / 創辦人模式</strong> → GStack（<code>/office-hours</code> + 三線審查）</li>
+        <li><strong>嚴肅中大型專案 / 多週開發</strong> → GSD Core（<code>.planning/</code> 跨 session 狀態）</li>
+        <li><strong>重視程式碼品質 / TDD</strong> → Superpowers + Agent Skills 補充</li>
+        <li><strong>現有 codebase 維護</strong> → Agent Skills（<code>doubt-driven-development</code>）</li>
+      </ul>
+
+      <h3>衝突組合（不要同時裝）</h3>
+      <ul>
+        <li>❌ Superpowers + GSD Core（都搶 session hook）</li>
+        <li>❌ Superpowers + GStack（都試圖控制整個流程）</li>
+        <li>❌ 任意三個以上全裝（Token 爆炸）</li>
+      </ul>
+
+      <h3>可疊加組合</h3>
+      <ul>
+        <li>✅ Agent Skills + GSD Core（百科 + 流程框架，互補）</li>
+        <li>✅ Agent Skills + GStack 部分工具（<code>/browse</code>、<code>/qa</code>、<code>/cso</code>）</li>
+      </ul>
+
+      <p><em>沒有「最好的」——只有「最適合你的」。建議從 Agent Skills 入門，遇到瓶頸後根據具體痛點選擇升級路徑。</em></p>
+
+      <hr>
       <p><a href="index.html">← 回到課程首頁</a></p>
     </section>
 

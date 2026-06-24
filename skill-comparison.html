@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Skills 比較指南 · Vibe Coding</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    .container { max-width: 760px; }
+    header.container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 1.5rem;
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      margin-bottom: 1.5rem;
+    }
+    #progress { color: var(--pico-muted-color); font-size: 0.9rem; }
+    footer#step-nav {
+      position: sticky;
+      bottom: 0;
+      background: var(--pico-card-background-color);
+      border-top: 1px solid var(--pico-muted-border-color);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    footer#step-nav button { margin: 0; }
+    .step pre { position: relative; }
+    .copy-btn {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: var(--pico-border-radius);
+      border: 1px solid var(--pico-muted-border-color);
+      background: var(--pico-card-background-color);
+      color: var(--pico-muted-color);
+    }
+    .skill-card {
+      border-left: 4px solid var(--pico-primary);
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .skill-card.gstack   { border-color: #f59e0b; }
+    .skill-card.frontend { border-color: #6366f1; }
+    .skill-card.uiux     { border-color: #10b981; }
+    .skill-card.baoyu    { border-color: #ef4444; }
+    .skill-card.notebook { border-color: #8b5cf6; }
+    .verdict {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .verdict.yes  { background: #dcfce7; color: #166534; }
+    .verdict.no   { background: #fee2e2; color: #991b1b; }
+    .verdict.maybe{ background: #fef9c3; color: #854d0e; }
+    table { font-size: 0.88rem; }
+    .decision-box {
+      background: var(--pico-card-background-color);
+      border: 1px solid var(--pico-muted-border-color);
+      border-radius: var(--pico-border-radius);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+    .decision-box h4 { margin-bottom: 0.5rem; color: var(--pico-primary); }
+  </style>
+</head>
+<body data-total-steps="5" data-storage-key="skill-comparison-step">
+  <header class="container">
+    <hgroup>
+      <h1>Claude Code Skills 比較指南</h1>
+      <p>幫 Vibe Coder 選對工具，不裝錯、不裝太多</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- ── Step 0: 前言 ─────────────────────────────── -->
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · Skill 是什麼？為什麼選錯很貴？</h2>
+          <p>~3 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Claude Code 的 <strong>Skill</strong>（技能包）是一種 Markdown 格式的系統提示詞，裝上去之後會改變 Claude 的預設行為——讓它設計品味更好、流程更嚴謹、或是能連接外部工具。</p>
+
+      <p>聽起來全裝最好？<strong>不對</strong>。每個 Skill 都會佔用你的 <em>context window</em>（上下文視窗），裝太多等於讓 Claude 的「工作記憶」被說明書填滿，實際幫你做事的空間反而縮小。</p>
+
+      <h3>這堂課要解決的問題</h3>
+      <p>市面上流傳的 Claude Code Skill 包有幾十個，最熱門的有這 5 個：</p>
+      <ol>
+        <li><strong>gstack</strong> — YC CEO Garry Tan 開源的 23 角色虛擬開發團隊</li>
+        <li><strong>Frontend Design</strong> — Anthropic 官方出品的 UI 美學注入器</li>
+        <li><strong>UI UX Pro Max</strong> — 社區製作的超大 UI 風格庫</li>
+        <li><strong>baoyu-skills</strong> — 寶玉老師的 22 個內容創作技能集</li>
+        <li><strong>NotebookLM Skill</strong> — 把 Claude 接到 Google NotebookLM 的橋接器</li>
+      </ol>
+
+      <p>這五個適合的人完全不同，放在一起比較才能看清楚。</p>
+
+      <h3>4 個 checkpoints</h3>
+      <ol>
+        <li>能說出每個 Skill 的核心差異（一句話）</li>
+        <li>知道哪兩個 Skill 裝在一起會打架</li>
+        <li>能用決策樹找到自己該裝哪個</li>
+        <li>知道「我已有 Superpowers 流程時」的正確做法</li>
+      </ol>
+    </section>
+
+    <!-- ── Step 1: 速覽五大 Skill ─────────────────────── -->
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 5 · 五大 Skill 速覽</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>TL;DR 一句話速查</h3>
+
+      <div class="skill-card gstack">
+        <h4>🏗️ gstack</h4>
+        <p><strong>一人公司的虛擬 CTO + DevOps pipeline</strong>，要認真上 production 才需要。</p>
+        <p><small>GitHub: <a href="https://github.com/garrytan/gstack" target="_blank">garrytan/gstack</a> · 作者: Garry Tan（YC CEO）· 48 小時 10K ⭐</small></p>
+      </div>
+
+      <div class="skill-card frontend">
+        <h4>🎨 Frontend Design</h4>
+        <p><strong>Anthropic 官方的「設計品味注入器」</strong>，Vibe Coder 的第一優先裝。</p>
+        <p><small>GitHub: <a href="https://github.com/anthropics/claude-code/blob/main/plugins/frontend-design/skills/frontend-design/SKILL.md" target="_blank">anthropics/claude-code</a> · 277,000+ 裝置數</small></p>
+      </div>
+
+      <div class="skill-card uiux">
+        <h4>✨ UI UX Pro Max</h4>
+        <p><strong>Frontend Design 的社區加強版</strong>，量大管飽但跟 Frontend Design 互斥——二選一。</p>
+        <p><small>GitHub: <a href="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill" target="_blank">nextlevelbuilder/ui-ux-pro-max-skill</a></small></p>
+      </div>
+
+      <div class="skill-card baoyu">
+        <h4>📝 baoyu-skills</h4>
+        <p><strong>內容創作者的軍火庫</strong>，從漫畫到信息圖到封面一條龍。做軟體的人不需要。</p>
+        <p><small>GitHub: <a href="https://github.com/JimLiu/baoyu-skills" target="_blank">JimLiu/baoyu-skills</a> · 作者: 寶玉老師</small></p>
+      </div>
+
+      <div class="skill-card notebook">
+        <h4>🔬 NotebookLM Skill</h4>
+        <p><strong>研究型工作流的橋樑</strong>，但<em>只能在本地 Claude Code CLI 使用</em>，Web UI 完全不支援。</p>
+        <p><small>GitHub: <a href="https://github.com/PleasePrompto/notebooklm-skill" target="_blank">PleasePrompto/notebooklm-skill</a></small></p>
+      </div>
+
+      <h3>橫向比較表</h3>
+      <figure>
+        <table>
+          <thead>
+            <tr>
+              <th>Skill</th>
+              <th>目標對象</th>
+              <th>Context 成本</th>
+              <th>Web UI？</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>gstack</td>
+              <td>產品開發者、小團隊</td>
+              <td>⚠️ 最高</td>
+              <td>✅ 可</td>
+            </tr>
+            <tr>
+              <td>Frontend Design</td>
+              <td>所有前端開發者</td>
+              <td>✅ 最低</td>
+              <td>✅ 可</td>
+            </tr>
+            <tr>
+              <td>UI UX Pro Max</td>
+              <td>追求特殊 UI 風格者</td>
+              <td>⚠️ 中高</td>
+              <td>✅ 可</td>
+            </tr>
+            <tr>
+              <td>baoyu-skills</td>
+              <td>內容創作者</td>
+              <td>✅ 低（單裝）</td>
+              <td>✅ 可</td>
+            </tr>
+            <tr>
+              <td>NotebookLM Skill</td>
+              <td>研究型工作者</td>
+              <td>✅ 低</td>
+              <td>❌ 本地 CLI only</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+    </section>
+
+    <!-- ── Step 2: gstack 深度解析 ─────────────────────── -->
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 5 · gstack 深度解析</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>它在解決什麼問題？</h3>
+      <p>一個人做產品，要同時扮演工程師、設計師、QA、資安審計員、發布管理員……這些角色在真實公司裡是不同的人，每個人都有自己的專業視角和<strong>品質要求</strong>。gstack 把這些角色都做成 slash command，讓你在需要時「召喚」正確的視角。</p>
+
+      <h3>23 個角色中最實用的 6 個</h3>
+      <figure>
+        <table>
+          <thead>
+            <tr><th>角色</th><th>呼叫方式</th><th>做什麼</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Security Auditor</td><td><code>/security-audit</code></td><td>OWASP + STRIDE 安全掃描</td></tr>
+            <tr><td>QA Engineer</td><td><code>/qa</code></td><td>真實瀏覽器 end-to-end 測試</td></tr>
+            <tr><td>Release Manager</td><td><code>/release</code></td><td>一鍵 PR + changelog + tag</td></tr>
+            <tr><td>Design QC</td><td><code>/design-review</code></td><td>UI 一致性 + accessibility 檢查</td></tr>
+            <tr><td>Architecture</td><td><code>/arch-review</code></td><td>系統架構審查 + 技術債分析</td></tr>
+            <tr><td>CEO Review</td><td><code>/ceo-review</code></td><td>產品方向、用戶價值審視</td></tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <h3>gstack 最好的使用方式</h3>
+      <p>❌ <strong>錯誤</strong>：開專案就把 23 個角色全部啟用</p>
+      <p>✅ <strong>正確</strong>：功能做完 → 上線前 → 只呼叫你需要的角色做品質閘門</p>
+      <pre data-copy><code># 上線前跑安全掃描
+/security-audit
+
+# 功能完成後跑瀏覽器 QA
+/qa
+
+# 準備 release
+/release</code></pre>
+
+      <h3>gstack 的弱點（誠實說）</h3>
+      <ul>
+        <li><strong>Context 成本最高</strong>：23 個角色的系統提示詞佔用大量 context，長對話特別明顯</li>
+        <li><strong>與 Superpowers 打架</strong>：如果你已經有自己的開發流程（Spec → Plan → Build），gstack 的流程層跟你的流程會互相干擾。建議：只取你缺的點功能用（安全審計、QA），不要用它替換整套流程</li>
+        <li><strong>Design QC 與 Frontend Design 衝突</strong>：兩個都有設計指引，Claude 會不知道聽誰的</li>
+      </ul>
+
+      <details>
+        <summary>⚠️ 如果你已經在用 hermes 的 Superpowers 流程</summary>
+        <p>你的 Superpowers（SDD → Plan → Build → Loop）已經是一套完整的開發 Harness。gstack 的價值在於它的<strong>安全審計和 QA 測試</strong>——這兩塊是大多數個人開發者的盲點。</p>
+        <p>建議做法：只安裝 gstack 的 <code>/security-audit</code> 和 <code>/qa</code> 兩個角色，不要啟用整套流程層。</p>
+      </details>
+    </section>
+
+    <!-- ── Step 3: 設計類 Skill ────────────────────────── -->
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 5 · Frontend Design vs UI UX Pro Max</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>兩個 Skill 解決同一個問題</h3>
+      <p>問題是：<em>AI 生成的 UI 長得都一樣</em>。永遠是 Inter 字體、藍紫漸層、圓角卡片。這不是 Claude 的錯，是沒有給它設計指引。</p>
+      <p>這兩個 Skill 都要解決這個問題，但方法不同：</p>
+
+      <h3>Frontend Design（官方出品）</h3>
+      <div class="skill-card frontend">
+        <p><strong>核心機制</strong>：在動手寫 code 之前，強制 Claude 先做美學決策——選風格、選色板、選字體。這種「強制承諾」才是它的真正價值，不是給你更多選擇。</p>
+        <p><strong>規格</strong>：50 種設計風格 · 21 種色板 · 50 種字體配對 · 20 種圖表類型</p>
+        <p><strong>禁用字體</strong>：Inter、Roboto、Arial、Space Grotesk（就是為了逼 Claude 有點個性）</p>
+        <p><strong>支援框架</strong>：React、Next.js、Vue、Svelte、SwiftUI、React Native、Flutter、Tailwind</p>
+      </div>
+
+      <h3>UI UX Pro Max（社區製作）</h3>
+      <div class="skill-card uiux">
+        <p><strong>核心機制</strong>：提供更多選項。67 種 UI 風格（含 Glassmorphism、Aurora UI、Neumorphism 等潮流設計）、161 種色板、161 項推理規則。</p>
+        <p><strong>規格</strong>：67 種 UI 風格 · 161 種色板 · 57 種字體配對 · 99 項 UX 指南 · 16 種技術棧</p>
+        <p><strong>適合</strong>：你知道自己要什麼風格，Frontend Design 的 50 種選項不夠用時。</p>
+      </div>
+
+      <h3>怎麼選？</h3>
+      <div class="decision-box">
+        <h4>如果你沒有特定風格偏好</h4>
+        <p>→ 裝 <strong>Frontend Design</strong>。官方出品、最輕量、品質穩定。</p>
+      </div>
+      <div class="decision-box">
+        <h4>如果你想要 Glassmorphism / Aurora UI / 賽博朋克 等特殊風格</h4>
+        <p>→ 裝 <strong>UI UX Pro Max</strong>。但決策之前先想好要什麼風格——167 種選項太多容易選擇困難。</p>
+      </div>
+      <div class="decision-box">
+        <h4>兩個都裝？</h4>
+        <p>→ <strong>千萬不要</strong>。兩套設計系統同時存在，Claude 會在兩個矛盾的設計指引之間搖擺，反而比沒裝更差。</p>
+      </div>
+
+      <h3>實際使用方式</h3>
+      <p>裝好後，在開始任何 UI 任務前，先告訴 Claude 你想要的風格：</p>
+      <pre data-copy><code>我要做一個密碼生成器工具
+設計風格：Cyberpunk Dark，主色霓虹綠 #00ff87
+字體：等寬字體，有 hacker 感
+幫我開始前先確認設計方向</code></pre>
+      <p>Frontend Design 會讓 Claude <strong>在寫第一行 code 之前</strong>先回覆設計決策，而不是一邊寫一邊亂猜。</p>
+    </section>
+
+    <!-- ── Step 4: 內容 + 研究類 Skill ──────────────────── -->
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 5 · baoyu-skills + NotebookLM Skill</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>這兩個 Skill 是給誰的？</h3>
+      <p>如果你的主要產出是<strong>視覺內容</strong>（信息圖、漫畫、封面）或<strong>嚴肅研究寫作</strong>（有引文的文章），這兩個才跟你有關。做軟體產品的人可以跳過這個 Step。</p>
+
+      <h3>baoyu-skills：內容創作者的軍火庫</h3>
+      <div class="skill-card baoyu">
+        <p>由寶玉老師創建，22 個技能集合，覆蓋「<strong>內容理解 → 生成視覺素材 → 匯出壓縮 → 自動發佈</strong>」完整工作流。</p>
+      </div>
+
+      <h3>最常用的 3 個技能</h3>
+      <figure>
+        <table>
+          <thead>
+            <tr><th>技能</th><th>做什麼</th><th>輸出</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>baoyu-infographic</code></td>
+              <td>從文字內容生成信息圖</td>
+              <td>21 種佈局 × 20 種視覺風格</td>
+            </tr>
+            <tr>
+              <td><code>baoyu-cover-image</code></td>
+              <td>生成文章/貼文封面</td>
+              <td>可指定色調、情感氛圍、文字覆蓋</td>
+            </tr>
+            <tr>
+              <td><code>baoyu-comic</code></td>
+              <td>把文字內容轉成教育漫畫</td>
+              <td>支援水墨、漫畫、極簡等多種風格</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <details>
+        <summary>⚠️ 不要一次裝全部 22 個技能</summary>
+        <p>作者寶玉老師自己的建議：<strong>按需安裝，每次只裝你要用的技能</strong>。22 個全裝的 context overhead 非常大，Claude 回答品質會下降。</p>
+        <p>建議做法：先裝 <code>baoyu-infographic</code> + <code>baoyu-cover-image</code> 這兩個最常用的，用到漫畫再另外裝 <code>baoyu-comic</code>。</p>
+      </details>
+
+      <h3>NotebookLM Skill：研究型工作流橋樑</h3>
+      <div class="skill-card notebook">
+        <p>讓 Claude Code 直接查詢你在 Google NotebookLM 上傳的文獻，取得 <strong>Gemini 提供的有引文答案</strong>，再讓 Claude 用這些有來源的資料撰寫內容。</p>
+      </div>
+
+      <h3>工作流程</h3>
+      <ol>
+        <li>把 PDF、URL、文獻上傳到 Google NotebookLM</li>
+        <li>Claude 發問 → NotebookLM 查詢 → Gemini 給出帶引文的答案</li>
+        <li>Claude 用有來源的資料撰寫文章或報告</li>
+      </ol>
+
+      <h3>重要限制</h3>
+      <p>⚠️ <strong>只支援本地 Claude Code CLI</strong>，不支援 Web UI（也不支援 hermes Web 介面）。如果你主要用 Telegram bot 或瀏覽器版 Claude，這個 Skill 對你無效。</p>
+
+      <h3>適合場景</h3>
+      <ul>
+        <li>學術寫作、論文研究</li>
+        <li>需要引文支撐的嚴肅文章</li>
+        <li>從大量文獻中提取有依據的資料</li>
+      </ul>
+    </section>
+
+    <!-- ── Step 5: 決策樹 + 組合建議 ─────────────────────── -->
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 5 · 決策樹 + 你的組合建議</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>決策樹：找到你的路線</h3>
+
+      <div class="decision-box">
+        <h4>🧑‍💻 我在做軟體產品 / Vibe Coding</h4>
+        <ul>
+          <li>一個人做小工具 / MVP → <strong>Frontend Design</strong>（必裝）</li>
+          <li>認真做要上線的產品 → <strong>Frontend Design + gstack（挑 Security + QA + Release）</strong></li>
+          <li>有團隊 → <strong>gstack 全套</strong></li>
+          <li>想要特殊 UI 風格 → <strong>UI UX Pro Max</strong>（取代 Frontend Design，二選一）</li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>✍️ 我在做內容（文章、行銷、教學）</h4>
+        <ul>
+          <li>需要視覺素材 → <strong>baoyu-skills</strong>（按需裝 2-3 個）</li>
+          <li>需要引文支撐 + 本地 CLI → 加上 <strong>NotebookLM Skill</strong></li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>🔄 我已經有 hermes 的 Superpowers / SDD 開發流程</h4>
+        <ul>
+          <li>你的 Harness 已經比 gstack 的流程層更適合你，<strong>不需要</strong>用 gstack 替換它</li>
+          <li>只從 gstack 取你缺的點：<code>/security-audit</code>、<code>/qa</code></li>
+          <li>設計品味短板 → 加 Frontend Design（輕量，不干擾流程）</li>
+        </ul>
+      </div>
+
+      <h3>哪些組合會打架？</h3>
+      <figure>
+        <table>
+          <thead>
+            <tr><th>組合</th><th>結果</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Frontend Design + UI UX Pro Max</td>
+              <td>❌ 兩套設計指引衝突，Claude 搖擺不定</td>
+            </tr>
+            <tr>
+              <td>gstack + Superpowers 流程</td>
+              <td>⚠️ 流程層重疊，只取 gstack 的特定角色用</td>
+            </tr>
+            <tr>
+              <td>gstack + Frontend Design</td>
+              <td>✅ 分工清楚，Frontend Design 管風格決策，gstack 管流程品質</td>
+            </tr>
+            <tr>
+              <td>baoyu-skills + NotebookLM Skill</td>
+              <td>✅ 研究→視覺的完整工作流</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+
+      <h3>三種人的最終推薦</h3>
+
+      <article>
+        <header><h4>Solo Indie Hacker</h4></header>
+        <p><strong>必裝：Frontend Design</strong>（設計品味是快速開發最大的短板）<br>
+        <strong>選裝：gstack 3 個角色</strong>（Release + Security + QA，上線前用）</p>
+        <p>不裝：UI UX Pro Max / baoyu-skills / NotebookLM</p>
+      </article>
+
+      <article>
+        <header><h4>帶團隊做 Production 產品</h4></header>
+        <p><strong>必裝：gstack 全套</strong>（23 角色對應真實團隊分工）<br>
+        <strong>選裝：Frontend Design</strong>（若團隊無設計師）</p>
+      </article>
+
+      <article>
+        <header><h4>內容創作者 / 行銷人</h4></header>
+        <p><strong>必裝：baoyu-infographic + baoyu-cover-image</strong><br>
+        <strong>選裝：baoyu-comic</strong>（做教育內容才需要）<br>
+        <strong>研究型加：NotebookLM Skill</strong>（本地 CLI 才能用）</p>
+        <p>不裝：gstack / Frontend Design / UI UX Pro Max</p>
+      </article>
+
+      <hr>
+
+      <h3>最後一句話</h3>
+      <blockquote>
+        <p>Skill 是 Harness，不是 Magic。<br>
+        選 Skill 的最佳策略不是「裝最多」，而是「找到你最弱的環節，只補那一個」。</p>
+      </blockquote>
+
+      <p>🎉 恭喜完成！回到 <a href="index.html">課程首頁</a> 繼續其他 Lesson。</p>
+    </section>
+
+  </main>
+
+  <footer id="step-nav" class="container">
+    <button id="prev-btn" class="secondary outline">← 上一步</button>
+    <button id="next-btn">下一步 →</button>
+  </footer>
+
+  <script src="wizard.js"></script>
+</body>
+</html>

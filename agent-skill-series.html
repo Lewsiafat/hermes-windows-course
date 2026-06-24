@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent Skill 系列比較指南 · Vibe Coding</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    .container { max-width: 760px; }
+    header.container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding-top: 1.5rem;
+      border-bottom: 1px solid var(--pico-muted-border-color);
+      margin-bottom: 1.5rem;
+    }
+    #progress { color: var(--pico-muted-color); font-size: 0.9rem; }
+    footer#step-nav {
+      position: sticky;
+      bottom: 0;
+      background: var(--pico-card-background-color);
+      border-top: 1px solid var(--pico-muted-border-color);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    footer#step-nav button { margin: 0; }
+    .step pre { position: relative; }
+    .copy-btn {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-radius: var(--pico-border-radius);
+      border: 1px solid var(--pico-muted-border-color);
+      background: var(--pico-card-background-color);
+      color: var(--pico-muted-color);
+    }
+    /* 各系列顏色 */
+    .skill-card {
+      border-left: 4px solid var(--pico-primary);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      background: var(--pico-card-background-color);
+      border-radius: var(--pico-border-radius);
+    }
+    .skill-card.agent-skills { border-color: #6366f1; }
+    .skill-card.superpowers  { border-color: #f59e0b; }
+    .skill-card.gstack       { border-color: #10b981; }
+    .skill-card.gsd          { border-color: #ef4444; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: bold;
+      margin-right: 0.3rem;
+    }
+    .badge.green  { background: #dcfce7; color: #166534; }
+    .badge.yellow { background: #fef9c3; color: #854d0e; }
+    .badge.red    { background: #fee2e2; color: #991b1b; }
+    .badge.blue   { background: #dbeafe; color: #1e40af; }
+    .badge.purple { background: #ede9fe; color: #5b21b6; }
+
+    table { font-size: 0.85rem; }
+    td, th { vertical-align: top; }
+
+    .decision-box {
+      background: var(--pico-card-background-color);
+      border: 1px solid var(--pico-muted-border-color);
+      border-radius: var(--pico-border-radius);
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+    .decision-box h4 { margin-bottom: 0.5rem; color: var(--pico-primary); }
+
+    .conflict-box {
+      border: 2px solid #ef4444;
+      border-radius: var(--pico-border-radius);
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      background: #fff5f5;
+      color: #7f1d1d;
+    }
+    :root[data-theme="dark"] .conflict-box {
+      background: rgba(239,68,68,0.1);
+      color: #fca5a5;
+    }
+
+    .combo-box {
+      border: 2px solid #10b981;
+      border-radius: var(--pico-border-radius);
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+    }
+
+    .persona-card {
+      padding: 1rem;
+      border-radius: var(--pico-border-radius);
+      margin-bottom: 1rem;
+      border: 1px solid var(--pico-muted-border-color);
+    }
+    .persona-card h4 { margin-bottom: 0.4rem; }
+
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.5rem 0;
+    }
+    .tag {
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      background: var(--pico-secondary-background);
+      color: var(--pico-secondary-color);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body data-total-steps="5" data-storage-key="agent-skill-series-step">
+  <header class="container">
+    <hgroup>
+      <h1>AI Agent Skill 系列比較</h1>
+      <p>四大 Pre-Plan Skill 系列深度解析，Vibe Coder 必讀</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- ── Step 0: 前言 ─────────────────────────────── -->
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼要比較這四個系列？</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <p>Claude Code 的 Skill 系統讓你可以「預裝」一套工作流程或最佳實踐，讓 AI agent 在每個 session 都照著來。但問題是——<strong>哪個系列適合你？</strong></p>
+
+      <p>這次要比較的四個都屬於「Pre-Plan Skill」——在你開始工作<em>之前</em>就改變 agent 行為的系統級技能包，彼此定位不同但常被混淆：</p>
+
+      <div class="skill-card agent-skills">
+        <h4>🔵 Agent Skills</h4>
+        <p>Addy Osmani（前 Google Chrome 工程總監）開源的 24 技能包，覆蓋軟體開發全生命週期。</p>
+        <p><small><a href="https://github.com/addyosmani/agent-skills" target="_blank">addyosmani/agent-skills</a></small></p>
+      </div>
+
+      <div class="skill-card superpowers">
+        <h4>🟡 Superpowers</h4>
+        <p>Jesse Vincent / Prime Radiant 的 14 技能方法論，以 Sub-agent Driven Development（SDD）和嚴格 TDD 為核心。</p>
+        <p><small><a href="https://github.com/obra/Superpowers" target="_blank">obra/Superpowers</a></small></p>
+      </div>
+
+      <div class="skill-card gstack">
+        <h4>🟢 GStack</h4>
+        <p>Y Combinator CEO Garry Tan 開源的 58 技能虛擬工程團隊——一人公司的虛擬 CEO、設計師、QA、安全官全配齊。</p>
+        <p><small><a href="https://github.com/garrytan/gstack" target="_blank">garrytan/gstack</a></small></p>
+      </div>
+
+      <div class="skill-card gsd">
+        <h4>🔴 GSD Core</h4>
+        <p>社區驅動的 69 指令 + 34 agent 框架，從根本解決 AI 長 session 品質退化（context rot）問題。</p>
+        <p><small><a href="https://github.com/open-gsd/gsd-core" target="_blank">open-gsd/gsd-core</a></small></p>
+      </div>
+
+      <h3>學完這份指南你能做到什麼</h3>
+      <ol>
+        <li>能說出每個系列的核心定位（一句話）</li>
+        <li>知道哪些組合裝在一起會互相衝突</li>
+        <li>用決策樹找到最適合自己的系列</li>
+        <li>知道不同情境（快速原型、大型專案、品質控管）各該選哪個</li>
+      </ol>
+    </section>
+
+    <!-- ── Step 1: 四大系列速覽 ─────────────────────── -->
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 5 · 四大系列速覽</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>TL;DR 比較表</h3>
+
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>系列</th>
+              <th>定位</th>
+              <th>技能數</th>
+              <th>Token 成本</th>
+              <th>安裝方式</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🔵 Agent Skills</td>
+              <td>軟體工程百科全書</td>
+              <td>24 技能 + 8 指令</td>
+              <td><span class="badge green">低</span></td>
+              <td>Plugin marketplace</td>
+            </tr>
+            <tr>
+              <td>🟡 Superpowers</td>
+              <td>AI 開發方法論</td>
+              <td>14 技能</td>
+              <td><span class="badge yellow">中</span></td>
+              <td>Plugin marketplace</td>
+            </tr>
+            <tr>
+              <td>🟢 GStack</td>
+              <td>虛擬工程團隊</td>
+              <td>58 技能</td>
+              <td><span class="badge red">高</span></td>
+              <td>git clone + Bun setup</td>
+            </tr>
+            <tr>
+              <td>🔴 GSD Core</td>
+              <td>上下文工程框架</td>
+              <td>69 指令 + 34 agent</td>
+              <td><span class="badge green">低→高</span></td>
+              <td>npx 一鍵安裝</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>🔵 Agent Skills — 軟體工程最佳實踐百科</h3>
+      <p>Addy Osmani 把資深工程師的工作流程編碼為「<strong>流程，而非文章</strong>」。最大特色是每個技能都附有「<em>反合理化表</em>」——讓 AI 無法用藉口跳過步驟。</p>
+      <p>技能按開發流程分類：</p>
+      <div class="skills-list">
+        <span class="tag">interview-me</span><span class="tag">spec-driven-development</span>
+        <span class="tag">incremental-implementation</span><span class="tag">test-driven-development</span>
+        <span class="tag">doubt-driven-development</span><span class="tag">browser-testing-with-devtools</span>
+        <span class="tag">security-and-hardening</span><span class="tag">performance-optimization</span>
+        <span class="tag">git-workflow-and-versioning</span><span class="tag">shipping-and-launch</span>
+        <span class="tag">…共 24 個</span>
+      </div>
+      <p>8 個 slash 指令：<code>/spec</code> → <code>/plan</code> → <code>/build</code> → <code>/test</code> → <code>/review</code> → <code>/ship</code></p>
+
+      <h3>🟡 Superpowers — Sub-agent 驅動開發方法論</h3>
+      <p>不只是技能，而是一套<strong>完整的開發哲學</strong>。核心是 SDD（Sub-agent Driven Development）：agent 先規劃再執行，所有重型工作分派給 sub-agent，能自主運行數小時而不偏離。</p>
+      <div class="skills-list">
+        <span class="tag">subagent-driven-development</span><span class="tag">test-driven-development</span>
+        <span class="tag">brainstorming</span><span class="tag">writing-plans</span>
+        <span class="tag">executing-plans</span><span class="tag">dispatching-parallel-agents</span>
+        <span class="tag">using-git-worktrees</span><span class="tag">systematic-debugging</span>
+        <span class="tag">…共 14 個</span>
+      </div>
+      <p>✨ 特色：技能<strong>自動觸發</strong>，不需手動呼叫 slash 指令。雙階段審查（規格合規 + 程式碼品質）。</p>
+
+      <h3>🟢 GStack — 虛擬工程團隊</h3>
+      <p>Garry Tan 的核心信念：「<em>在 AI 時代完整實作的邊際成本趨近於零</em>」。58 個技能涵蓋 CEO 審查、設計諮詢、Playwright QA、安全審計到部署監控。</p>
+      <div class="skills-list">
+        <span class="tag">/office-hours</span><span class="tag">/plan-ceo-review</span>
+        <span class="tag">/plan-design-review</span><span class="tag">/design-shotgun</span>
+        <span class="tag">/qa</span><span class="tag">/browse</span>
+        <span class="tag">/cso</span><span class="tag">/land-and-deploy</span>
+        <span class="tag">/canary</span><span class="tag">…共 58 個</span>
+      </div>
+      <p>✨ 特色：<code>/office-hours</code> YC 風格的創業診斷、內建 Playwright 瀏覽器 QA、多 AI 交叉驗證。</p>
+
+      <h3>🔴 GSD Core — 上下文工程框架</h3>
+      <p>解決 AI 最根本的問題：<strong>長 session 品質退化（context rot）</strong>。所有重型工作都在全新 200K token 上下文的 sub-agent 中執行，並透過 <code>.planning/</code> 目錄（STATE.md、ROADMAP.md 等）跨 session 持久化狀態。</p>
+      <div class="skills-list">
+        <span class="tag">/gsd-new-project</span><span class="tag">/gsd-spec-phase</span>
+        <span class="tag">/gsd-plan-phase</span><span class="tag">/gsd-execute-phase</span>
+        <span class="tag">/gsd-verify-work</span><span class="tag">/gsd-ship</span>
+        <span class="tag">/gsd-autonomous</span><span class="tag">/gsd-mempalace-capture</span>
+        <span class="tag">…共 69 指令 + 34 agent</span>
+      </div>
+      <p>✨ 特色：兩階段命名空間路由（6 個路由 → 69 個指令）讓 idle token 成本極低（~120 tokens）。</p>
+    </section>
+
+    <!-- ── Step 2: 深度比較 ──────────────────────────── -->
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 5 · 深度比較</h2>
+          <p>~10 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>核心差異矩陣</h3>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>特性</th>
+              <th>🔵 Agent Skills</th>
+              <th>🟡 Superpowers</th>
+              <th>🟢 GStack</th>
+              <th>🔴 GSD Core</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>核心定位</strong></td>
+              <td>全生命週期最佳實踐百科</td>
+              <td>SDD 完整開發方法論</td>
+              <td>虛擬工程團隊（CEO→設計→QA→交付）</td>
+              <td>上下文工程 + 規格驅動框架</td>
+            </tr>
+            <tr>
+              <td><strong>自動觸發</strong></td>
+              <td>部分自動</td>
+              <td>✅ 完全自動</td>
+              <td>手動 slash</td>
+              <td>手動 slash</td>
+            </tr>
+            <tr>
+              <td><strong>Sub-agent 支援</strong></td>
+              <td>❌ 無</td>
+              <td>✅ 核心特色</td>
+              <td>部分（/codex 交叉驗證）</td>
+              <td>✅ 核心架構</td>
+            </tr>
+            <tr>
+              <td><strong>狀態持久化</strong></td>
+              <td>❌ 無</td>
+              <td>❌（依賴 git worktree）</td>
+              <td>基本（context-save/restore）</td>
+              <td>✅ 完整（.planning/ 目錄）</td>
+            </tr>
+            <tr>
+              <td><strong>瀏覽器 QA</strong></td>
+              <td>❌</td>
+              <td>❌</td>
+              <td>✅ Playwright CLI</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td><strong>TDD 支援</strong></td>
+              <td>有（獨立技能）</td>
+              <td>✅ 核心要求</td>
+              <td>無專項</td>
+              <td>有（--tdd flag）</td>
+            </tr>
+            <tr>
+              <td><strong>安全審計</strong></td>
+              <td>OWASP Top 10</td>
+              <td>❌</td>
+              <td>✅ OWASP + STRIDE</td>
+              <td>有 /gsd-secure-phase</td>
+            </tr>
+            <tr>
+              <td><strong>Idle Token 成本</strong></td>
+              <td>~2-4k / 技能</td>
+              <td>中（session-start bootstrap）</td>
+              <td>高（主 SKILL.md ~12k tokens）</td>
+              <td>極低（~120 tokens namespace 路由）</td>
+            </tr>
+            <tr>
+              <td><strong>學習曲線</strong></td>
+              <td>低</td>
+              <td>中</td>
+              <td>中</td>
+              <td>高</td>
+            </tr>
+            <tr>
+              <td><strong>安裝難度</strong></td>
+              <td>極簡（Plugin）</td>
+              <td>極簡（Plugin）</td>
+              <td>中等（需 Bun）</td>
+              <td>簡單（npx）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>獨家特色說明</h3>
+
+      <div class="decision-box">
+        <h4>🔵 Agent Skills 獨有：反合理化表（Anti-rationalization tables）</h4>
+        <p>每個技能都明確列出「AI 可能給的藉口」和「為什麼這些藉口不成立」。防止 Claude 以「這個步驟太慢」或「這個情況不需要測試」等理由跳過重要流程。</p>
+      </div>
+
+      <div class="decision-box">
+        <h4>🟡 Superpowers 獨有：SDD 雙階段審查</h4>
+        <p>Sub-agent 完成後，不是直接合併，而是先做「規格合規審查」再做「程式碼品質審查」。這也是 PR 拒絕率高達 94% 的原因——真的很嚴格。</p>
+      </div>
+
+      <div class="decision-box">
+        <h4>🟢 GStack 獨有：YC Office Hours (/office-hours)</h4>
+        <p>模擬 Y Combinator 辦公時間的創業診斷對話。AI 會扮演 YC 合夥人，問「這個功能真的有人要付錢嗎？」、「你的增長飛輪是什麼？」。適合在動工前先釐清產品方向。</p>
+      </div>
+
+      <div class="decision-box">
+        <h4>🔴 GSD Core 獨有：MemPalace 記憶宮殿</h4>
+        <p><code>/gsd-mempalace-capture</code> 讓 agent 把重要的技術決策、架構洞見存入結構化的記憶檔案，之後用 <code>/gsd-mempalace-recall</code> 跨 session 調出。可以跨好幾個月的專案維持上下文連貫性。</p>
+      </div>
+    </section>
+
+    <!-- ── Step 3: 衝突分析 ──────────────────────────── -->
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 5 · 衝突分析與組合建議</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>⚠️ 衝突組合（不要同時裝）</h3>
+
+      <div class="conflict-box">
+        <strong>❌ Superpowers + GSD Core</strong>
+        <p>兩者都有完整的「規劃 → 執行 → 驗證」流程，且都會 hook 到 session start。同時啟用，AI 不知道該遵循哪個方法論，行為不可預測。</p>
+      </div>
+
+      <div class="conflict-box">
+        <strong>❌ Superpowers + GStack</strong>
+        <p>兩者都試圖控制整個開發流程，啟動機制可能互相干擾。GStack 的虛擬團隊角色和 Superpowers 的 SDD 流程設計理念根本不同。</p>
+      </div>
+
+      <div class="conflict-box">
+        <strong>❌ 任意三個以上全裝</strong>
+        <p>絕對不要。Token 爆炸、流程衝突、AI 行為完全不可預測。只裝一個主系列，最多搭配一個輔助。</p>
+      </div>
+
+      <h3>✅ 可以疊加的組合</h3>
+
+      <div class="combo-box">
+        <h4>✅ Agent Skills + GSD Core</h4>
+        <p>最自然的組合。Agent Skills 作為個別技能參考（security、performance、doubt-driven-development），GSD Core 作為工作流骨架。兩者設計理念互補，衝突極低。</p>
+        <p><span class="badge green">推薦給：中大型專案的進階 Vibe Coder</span></p>
+      </div>
+
+      <div class="combo-box">
+        <h4>✅ Agent Skills + GStack 部分技能</h4>
+        <p>只安裝 GStack 的工具性技能（<code>/browse</code>、<code>/qa</code>、<code>/cso</code>），搭配 Agent Skills 的完整開發流程。需要注意 CLAUDE.md 的合併方式。</p>
+        <p><span class="badge green">推薦給：需要瀏覽器 QA 的全端開發者</span></p>
+      </div>
+
+      <div class="combo-box">
+        <h4>✅ 單一系列全用（最乾淨）</h4>
+        <p>選一個你最認同的系列，吃透它，不要疊加。這往往比兩個系列各用一半更有效率。</p>
+        <p><span class="badge blue">適合：對 AI 工作流還在摸索的開發者</span></p>
+      </div>
+
+      <h3>四系列與 Hermes（你的 Agent）的相容性</h3>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>系列</th>
+              <th>與 Hermes 的配合</th>
+              <th>注意事項</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🔵 Agent Skills</td>
+              <td><span class="badge green">良好</span></td>
+              <td>技能獨立，不會干擾 Hermes 的 session 管理</td>
+            </tr>
+            <tr>
+              <td>🟡 Superpowers</td>
+              <td><span class="badge yellow">注意</span></td>
+              <td>session-start hook 可能與 Hermes 的啟動流程衝突，需測試</td>
+            </tr>
+            <tr>
+              <td>🟢 GStack</td>
+              <td><span class="badge yellow">注意</span></td>
+              <td>Token 開銷高，Hermes 對話 session 要特別注意 context 用量</td>
+            </tr>
+            <tr>
+              <td>🔴 GSD Core</td>
+              <td><span class="badge green">良好</span></td>
+              <td>.planning/ 目錄和 Hermes 的 workspace 完全獨立，無衝突</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Step 4: 情境推薦 ─────────────────────────── -->
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 5 · 情境推薦</h2>
+          <p>~8 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>按使用情境選系列</h3>
+
+      <div class="decision-box">
+        <h4>⚡ 快速原型 / Side Project / 一天內完成</h4>
+        <p><strong>推薦：🔵 Agent Skills（只用 <code>/spec</code> + <code>/build auto</code>）</strong></p>
+        <ul>
+          <li>最輕量的結構化流程，Token 開銷最低</li>
+          <li><code>/build auto</code> 一鍵從 spec 到實作</li>
+          <li>不需要學習複雜的 phase 系統</li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>🏢 個人全端產品 / 創辦人模式</h4>
+        <p><strong>推薦：🟢 GStack</strong></p>
+        <ul>
+          <li><code>/office-hours</code> 幫你釐清產品方向再動工</li>
+          <li><code>/plan-ceo-review</code> → <code>/plan-design-review</code> → <code>/plan-eng-review</code> 三線審查</li>
+          <li><code>/browse</code> + <code>/qa</code> 做真實瀏覽器測試</li>
+          <li>一個人有整個公司的感覺</li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>📊 嚴肅的中大型專案 / 多週開發</h4>
+        <p><strong>推薦：🔴 GSD Core</strong></p>
+        <ul>
+          <li><code>.planning/</code> 目錄讓狀態跨 session 持久化</li>
+          <li>Fresh-context sub-agent 確保每步驟都在最佳狀態</li>
+          <li>結構化的 Milestone → Phase → Task 管理</li>
+          <li><code>/gsd-autonomous</code> 可以讓 AI 自主跑完整個 phase</li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>🧪 重視程式碼品質 / TDD 文化</h4>
+        <p><strong>推薦：🟡 Superpowers（+ Agent Skills 補充）</strong></p>
+        <ul>
+          <li>SDD 自動化流程 + 嚴格 RED-GREEN-REFACTOR TDD</li>
+          <li>技能自動觸發，不需手動選擇</li>
+          <li>94% PR 拒絕率——真的很嚴格但品質最高</li>
+          <li>搭配 Agent Skills 的 security/performance 技能作補充</li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>🔧 現有 codebase 維護模式</h4>
+        <p><strong>推薦：🔵 Agent Skills</strong></p>
+        <ul>
+          <li>完整的 review、security、performance、deprecation 技能</li>
+          <li>不需要「新專案啟動」流程，直接按需使用個別技能</li>
+          <li><code>doubt-driven-development</code> 對高風險修改特別有用</li>
+          <li><code>source-driven-development</code> 適合需要查閱大量文件的維護工作</li>
+        </ul>
+      </div>
+
+      <h3>按開發者類型選系列</h3>
+
+      <div class="persona-card">
+        <h4>🌱 新手 Vibe Coder（剛開始用 AI 寫程式）</h4>
+        <p><strong>推薦路徑：</strong></p>
+        <ol>
+          <li>先不裝任何 skill pack，原生 Claude Code 用一週</li>
+          <li>裝 <strong>Agent Skills</strong>，跟著 <code>/spec → /plan → /build → /test → /ship</code> 走</li>
+          <li>感受到 AI 品質退化後，再研究 GSD Core 的 phase loop</li>
+        </ol>
+        <p><em>理由：Agent Skills 最像教科書，每個技能都有清楚的 When to Use 和 Verification。</em></p>
+      </div>
+
+      <div class="persona-card">
+        <h4>🚀 進階 Vibe Coder（已熟悉 AI 開發）</h4>
+        <p><strong>推薦組合：</strong></p>
+        <ul>
+          <li><strong>主力流程：</strong> GSD Core（context engineering 真的能解決長 session 品質問題）</li>
+          <li><strong>補充技能：</strong> Agent Skills 的 <code>doubt-driven-development</code>、<code>source-driven-development</code></li>
+          <li><strong>工具增強：</strong> GStack 的 <code>/browse</code>（如果需要瀏覽器 QA）</li>
+        </ul>
+      </div>
+
+      <div class="persona-card">
+        <h4>👨‍💼 Indie Developer / 創辦人型開發者</h4>
+        <p><strong>推薦：</strong> <strong>GStack</strong> 作為主力，搭配 Agent Skills 的安全 + 效能技能。</p>
+        <p>GStack 的 <code>/office-hours</code> 和 CEO 視角審查讓你在動工前先確認方向，避免浪費時間做沒人要的功能。</p>
+      </div>
+    </section>
+
+    <!-- ── Step 5: 決策樹 + 入門包 ──────────────────── -->
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 5 · 決策樹與入門包推薦</h2>
+          <p>~5 分鐘</p>
+        </hgroup>
+      </header>
+
+      <h3>快速決策樹</h3>
+
+      <div class="decision-box">
+        <h4>Q1：你的主要痛點是什麼？</h4>
+        <ul>
+          <li>「AI 越用越爛、長 session 品質退化」→ <span class="badge red">🔴 GSD Core</span></li>
+          <li>「程式碼品質差、不寫測試」→ <span class="badge yellow">🟡 Superpowers</span></li>
+          <li>「不知道產品方向對不對」→ <span class="badge green">🟢 GStack</span></li>
+          <li>「沒有系統化開發流程」→ <span class="badge blue">🔵 Agent Skills</span></li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>Q2：你的專案規模？</h4>
+        <ul>
+          <li>一天 side project → <span class="badge blue">🔵 Agent Skills</span></li>
+          <li>一週 MVP → <span class="badge blue">🔵 Agent Skills</span> 或 <span class="badge green">🟢 GStack</span></li>
+          <li>一個月以上大型專案 → <span class="badge red">🔴 GSD Core</span></li>
+          <li>需要嚴格品質管控 → <span class="badge yellow">🟡 Superpowers</span></li>
+        </ul>
+      </div>
+
+      <div class="decision-box">
+        <h4>Q3：你願意投入多少學習時間？</h4>
+        <ul>
+          <li>想立刻用 → <span class="badge blue">🔵 Agent Skills</span>（30 分鐘上手）</li>
+          <li>願意花半天理解系統 → <span class="badge yellow">🟡 Superpowers</span> 或 <span class="badge green">🟢 GStack</span></li>
+          <li>願意深入研究 → <span class="badge red">🔴 GSD Core</span></li>
+        </ul>
+      </div>
+
+      <h3>四大入門包</h3>
+
+      <div class="persona-card">
+        <h4>📦 輕量入門包（推薦 80% 的 Vibe Coder）</h4>
+        <p><strong>🔵 Agent Skills</strong> via Plugin marketplace</p>
+        <pre><code data-copy>/plugin install agent-skills@addy-agent-skills</code></pre>
+        <ul>
+          <li>8 個 slash 指令覆蓋完整開發週期</li>
+          <li>Token 開銷可控，不影響現有工作流</li>
+          <li>學習成本最低</li>
+        </ul>
+      </div>
+
+      <div class="persona-card">
+        <h4>📦 全能工作站包（Indie Dev / 全端開發者）</h4>
+        <p><strong>🟢 GStack</strong> 全域安裝</p>
+        <pre><code>git clone https://github.com/garrytan/gstack ~/.claude/plugins/gstack
+cd ~/.claude/plugins/gstack && bun run setup</code></pre>
+        <ul>
+          <li>58 個技能，虛擬工程團隊完整配置</li>
+          <li>搭配 Agent Skills 的技能文件作為 CLAUDE.md 參考原則</li>
+          <li>注意 Token 開銷偏高</li>
+        </ul>
+      </div>
+
+      <div class="persona-card">
+        <h4>📦 大型專案包（認真做長期專案）</h4>
+        <p><strong>🔴 GSD Core</strong> via npx</p>
+        <pre><code data-copy>npx @opengsd/gsd-core@latest</code></pre>
+        <ul>
+          <li>單一系統即可，不需要疊加其他</li>
+          <li><code>.planning/</code> 提供完整的專案記憶</li>
+          <li>69 指令涵蓋所有需求</li>
+        </ul>
+      </div>
+
+      <div class="persona-card">
+        <h4>📦 品質偏執包（重視 TDD 的開發者）</h4>
+        <p><strong>🟡 Superpowers</strong> via Plugin marketplace</p>
+        <pre><code>/plugin install superpowers@prime-radiant</code></pre>
+        <ul>
+          <li>SDD 自動化流程，AI 自主運行</li>
+          <li>嚴格的 TDD 文化，雙階段審查</li>
+          <li>適合已有 TDD 習慣的開發者</li>
+        </ul>
+      </div>
+
+      <h3>總結</h3>
+
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>一句話定位</th>
+              <th>最適合誰</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🔵 <strong>Agent Skills</strong> — 軟體工程百科</td>
+              <td>所有人的入門首選，中小專案主力</td>
+            </tr>
+            <tr>
+              <td>🟡 <strong>Superpowers</strong> — 開發方法論</td>
+              <td>最自動化、最強調 TDD、最有主見</td>
+            </tr>
+            <tr>
+              <td>🟢 <strong>GStack</strong> — 虛擬工程團隊</td>
+              <td>創辦人/獨立開發者，全端產品建構</td>
+            </tr>
+            <tr>
+              <td>🔴 <strong>GSD Core</strong> — 上下文工程框架</td>
+              <td>最解決根本問題、最適合大型長期專案</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>沒有「最好的」——只有「最適合你的」。建議從 <strong>Agent Skills</strong> 入門，遇到瓶頸後根據具體痛點選擇升級路徑。</p>
+
+      <p>👏 恭喜完成 AI Agent Skill 系列比較指南！</p>
+      <p><a href="index.html">← 回到課程首頁</a></p>
+    </section>
+
+  </main>
+
+  <footer id="step-nav" class="container">
+    <button id="btn-prev" class="secondary outline" disabled>← 上一步</button>
+    <button id="btn-next">下一步 →</button>
+  </footer>
+
+  <script src="wizard.js"></script>
+  <script>
+    // copy buttons
+    document.querySelectorAll('pre').forEach(pre => {
+      const code = pre.querySelector('[data-copy]');
+      if (!code) return;
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = '複製';
+      btn.onclick = () => {
+        navigator.clipboard.writeText(code.textContent.trim());
+        btn.textContent = '✓';
+        setTimeout(() => btn.textContent = '複製', 1500);
+      };
+      pre.appendChild(btn);
+    });
+  </script>
+</body>
+</html>

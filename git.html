@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git 版本控制入門 · Hermes 課程</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-total-steps="7" data-storage-key="git-course-step">
+  <header class="container">
+    <hgroup>
+      <h1>Git 版本控制入門</h1>
+      <p>從本地 → GitHub，建立你的 AI 開發安全網</p>
+    </hgroup>
+    <nav id="progress" aria-label="進度">
+      <span id="progress-text">前言</span>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- ── Step 0：前言 ─────────────────────────────────────────────── -->
+    <section class="step" data-step="0">
+      <header>
+        <hgroup>
+          <h2>前言 · 為什麼 AI 開發者一定要學 Git</h2>
+          <p>2 分鐘了解它能幫你避開哪些災難</p>
+        </hgroup>
+      </header>
+
+      <p>你有沒有遇過這些情況：</p>
+      <ul>
+        <li>改了一段 code，AI 幫你改到一半，結果跑不動了，也不知道原本長什麼樣子</li>
+        <li>請 Claude Code 修 bug，越改越亂，想回到昨天那個「還可以用」的狀態</li>
+        <li>電腦壞掉、硬碟掛點，做了一個月的 code 全部消失</li>
+        <li>同一份專案你改了，朋友也改了，合在一起全部爛掉</li>
+      </ul>
+
+      <p><strong>Git 就是解決這些問題的工具。</strong> 它是一個「時光機 + 安全網」——讓你在 AI 輔助開發的過程中，大膽嘗試，出錯了隨時回頭。</p>
+
+      <h3>Git 對 AI 開發特別重要的 3 個理由</h3>
+
+      <details open>
+        <summary>🛡️ 理由 1：AI 改壞了，一個指令就回去</summary>
+        <p>Claude Code、Cursor、GitHub Copilot 幫你改 code 時，它不一定每次都改對。有了 Git，你每次讓 AI 動大手術之前都可以先 <code>git commit</code>，如果改壞了，一行 <code>git checkout</code> 馬上回到上一個版本，完全不慌。</p>
+        <p>沒有 Git 的情況：改壞了，Ctrl+Z 到懷疑人生，或者直接重寫。</p>
+      </details>
+
+      <details>
+        <summary>📚 理由 2：整個開發歷程都留著</summary>
+        <p>Git 的 commit 歷史就是你的開發日記。你可以看到「我三週前做了什麼決定」、「這個 bug 是哪次改動引入的」、「這個功能是何時加的」。當 AI 幫你寫 code，這份歷史紀錄更有價值——你可以追蹤每次 AI 的建議是否改善了系統。</p>
+      </details>
+
+      <details>
+        <summary>☁️ 理由 3：GitHub 是你的雲端備份 + 作品集</summary>
+        <p>把 code 推到 GitHub，電腦壞掉也不怕，換電腦照樣繼續工作。而且 GitHub 上的專案就是你最真實的技術作品集，不需要寫履歷，直接讓別人看你的 code。</p>
+      </details>
+
+      <h3>這堂課學完你會做到什麼</h3>
+      <ul>
+        <li>✅ 在本地端用 Git 管理你的專案（init / add / commit）</li>
+        <li>✅ 申請 GitHub 帳號並建立第一個 Repository</li>
+        <li>✅ 設定 SSH Key，安全地連接本地和 GitHub</li>
+        <li>✅ 把本地專案推送到 GitHub（push）</li>
+        <li>✅ 看懂 commit 歷史，知道如何回到任何一個版本</li>
+      </ul>
+
+      <p><em>整個流程約 45 分鐘。按「下一步」開始。</em></p>
+    </section>
+
+    <!-- ── Step 1：安裝 Git ────────────────────────────────────────── -->
+    <section class="step" data-step="1" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 1 / 7 · 確認 Git 已安裝</h2>
+          <p>WSL2 / macOS 幾乎內建，Windows 原生需要另裝</p>
+        </hgroup>
+      </header>
+
+      <p>先確認你的環境有沒有 Git：</p>
+
+      <pre data-copy><code>git --version</code></pre>
+
+      <p>如果看到 <code>git version 2.x.x</code>，代表已經安裝好了，跳到 Step 2。</p>
+
+      <details>
+        <summary>🐧 WSL2（Ubuntu）— 沒有 git 的話</summary>
+        <pre data-copy><code>sudo apt update && sudo apt install git -y</code></pre>
+        <p>裝完再跑一次 <code>git --version</code> 確認。</p>
+      </details>
+
+      <details>
+        <summary>🍎 macOS — 沒有 git 的話</summary>
+        <p>方法一（推薦）：安裝 Homebrew 後執行</p>
+        <pre data-copy><code>brew install git</code></pre>
+        <p>方法二：直接輸入 <code>git</code>，macOS 會提示你安裝 Xcode Command Line Tools，按確認就好。</p>
+      </details>
+
+      <details>
+        <summary>🪟 Windows 原生（不使用 WSL2）</summary>
+        <p>前往 <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a> 下載安裝程式，一路 Next 即可。安裝完開啟 Git Bash 使用。</p>
+        <p>⚠️ 建議優先使用 WSL2，體驗更接近 Linux / macOS，指令完全通用。</p>
+      </details>
+
+      <h3>設定你的身份（只需做一次）</h3>
+      <p>Git 每一個 commit 都會記錄是誰做的。先告訴 Git 你是誰：</p>
+
+      <pre data-copy><code>git config --global user.name "你的名字"</code></pre>
+      <pre data-copy><code>git config --global user.email "你的email@example.com"</code></pre>
+
+      <p>這裡的 email 之後要跟 GitHub 帳號的 email 一致，commit 才會連結到你的帳號。</p>
+
+      <p>確認設定：</p>
+      <pre data-copy><code>git config --global --list</code></pre>
+    </section>
+
+    <!-- ── Step 2：本地端基礎 ──────────────────────────────────────── -->
+    <section class="step" data-step="2" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 2 / 7 · 本地端基礎：init / add / commit</h2>
+          <p>三個指令就能追蹤你的所有變動</p>
+        </hgroup>
+      </header>
+
+      <p>Git 最核心的工作流程只有三步：<strong>初始化 → 加入追蹤 → 提交快照</strong>。我們先建立一個練習用的專案。</p>
+
+      <h3>建立練習專案</h3>
+      <pre data-copy><code>mkdir my-first-git && cd my-first-git</code></pre>
+
+      <h3>Step ① — <code>git init</code>：初始化 Git 倉庫</h3>
+      <p>在這個目錄裡啟動 Git 的時光機：</p>
+      <pre data-copy><code>git init</code></pre>
+      <p>你會看到 <code>Initialized empty Git repository in .../my-first-git/.git/</code>。Git 在背景建立了一個隱藏的 <code>.git/</code> 資料夾，所有版本歷史都存在裡面。</p>
+
+      <h3>建立第一個檔案</h3>
+      <pre data-copy><code>echo "# My First Project" > README.md</code></pre>
+      <p>查看 Git 目前狀態：</p>
+      <pre data-copy><code>git status</code></pre>
+      <p>你會看到 <code>README.md</code> 顯示為 <em>Untracked files</em>（紅色）——代表 Git 看到這個檔案，但還沒開始追蹤它。</p>
+
+      <h3>Step ② — <code>git add</code>：把變動加入暫存區</h3>
+      <p>把 README.md 加入「等待提交」的暫存區：</p>
+      <pre data-copy><code>git add README.md</code></pre>
+      <p>或者一次加入所有變動的檔案：</p>
+      <pre data-copy><code>git add .</code></pre>
+      <p>再跑一次 <code>git status</code>，會看到 README.md 變成綠色的 <em>Changes to be committed</em>。</p>
+
+      <h3>Step ③ — <code>git commit</code>：提交快照（存檔點）</h3>
+      <p>把暫存區的內容正式存成一個版本，加上說明訊息：</p>
+      <pre data-copy><code>git commit -m "初始化專案：加入 README"</code></pre>
+
+      <p>🎉 恭喜！你存了第一個版本。查看 commit 歷史：</p>
+      <pre data-copy><code>git log --oneline</code></pre>
+
+      <details>
+        <summary>💡 commit 訊息怎麼寫？</summary>
+        <p>好的 commit 訊息讓未來的你（和 AI）能快速理解「這次改了什麼、為什麼改」：</p>
+        <ul>
+          <li>✅ <code>feat: 新增使用者登入功能</code></li>
+          <li>✅ <code>fix: 修正首頁載入失敗的 bug</code></li>
+          <li>✅ <code>docs: 更新 README 安裝說明</code></li>
+          <li>❌ <code>update</code>（什麼都沒說）</li>
+          <li>❌ <code>asdfasdf</code>（隨便打）</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>💡 如何回到過去的版本？</summary>
+        <p>先找到你想回去的 commit 的 hash（7 碼縮寫）：</p>
+        <pre data-copy><code>git log --oneline</code></pre>
+        <p>回到那個版本（只是查看，不會影響現在的進度）：</p>
+        <pre data-copy><code>git checkout abc1234</code></pre>
+        <p>回到最新版本：</p>
+        <pre data-copy><code>git checkout main</code></pre>
+      </details>
+    </section>
+
+    <!-- ── Step 3：申請 GitHub ────────────────────────────────────── -->
+    <section class="step" data-step="3" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 3 / 7 · 申請 GitHub 帳號</h2>
+          <p>全球最大的 code 儲存平台，免費使用</p>
+        </hgroup>
+      </header>
+
+      <p>GitHub 是你的雲端 Git 儲存庫。把 code 推到 GitHub，就能從任何地方存取、備份，也能跟別人協作。</p>
+
+      <h3>申請步驟</h3>
+      <ol>
+        <li>前往 <a href="https://github.com/signup" target="_blank">github.com/signup</a></li>
+        <li>輸入 Email → 設定密碼 → 選擇 Username（這會是你的公開 ID，想清楚）</li>
+        <li>驗證 email（收信箱確認信）</li>
+        <li>選擇免費方案（Free），功能已完全夠用</li>
+      </ol>
+
+      <details>
+        <summary>💡 Username 怎麼取？</summary>
+        <p>你的 GitHub URL 是 <code>github.com/你的Username</code>，等於你的技術名片。建議：</p>
+        <ul>
+          <li>用真實姓名或常用網路 ID（例如 <code>lewsiafat</code>）</li>
+          <li>全小寫，可以有連字號（<code>-</code>）</li>
+          <li>避免隨機數字，未來給別人看不太好</li>
+        </ul>
+      </details>
+
+      <h3>設定個人檔案（選做）</h3>
+      <p>登入後到 <strong>Settings → Profile</strong>，填上名字、頭像、一行自我介紹。你的 GitHub 個人頁就是技術作品集，值得花 5 分鐘設定好。</p>
+
+      <h3>確認帳號建立成功</h3>
+      <p>登入 GitHub 後，你應該看到自己的 Dashboard。URL 是 <code>https://github.com/你的Username</code>。</p>
+
+      <p>帳號建立好了，下一步建立你的第一個 Repository（遠端專案）。</p>
+    </section>
+
+    <!-- ── Step 4：建立遠端專案 ───────────────────────────────────── -->
+    <section class="step" data-step="4" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 4 / 7 · 在 GitHub 建立遠端 Repository</h2>
+          <p>Repository = 一個專案的雲端家</p>
+        </hgroup>
+      </header>
+
+      <p>Repository（簡稱 Repo）是 GitHub 上存放一個專案所有 code 和歷史記錄的地方。我們來建立一個。</p>
+
+      <h3>建立步驟</h3>
+      <ol>
+        <li>登入 GitHub，點右上角的 <strong>+</strong> → <strong>New repository</strong></li>
+        <li>填寫：
+          <ul>
+            <li><strong>Repository name</strong>：<code>my-first-git</code>（跟你本地的資料夾同名，比較直觀）</li>
+            <li><strong>Description</strong>：可以留空，或寫「練習用的第一個 Git 專案」</li>
+            <li><strong>Visibility</strong>：選 <strong>Public</strong>（公開，免費；Private 是私有）</li>
+          </ul>
+        </li>
+        <li>⚠️ <strong>不要勾選</strong> "Add a README file"、"Add .gitignore"、"Choose a license"——因為我們本地已經有 commit 了，GitHub 有東西的話之後推送會衝突</li>
+        <li>點 <strong>Create repository</strong></li>
+      </ol>
+
+      <h3>建立後你會看到什麼</h3>
+      <p>GitHub 會顯示一頁「快速設定」指令。你會看到三個選項：</p>
+      <ul>
+        <li><strong>...or create a new repository on the command line</strong>（你本地還沒有 repo 的情況）</li>
+        <li><strong>...or push an existing repository from the command line</strong>（我們的情況）</li>
+        <li>...or import code from another repository</li>
+      </ul>
+
+      <p>先把這頁放著，下一步設定 SSH Key 後，我們就會用到 <strong>"push an existing repository"</strong> 的指令。</p>
+
+      <details>
+        <summary>💡 Public vs Private，我該選哪個？</summary>
+        <ul>
+          <li><strong>Public</strong>：任何人都能看到你的 code，但你可以控制誰能修改。練習、開源專案、作品集用 Public。</li>
+          <li><strong>Private</strong>：只有你和你指定的人能看到。含有 API key、商業機密的專案用 Private。</li>
+          <li>⚠️ 不管 Public 還是 Private，<strong>永遠不要把 .env 檔案、API Key、密碼推到 GitHub</strong>。</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- ── Step 5：建立 SSH Key ───────────────────────────────────── -->
+    <section class="step" data-step="5" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 5 / 7 · 建立 SSH Key</h2>
+          <p>讓你的電腦和 GitHub 建立安全的信任關係</p>
+        </hgroup>
+      </header>
+
+      <p>推送 code 到 GitHub 需要「證明你是你」。推薦用 SSH Key——比每次輸入密碼更安全、更方便。</p>
+
+      <h3>什麼是 SSH Key？</h3>
+      <p>SSH Key 是一對密鑰：<strong>私鑰</strong>（存在你電腦，絕對不能給別人）+ <strong>公鑰</strong>（上傳到 GitHub，讓 GitHub 認識你）。就像門鎖和鑰匙——公鑰是鎖，私鑰是鑰匙，只有你的鑰匙能開這把鎖。</p>
+
+      <h3>① 生成 SSH Key</h3>
+      <p>用你的 GitHub email 建立 SSH Key（ed25519 是目前最推薦的演算法）：</p>
+      <pre data-copy><code>ssh-keygen -t ed25519 -C "你的email@example.com"</code></pre>
+      <p>接下來會問你：</p>
+      <ul>
+        <li><strong>Enter file in which to save the key</strong>：直接按 Enter，使用預設路徑 <code>~/.ssh/id_ed25519</code></li>
+        <li><strong>Enter passphrase</strong>：可以設定密碼（更安全），或直接 Enter 跳過（方便）。練習用可以跳過。</li>
+      </ul>
+
+      <h3>② 查看你的公鑰</h3>
+      <pre data-copy><code>cat ~/.ssh/id_ed25519.pub</code></pre>
+      <p>你會看到一段以 <code>ssh-ed25519</code> 開頭、以 <code>你的email</code> 結尾的長字串。<strong>複製整行</strong>（包含開頭的 ssh-ed25519 到結尾的 email）。</p>
+
+      <h3>③ 把公鑰加到 GitHub</h3>
+      <ol>
+        <li>登入 GitHub → 右上角頭像 → <strong>Settings</strong></li>
+        <li>左側選單選 <strong>SSH and GPG keys</strong></li>
+        <li>點綠色的 <strong>New SSH key</strong></li>
+        <li><strong>Title</strong>：輸入一個容易辨識的名字（例如「我的 MacBook」或「WSL2 Ubuntu」）</li>
+        <li><strong>Key</strong>：貼上剛才複製的公鑰</li>
+        <li>點 <strong>Add SSH key</strong>，輸入 GitHub 密碼確認</li>
+      </ol>
+
+      <details>
+        <summary>⚠️ 常見錯誤：複製公鑰時多了換行</summary>
+        <p>有些終端機複製時會在結尾多一個換行符，導致 GitHub 顯示格式錯誤。確認你複製的內容是一整行，沒有多餘的空白或換行。可以用這個指令直接複製到剪貼簿（macOS）：</p>
+        <pre data-copy><code>pbcopy < ~/.ssh/id_ed25519.pub</code></pre>
+        <p>WSL2 上：</p>
+        <pre data-copy><code>cat ~/.ssh/id_ed25519.pub | clip.exe</code></pre>
+      </details>
+    </section>
+
+    <!-- ── Step 6：設定 SSH Config ────────────────────────────────── -->
+    <section class="step" data-step="6" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 6 / 7 · 設定本地端 SSH 存取 GitHub</h2>
+          <p>讓 git 指令自動使用正確的 SSH Key</p>
+        </hgroup>
+      </header>
+
+      <h3>測試 SSH 連線是否成功</h3>
+      <p>先確認 GitHub 認識你的 SSH Key：</p>
+      <pre data-copy><code>ssh -T git@github.com</code></pre>
+      <p>第一次連線會問你是否信任 <code>github.com</code>，輸入 <code>yes</code>。</p>
+      <p>如果看到 <code>Hi 你的Username! You've successfully authenticated...</code>，就成功了！🎉</p>
+
+      <details>
+        <summary>❌ 如果看到 Permission denied (publickey)</summary>
+        <p>代表 GitHub 沒認到你的 key。常見原因：</p>
+        <ol>
+          <li>公鑰沒有正確加到 GitHub（回 Step 5 確認）</li>
+          <li>SSH agent 沒有載入私鑰，執行：</li>
+        </ol>
+        <pre data-copy><code>eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519</code></pre>
+        <p>再測試一次 <code>ssh -T git@github.com</code></p>
+      </details>
+
+      <h3>（選做）設定 SSH Config 檔</h3>
+      <p>如果你有多個 GitHub 帳號，或想指定特定 key，可以建立 SSH 設定檔：</p>
+      <pre data-copy><code>mkdir -p ~/.ssh && nano ~/.ssh/config</code></pre>
+      <p>加入以下內容（然後 Ctrl+X → Y → Enter 儲存）：</p>
+      <pre data-copy><code>Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519</code></pre>
+
+      <h3>設定 Git 預設分支名稱</h3>
+      <p>現代 GitHub 預設主分支叫 <code>main</code>（舊版叫 <code>master</code>）。讓你本地 Git 也用 <code>main</code>：</p>
+      <pre data-copy><code>git config --global init.defaultBranch main</code></pre>
+    </section>
+
+    <!-- ── Step 7：實戰 push ───────────────────────────────────────── -->
+    <section class="step" data-step="7" hidden>
+      <header>
+        <hgroup>
+          <h2>Step 7 / 7 · 實戰：推送本地專案到 GitHub</h2>
+          <p>把你在 Step 2 建立的本地專案推上雲端</p>
+        </hgroup>
+      </header>
+
+      <p>回到 Step 2 建立的 <code>my-first-git</code> 目錄：</p>
+      <pre data-copy><code>cd ~/my-first-git</code></pre>
+
+      <h3>① 連結本地 repo 和 GitHub 遠端</h3>
+      <p>把 GitHub 上的遠端 repo 位址告訴你的本地 Git（把 <code>你的Username</code> 換成你的 GitHub 帳號）：</p>
+      <pre data-copy><code>git remote add origin git@github.com:你的Username/my-first-git.git</code></pre>
+
+      <p>確認遠端設定成功：</p>
+      <pre data-copy><code>git remote -v</code></pre>
+      <p>你會看到 <code>origin</code> 指向你的 GitHub repo（fetch 和 push 各一行）。</p>
+
+      <h3>② 把本地 commit 推送到 GitHub</h3>
+      <pre data-copy><code>git push -u origin main</code></pre>
+      <p><code>-u origin main</code> 的意思是：把本地的 <code>main</code> 分支推到遠端的 <code>origin</code>，並建立追蹤關係。之後只需要打 <code>git push</code> 就夠了。</p>
+
+      <p>成功的話終端機會顯示進度條，最後顯示 <code>Branch 'main' set up to track remote branch 'main' from 'origin'</code>。</p>
+
+      <h3>③ 去 GitHub 確認</h3>
+      <p>打開瀏覽器，前往 <code>https://github.com/你的Username/my-first-git</code>，你應該看到你的 README.md 顯示在頁面上了！</p>
+
+      <h3>之後的日常工作流程</h3>
+      <p>每次改完 code，執行這三行就好：</p>
+      <pre data-copy><code>git add .
+git commit -m "說明這次改了什麼"
+git push</code></pre>
+
+      <details>
+        <summary>💡 從 GitHub 拉取最新版本（git pull）</summary>
+        <p>如果你在另一台電腦修改了 code，或跟別人協作，要先拉取最新版本：</p>
+        <pre data-copy><code>git pull</code></pre>
+        <p>這等於 <code>git fetch</code>（下載遠端更新）+ <code>git merge</code>（合併到本地）。</p>
+      </details>
+
+      <details>
+        <summary>💡 .gitignore：讓 Git 忽略某些檔案</summary>
+        <p>有些檔案不應該推到 GitHub（API Key、密碼、系統暫存檔）。在專案根目錄建立 <code>.gitignore</code>，Git 就會自動忽略這些檔案：</p>
+        <pre data-copy><code>echo ".env" >> .gitignore
+echo "node_modules/" >> .gitignore
+echo "__pycache__/" >> .gitignore
+git add .gitignore
+git commit -m "加入 .gitignore，忽略敏感檔案"</code></pre>
+        <p>⚠️ 如果你不小心把 .env 推上去了，即使之後刪掉，歷史記錄裡還是看得到。要用 <code>git filter-branch</code> 或 BFG Repo Cleaner 清除歷史，並且立刻更換 API Key。</p>
+      </details>
+
+      <hr>
+
+      <h3>🎉 完成！你現在會了：</h3>
+      <ul>
+        <li>✅ <code>git init</code> → 初始化本地 repo</li>
+        <li>✅ <code>git add</code> + <code>git commit</code> → 存版本快照</li>
+        <li>✅ 申請 GitHub 帳號並建立 Repository</li>
+        <li>✅ 建立 SSH Key 並設定到 GitHub</li>
+        <li>✅ <code>git remote add</code> + <code>git push</code> → 推送到雲端</li>
+      </ul>
+
+      <p>接下來可以：把你的 hermes-agent 設定目錄（<code>~/.hermes</code>）也用 Git 管理（記得 <code>.gitignore</code> 排除 .env！），這樣換電腦或設定出問題時，一個 <code>git clone</code> 就能還原。</p>
+
+      <p><a href="index.html" role="button" class="secondary">← 回到課程首頁</a></p>
+    </section>
+
+  </main>
+
+  <footer class="container">
+    <div style="display:flex; gap:1rem; align-items:center; padding-block:1rem;">
+      <button id="prev-btn" disabled>← 上一步</button>
+      <button id="next-btn">下一步 →</button>
+    </div>
+  </footer>
+
+  <script src="wizard.js"></script>
+</body>
+</html>

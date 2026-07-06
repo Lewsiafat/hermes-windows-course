@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM 101 — 一小時搞懂你天天在用的「文字接龍怪獸」</title>
+<meta name="description" content="給 Vibe Coding 與 AI Agent 新手的一小時 LLM 基礎課：從自動選字到 ChatGPT，一次講清楚底層到底發生什麼事。">
+<style>
+/* ============ 主題變數（深色為預設） ============ */
+:root {
+  --bg: #0d1117;
+  --bg-soft: #161b22;
+  --bg-card: #1c2333;
+  --bg-card-hover: #232c40;
+  --border: #2d3748;
+  --text: #e6edf3;
+  --text-dim: #9aa7b8;
+  --text-faint: #6b7688;
+  --accent: #f5a623;       /* 主色：琥珀 */
+  --accent-soft: rgba(245, 166, 35, 0.14);
+  --accent2: #58a6ff;      /* 次色：藍 */
+  --accent2-soft: rgba(88, 166, 255, 0.12);
+  --green: #3fb950;
+  --green-soft: rgba(63, 185, 80, 0.14);
+  --red: #f85149;
+  --red-soft: rgba(248, 81, 73, 0.13);
+  --purple: #bc8cff;
+  --purple-soft: rgba(188, 140, 255, 0.13);
+  --pink: #ff7b9c;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --mono: "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+}
+html.light {
+  --bg: #f6f8fa;
+  --bg-soft: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f3f7;
+  --border: #d7dde5;
+  --text: #1f2733;
+  --text-dim: #4b5768;
+  --text-faint: #7b8798;
+  --accent-soft: rgba(245, 166, 35, 0.18);
+  --accent2-soft: rgba(88, 166, 255, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", -apple-system, sans-serif;
+  line-height: 1.75;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ 頂部進度導覽 ============ */
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+#scrollbar { height: 3px; background: linear-gradient(90deg, var(--accent), var(--pink)); width: 0%; transition: width 0.1s linear; }
+.nav-inner {
+  max-width: 960px; margin: 0 auto; padding: 8px 16px;
+  display: flex; align-items: center; gap: 6px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo { font-weight: 800; color: var(--accent); white-space: nowrap; margin-right: 8px; font-size: 15px; text-decoration: none; }
+.nav-step {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  font-size: 13px; color: var(--text-faint); text-decoration: none;
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.nav-step .dot {
+  width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--bg-card); border: 1px solid var(--border);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+}
+.nav-step:hover { color: var(--text); background: var(--bg-card); }
+.nav-step.active { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.nav-step.active .dot { background: var(--accent); color: #1a1204; border-color: var(--accent); }
+.nav-step.done .dot { background: var(--green-soft); color: var(--green); border-color: var(--green); }
+#theme-toggle {
+  margin-left: auto; flex: 0 0 auto; background: var(--bg-card); color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  cursor: pointer; font-size: 13px; font-family: inherit;
+}
+#theme-toggle:hover { color: var(--text); }
+
+/* ============ 版面 ============ */
+main { max-width: 960px; margin: 0 auto; padding: 90px 20px 60px; }
+section { padding: 44px 0; border-bottom: 1px dashed var(--border); scroll-margin-top: 70px; }
+section:last-of-type { border-bottom: none; }
+
+.time-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent2-soft); color: var(--accent2);
+  font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+  margin-bottom: 12px; letter-spacing: 0.5px;
+}
+h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.25; font-weight: 900; letter-spacing: -0.5px; }
+h2 { font-size: clamp(24px, 4.5vw, 36px); line-height: 1.3; font-weight: 800; margin-bottom: 18px; }
+h3 { font-size: 21px; font-weight: 700; margin: 30px 0 10px; }
+h2 .kicker { display: block; font-size: 14px; color: var(--accent); letter-spacing: 2px; font-weight: 700; margin-bottom: 6px; }
+p { margin: 14px 0; color: var(--text); }
+p.dim, li.dim { color: var(--text-dim); }
+strong { color: var(--accent); font-weight: 700; }
+em { color: var(--pink); font-style: normal; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 8px 0; }
+code { font-family: var(--mono); background: var(--bg-card); border: 1px solid var(--border); padding: 1px 7px; border-radius: 6px; font-size: 0.88em; color: var(--accent2); }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px; margin: 20px 0;
+}
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 20px 0; }
+.callout.blue { border-left-color: var(--accent2); background: var(--accent2-soft); }
+.callout.red { border-left-color: var(--red); background: var(--red-soft); }
+.callout.green { border-left-color: var(--green); background: var(--green-soft); }
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-title { font-weight: 800; font-size: 15px; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+
+button.primary {
+  background: var(--accent); color: #1a1204; border: none; font-family: inherit;
+  font-size: 16px; font-weight: 800; padding: 11px 26px; border-radius: 999px;
+  cursor: pointer; transition: transform 0.12s, filter 0.2s;
+}
+button.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+button.primary:active { transform: translateY(1px); }
+button.primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+button.ghost {
+  background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+  font-family: inherit; font-size: 15px; padding: 10px 20px; border-radius: 999px; cursor: pointer;
+}
+button.ghost:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* ============ Hero ============ */
+#hero { padding-top: 30px; border-bottom: 1px dashed var(--border); }
+.hero-tag { color: var(--accent2); font-weight: 700; letter-spacing: 3px; font-size: 14px; margin-bottom: 14px; }
+.hero-sub { font-size: 19px; color: var(--text-dim); margin-top: 18px; max-width: 720px; }
+.hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 30px; }
+.hero-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; text-align: center; }
+.hero-stat .num { font-size: 26px; font-weight: 900; color: var(--accent); }
+.hero-stat .lbl { font-size: 13px; color: var(--text-faint); }
+.agenda { margin-top: 26px; }
+.agenda-row { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 15.5px; }
+.agenda-row:last-child { border-bottom: none; }
+.agenda-row .t { flex: 0 0 62px; color: var(--accent2); font-weight: 700; font-family: var(--mono); font-size: 13.5px; }
+.agenda-row a { color: var(--text); text-decoration: none; }
+.agenda-row a:hover { color: var(--accent); }
+
+/* ============ Token / 拼字視覺 ============ */
+.token {
+  display: inline-block; padding: 3px 10px; margin: 3px; border-radius: 8px;
+  background: var(--accent2-soft); border: 1px solid var(--accent2);
+  color: var(--accent2); font-weight: 700; font-size: 16px;
+}
+.token.hot { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.token.new { background: var(--green-soft); border-color: var(--green); color: var(--green); animation: pop 0.4s; }
+.tid { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin: 0 6px 0 2px; }
+@keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+
+/* ============ 機率長條 ============ */
+.prob-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.prob-label { flex: 0 0 84px; text-align: right; font-weight: 700; font-size: 15px; }
+.prob-track { flex: 1; background: var(--bg-soft); border-radius: 999px; height: 22px; overflow: hidden; border: 1px solid var(--border); }
+.prob-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent2), var(--purple)); width: 0%; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.prob-fill.winner { background: linear-gradient(90deg, var(--accent), var(--pink)); }
+.prob-pct { flex: 0 0 64px; font-family: var(--mono); font-size: 13.5px; color: var(--text-dim); }
+
+/* ============ Pipeline 步進器 ============ */
+#pipeline { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 24px 0; }
+.pipe-head { background: var(--bg-soft); padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pipe-head .title { font-weight: 800; font-size: 16px; }
+.pipe-steps { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.pipe-steps .pstep {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; background: var(--bg-card); color: var(--text-faint);
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+}
+.pipe-steps .pstep.on { background: var(--accent); color: #1a1204; border-color: var(--accent); }
+.pipe-steps .pstep.past { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.pipe-body { padding: 24px; min-height: 330px; }
+.pipe-stage-name { color: var(--accent); font-weight: 800; font-size: 14px; letter-spacing: 2px; margin-bottom: 4px; }
+.pipe-stage-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+.pipe-visual { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px; margin: 14px 0; min-height: 110px; }
+.pipe-note { color: var(--text-dim); font-size: 15.5px; }
+.pipe-foot { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg-soft); display: flex; gap: 10px; align-items: center; }
+.pipe-foot .count { margin-left: auto; color: var(--text-faint); font-size: 13.5px; font-family: var(--mono); }
+.vec { font-family: var(--mono); font-size: 12.5px; color: var(--purple); background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 8px; padding: 4px 8px; display: inline-block; margin: 3px; }
+.layer-stack { display: flex; flex-direction: column-reverse; gap: 4px; max-width: 380px; }
+.layer-bar {
+  height: 16px; border-radius: 5px; background: var(--bg-card); border: 1px solid var(--border);
+  font-size: 10px; color: var(--text-faint); display: flex; align-items: center; padding-left: 8px;
+  transition: all 0.25s;
+}
+.layer-bar.lit { background: linear-gradient(90deg, var(--accent2-soft), var(--purple-soft)); border-color: var(--purple); color: var(--purple); }
+
+/* ============ 猜 token 遊戲 ============ */
+.game-sentence { font-size: 26px; font-weight: 800; text-align: center; margin: 18px 0; }
+.game-blank { display: inline-block; min-width: 84px; border-bottom: 3px solid var(--accent); color: var(--accent); text-align: center; }
+.game-options { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 18px 0; }
+.game-opt {
+  background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 17px; font-weight: 700; padding: 10px 22px;
+  border-radius: 12px; cursor: pointer; transition: all 0.15s;
+}
+.game-opt:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.game-opt:disabled { cursor: default; opacity: 0.75; }
+.game-opt.picked { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.game-verdict { text-align: center; font-size: 16px; min-height: 28px; margin-top: 8px; font-weight: 700; }
+.game-nav { display: flex; justify-content: center; gap: 10px; margin-top: 16px; }
+
+/* ============ 架構圖 ============ */
+.arch { margin: 26px 0; }
+.arch-box { border-radius: var(--radius); padding: 16px 18px; margin: 0 auto; text-align: center; position: relative; }
+.arch-user { background: var(--green-soft); border: 2px solid var(--green); max-width: 300px; font-weight: 800; }
+.arch-app { background: var(--accent2-soft); border: 2px solid var(--accent2); max-width: 660px; }
+.arch-llm { background: var(--purple-soft); border: 2px solid var(--purple); max-width: 560px; margin-top: 14px; }
+.arch-label { font-weight: 900; font-size: 17px; margin-bottom: 4px; }
+.arch-app .arch-label { color: var(--accent2); }
+.arch-llm .arch-label { color: var(--purple); }
+.arch-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+.arch-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.arch-chip { background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px; padding: 4px 13px; font-size: 13.5px; color: var(--text-dim); }
+.arch-chip.hl { border-color: var(--purple); color: var(--purple); }
+.arch-arrow { text-align: center; font-size: 22px; color: var(--text-faint); line-height: 1.2; padding: 6px 0; }
+.arch-arrow small { display: block; font-size: 12px; letter-spacing: 1px; }
+.arch-flow { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-top: 10px; font-size: 13.5px; }
+.arch-flow .f { background: var(--bg-card); border: 1px solid var(--purple); color: var(--text); border-radius: 8px; padding: 4px 10px; }
+.arch-flow .fa { color: var(--purple); font-weight: 900; }
+
+/* ============ 測驗 ============ */
+.quiz { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 20px 0; background: var(--bg-card); }
+.quiz-q { font-weight: 800; font-size: 17.5px; margin-bottom: 14px; }
+.quiz-q .qnum { color: var(--accent); margin-right: 6px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  text-align: left; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 15.5px; padding: 11px 16px; border-radius: 10px; cursor: pointer;
+  transition: all 0.15s; line-height: 1.5;
+}
+.quiz-opt:hover:not(:disabled) { border-color: var(--accent2); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.correct { border-color: var(--green); background: var(--green-soft); color: var(--green); font-weight: 700; }
+.quiz-opt.wrong { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+.quiz-expl { margin-top: 12px; font-size: 15px; color: var(--text-dim); display: none; border-top: 1px dashed var(--border); padding-top: 12px; }
+.quiz-expl.show { display: block; animation: pop 0.3s; }
+.quiz-expl .verdict { font-weight: 900; }
+
+/* ============ 對照表 ============ */
+table.cmp { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 15px; }
+table.cmp th, table.cmp td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; vertical-align: top; }
+table.cmp th { background: var(--bg-soft); font-size: 14px; letter-spacing: 1px; }
+table.cmp td:first-child { font-weight: 700; white-space: nowrap; }
+
+.big-quote { font-size: clamp(20px, 3.6vw, 28px); font-weight: 900; text-align: center; padding: 30px 18px; line-height: 1.5; }
+.big-quote .hl { color: var(--accent); }
+
+footer { text-align: center; color: var(--text-faint); font-size: 13.5px; padding: 30px 16px 50px; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .pipe-body { padding: 16px; }
+  .prob-label { flex-basis: 64px; font-size: 14px; }
+  .game-sentence { font-size: 21px; }
+  .nav-step span.nm { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <div id="scrollbar"></div>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html" title="回 AgentVibe 課程首頁" style="font-size:0.8rem;opacity:0.7;margin-right:0.5rem">← AgentVibe</a>
+    <a class="nav-logo" href="#hero">LLM&nbsp;101</a>
+    <a class="nav-step" href="#s1" data-sec="s1"><span class="dot">1</span><span class="nm">怪獸真面目</span></a>
+    <a class="nav-step" href="#s2" data-sec="s2"><span class="dot">2</span><span class="nm">巨大字典</span></a>
+    <a class="nav-step" href="#s3" data-sec="s3"><span class="dot">3</span><span class="nm">體內解剖</span></a>
+    <a class="nav-step" href="#s4" data-sec="s4"><span class="dot">4</span><span class="nm">車體 vs 引擎</span></a>
+    <a class="nav-step" href="#s5" data-sec="s5"><span class="dot">5</span><span class="nm">Agent 開發</span></a>
+    <a class="nav-step" href="#s6" data-sec="s6"><span class="dot">6</span><span class="nm">結業考</span></a>
+    <button id="theme-toggle" title="切換深淺色">☀️ 淺色</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================================================================ -->
+<!-- HERO -->
+<!-- ================================================================ -->
+<section id="hero">
+  <div class="hero-tag">VIBE CODING 新手村 · 第 0 課</div>
+  <h1>你每天聊天的那個 AI，<br>其實是一台<span style="color:var(--accent)">文字接龍怪獸</span></h1>
+  <p class="hero-sub">
+    一小時，搞懂 LLM 到底是什麼。上完這堂課，你寫 prompt、蓋 agent 的時候，
+    終於知道自己在跟「什麼東西」講話——而不是對著黑盒子燒香拜拜。
+  </p>
+  <div class="hero-grid">
+    <div class="hero-stat"><div class="num">60 分鐘</div><div class="lbl">課程總長</div></div>
+    <div class="hero-stat"><div class="num">6 個章節</div><div class="lbl">循序漸進</div></div>
+    <div class="hero-stat"><div class="num">0 行數學</div><div class="lbl">保證無公式</div></div>
+    <div class="hero-stat"><div class="num">3 個互動</div><div class="lbl">動手玩、不用背</div></div>
+  </div>
+
+  <div class="card agenda">
+    <strong style="color:var(--text)">📋 課程時間表（帶課或自學都照這個節奏走）</strong>
+    <div class="agenda-row"><span class="t">5 min</span><a href="#s1">第 1 章 · 開場暴擊：LLM 的真面目</a></div>
+    <div class="agenda-row"><span class="t">10 min</span><a href="#s2">第 2 章 · 核心比喻：一本吃掉整個網際網路的巨大字典</a></div>
+    <div class="agenda-row"><span class="t">15 min</span><a href="#s3">第 3 章 · 體內解剖：一句話進去之後發生的 7 件事（互動實驗）</a></div>
+    <div class="agenda-row"><span class="t">10 min</span><a href="#s4">第 4 章 · ChatGPT 不是 LLM：車體 vs 引擎</a></div>
+    <div class="agenda-row"><span class="t">15 min</span><a href="#s5">第 5 章 · 為什麼 Agent 開發者非懂不可</a></div>
+    <div class="agenda-row"><span class="t">5 min</span><a href="#s6">第 6 章 · 結業考 + 帶走的 5 句話</a></div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 1 章：HOOK -->
+<!-- ================================================================ -->
+<section id="s1">
+  <span class="time-badge">⏱ 5 分鐘</span>
+  <h2><span class="kicker">第 1 章 · 開場暴擊</span>先說結論：它不會思考，它在賭博</h2>
+
+  <p>來，做好心理準備。今天這堂課的第一句話就要毀掉你對 AI 的浪漫想像：</p>
+
+  <div class="big-quote">
+    那個跟你聊人生、幫你寫程式、安慰你失戀的 AI，<br>
+    骨子裡只會做<span class="hl">一件事</span>——<br>
+    「猜下一個字是什麼」。
+  </div>
+
+  <p>
+    對，就這樣。沒有靈魂，沒有意識，沒有一個小人坐在伺服器裡面看你的訊息。
+    LLM（Large Language Model，大型語言模型）是一台被練到走火入魔的<strong>「下一個字預測機」</strong>。
+    你丟一段文字給它，它回答一個問題：「照統計來看，接下來最可能出現什麼字？」
+    然後把那個字吐出來。再猜下一個。再吐。再猜。再吐。
+  </p>
+  <p>
+    它寫出莎士比亞等級的情書？<em>一個字一個字賭出來的。</em>
+    它幫你 debug 三百行程式？<em>一個字一個字賭出來的。</em>
+    它跟你說「我理解你的感受」？<em>它連「感受」兩個字是怎麼從它嘴裡出來的都不知道，因為它根本沒有嘴，也沒有「知道」這回事。</em>
+  </p>
+
+  <div class="callout">
+    <span class="callout-title">🤯 那為什麼感覺它那麼聰明？</span>
+    <p>
+      因為當一台機器把「猜下一個字」這件事練到<strong>宇宙級別的準</strong>，
+      產出的效果就跟「會思考」幾乎沒兩樣。要精準猜出「醫生看了 X 光片後說：___」的下一句，
+      它就不得不在訓練過程中壓縮進大量醫學、語言、人情世故的<strong>模式</strong>。
+      聰明是「猜得準」的副作用。這不是貶低它——這件事本身就夠嚇人了。
+    </p>
+  </div>
+
+  <p class="dim">
+    整堂課你只要抓住這一句：<strong>「LLM = 練到走火入魔的文字接龍機」</strong>。
+    後面每一章都是在這句話上面蓋房子。
+  </p>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 2 章：核心比喻 -->
+<!-- ================================================================ -->
+<section id="s2">
+  <span class="time-badge">⏱ 10 分鐘</span>
+  <h2><span class="kicker">第 2 章 · 核心比喻</span>一本吃掉整個網際網路的巨大字典</h2>
+
+  <h3>比喻一：你手機鍵盤上的自動選字，吃了類固醇</h3>
+  <p>
+    打開你的手機，隨便打「今天天氣」四個字。鍵盤上方是不是跳出「很好」「不錯」「如何」幾個候選詞？
+    恭喜，<strong>你手上已經有一個迷你 LLM 了</strong>。它看你打過的字，猜你下一個要打什麼。
+  </p>
+  <p>現在，我們來把這個小東西餵大：</p>
+  <ul>
+    <li>手機選字看過的文字量：大概是<em>你自己打過的訊息</em>。</li>
+    <li>LLM 看過的文字量：<em>幾乎整個網際網路</em>——維基百科、幾百萬本書、GitHub 上的程式碼、論壇上的吵架文、食譜、法律條文、你八百年前寫的部落格。</li>
+    <li>手機選字一次猜 1～3 個候選詞。</li>
+    <li>LLM 每猜一個字，都在<strong>十幾萬個候選字</strong>裡面排名，而且它連你前面講的<strong>好幾萬字</strong>都一起納入考量。</li>
+  </ul>
+  <p>
+    把你的手機選字餵到<strong>吞掉整個地球的文字產出</strong>、練出幾千億個調節旋鈕（參數），
+    它就會從「幫你補『很好』」進化成「幫你寫出一整套 React 專案」。
+    <em>本質沒變，只是規模大到產生了魔法的錯覺。</em>
+  </p>
+
+  <h3>比喻二：讀過所有書、卻完全失憶的圖書館員</h3>
+  <p>想像一位很離奇的圖書館員：</p>
+  <div class="card">
+    <ul style="margin-left: 20px;">
+      <li>📚 他<strong>讀過人類寫過的每一本書</strong>。每一本。連你不想承認存在的那些同人文都讀過。</li>
+      <li>🧠 但他<strong>完全沒有記憶力</strong>。你上一秒跟他說的話，下一秒就忘了。每次見面都是初次見面。</li>
+      <li>🗣️ 而且他<strong>只會回答一種問題</strong>：「這段話的下一個字，最可能是什麼？」</li>
+      <li>🙅 他不能查資料、不能上網、不能打電話、不能幫你訂便當。他唯一的能力就是那股「讀遍天下」練出來的語感。</li>
+    </ul>
+  </div>
+  <p>
+    這位圖書館員就是<strong>裸的 LLM</strong>（raw model）。
+    「咦？可是 ChatGPT 明明記得我上一句話啊？」——好問題！先把疑惑收進口袋，
+    第 4 章會揭曉這個魔術的機關，保證你會「哦～～」出聲。
+  </p>
+
+  <h3>比喻三：宇宙第一天才鸚鵡</h3>
+  <p>
+    鸚鵡學人講話，是因為牠抓到了聲音的<strong>模式</strong>，不是因為牠懂「你吃飽沒」的哲學意涵。
+    LLM 是一隻聽過<em>全人類所有對話</em>的鸚鵡——牠模仿模式的能力強到，
+    講出來的話比大部分人類還有條理。但請記住牠的本質：
+    <strong>牠在重組模式，不是在「查證事實」。</strong>
+    這就是為什麼它會一本正經地胡說八道（術語叫「幻覺」，第 5 章細講）。
+  </p>
+
+  <div class="callout blue">
+    <span class="callout-title">📌 本章帶走這張圖</span>
+    <p>
+      LLM = <strong>手機自動選字（規模）</strong> × <strong>失憶圖書館員（無記憶、無手腳）</strong> × <strong>天才鸚鵡（模式而非事實）</strong>。<br>
+      接下來整堂課，我們會一直回來摸這三隻吉祥物。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 1 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>LLM 在「回答你的問題」的時候，它實際上在做什麼？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">在資料庫裡搜尋正確答案，然後複製貼上給你</button>
+      <button class="quiz-opt" data-a="1">根據你給的文字，一個字一個字地預測「下一個最可能的字」</button>
+      <button class="quiz-opt" data-a="0">連上網路查維基百科，整理後回覆</button>
+      <button class="quiz-opt" data-a="0">把你的問題轉給一位真人客服</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      裸的 LLM 沒有資料庫查詢、沒有上網功能（那些是外掛，第 4、5 章會講）。
+      它唯一的動作就是「接龍」：讀完你的文字，預測下一個字，重複到講完為止。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 3 章：PIPELINE -->
+<!-- ================================================================ -->
+<section id="s3">
+  <span class="time-badge">⏱ 15 分鐘</span>
+  <h2><span class="kicker">第 3 章 · 體內解剖</span>你按下 Enter 之後，體內發生的 7 件事</h2>
+
+  <p>
+    現在我們把一句話丟進 LLM，全程跟拍。實驗白老鼠是這句樸實無華的話：
+  </p>
+  <p style="text-align:center; font-size: 26px; font-weight: 900;">「今天天氣很<span style="color:var(--accent); border-bottom: 3px solid var(--accent);">___</span>」</p>
+  <p class="dim">
+    按「下一步」跟著走完整條生產線。不用怕，全程沒有數學，只有比喻和彩色方塊。
+  </p>
+
+  <!-- 互動 pipeline -->
+  <div id="pipeline">
+    <div class="pipe-head">
+      <span class="title">🔬 LLM 生產線直播</span>
+      <div class="pipe-steps" id="pipe-steps"></div>
+    </div>
+    <div class="pipe-body">
+      <div class="pipe-stage-name" id="pipe-name"></div>
+      <div class="pipe-stage-title" id="pipe-title"></div>
+      <div class="pipe-visual" id="pipe-visual"></div>
+      <div class="pipe-note" id="pipe-note"></div>
+    </div>
+    <div class="pipe-foot">
+      <button class="ghost" id="pipe-prev">← 上一步</button>
+      <button class="primary" id="pipe-next">下一步 →</button>
+      <span class="count" id="pipe-count"></span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-title">🧂 誠實小字</span>
+    <p>
+      上面的 token 切法、編號、機率數字都是<strong>示意用的教學版</strong>，不是某個真實模型的實際輸出。
+      真實世界裡，中文常被切得更碎（有時一個字被拆成好幾塊），編號和機率每個模型都不同——但<strong>流程順序是真的</strong>，一步都沒少。
+    </p>
+  </div>
+
+  <h3>🎮 換你當 LLM：猜下一個 token</h3>
+  <p>
+    理解「預測下一個字」最快的方法，就是自己當一次模型。
+    下面給你一句沒講完的話，<strong>憑語感選一個你覺得最可能接上的詞</strong>，
+    然後看看一個典型 LLM 心裡的機率表長什麼樣。
+  </p>
+
+  <div class="card" id="game">
+    <div class="game-sentence" id="game-sentence"></div>
+    <div class="game-options" id="game-options"></div>
+    <div id="game-probs" style="display:none; margin-top: 18px;">
+      <p style="font-weight:800; margin-bottom: 6px;">🎰 模型內心的賭盤（示意機率）：</p>
+      <div id="game-bars"></div>
+    </div>
+    <div class="game-verdict" id="game-verdict"></div>
+    <div class="game-nav">
+      <button class="ghost" id="game-next" style="display:none;">下一題 →</button>
+    </div>
+    <p class="dim" style="font-size: 13.5px; text-align:center; margin-top: 14px;">
+      ※ 機率為教學示意，非即時查詢真實模型。
+    </p>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-title">💡 你剛剛體驗到的三件事</span>
+    <p>
+      1️⃣ <strong>沒有「唯一正解」，只有機率排行榜。</strong>「好」和「熱」都合理，只是機率不同。<br>
+      2️⃣ <strong>抽籤（sampling）讓答案每次不一樣。</strong>模型不一定選第一名——溫度（temperature）調高，就更常抽到黑馬。這就是同一個問題問兩次、答案不同的原因。<br>
+      3️⃣ <strong>「香菜」機率不是 0。</strong>再離譜的字都有一絲絲機率。大部分時候這沒事，但偶爾模型抽到一連串「聽起來很順的錯誤」，就變成幻覺。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 2 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>為什麼一模一樣的問題，問 LLM 兩次會得到不同的答案？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">因為它記得你問過了，故意換個說法</button>
+      <button class="quiz-opt" data-a="0">因為伺服器不同台，訓練資料不一樣</button>
+      <button class="quiz-opt" data-a="1">因為每個字都是照機率「抽籤」出來的，抽到不同字，後面就整路岔開</button>
+      <button class="quiz-opt" data-a="0">因為它有心情，今天心情不同</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      關鍵字是「抽籤」（sampling）。第 3 個字抽到「好」還是「熱」，後面接龍的路線就完全分岔了。
+      它不記得你問過（失憶圖書館員！），更沒有心情——只有骰子。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 4 章：車體 vs 引擎 -->
+<!-- ================================================================ -->
+<section id="s4">
+  <span class="time-badge">⏱ 10 分鐘</span>
+  <h2><span class="kicker">第 4 章 · 世紀大誤會</span>ChatGPT 不是 LLM，就像汽車不是引擎</h2>
+
+  <p>
+    來破解一個 90% 新手都有的誤會：很多人以為「ChatGPT = 那個 AI 模型本人」。
+    <strong>錯。</strong>你在 chatgpt.com 或 Claude app 裡聊天的那個東西，是一台<strong>整車</strong>；
+    LLM 只是引擎室裡那顆<strong>引擎</strong>。
+  </p>
+  <p>
+    引擎本身只會做一件事：進油、爆炸、輸出動力。它沒有方向盤、沒有座椅、沒有安全氣囊、
+    沒有冷氣。你不會直接騎在引擎上出門（會很燙）。同理——
+    裸的 LLM 只會「文字進、下一個字出」。ChatGPT 和 Claude 這些<strong>產品</strong>，
+    是在引擎外面裝了一整套車體：
+  </p>
+
+  <div class="arch">
+    <div class="arch-box arch-user">🧑 你（使用者）</div>
+    <div class="arch-arrow">⬇<small>「幫我寫一首詩」</small></div>
+    <div class="arch-box arch-app">
+      <div class="arch-label">🚗 聊天 App 層（ChatGPT / Claude 的「車體」）</div>
+      <div class="arch-sub">這一層是產品工程，不是模型本身</div>
+      <div class="arch-chips">
+        <span class="arch-chip">📜 系統提示詞（偷偷墊在最前面的人設說明書）</span>
+        <span class="arch-chip">🧾 對話記憶管理（把整段歷史重新塞回去）</span>
+        <span class="arch-chip">🛡️ 安全過濾</span>
+        <span class="arch-chip">🔧 工具呼叫調度（搜尋、跑程式碼…）</span>
+        <span class="arch-chip">🖥️ 漂亮的聊天介面</span>
+      </div>
+    </div>
+    <div class="arch-arrow">⬇<small>組裝好的完整文字包 → 呼叫 API</small></div>
+    <div class="arch-box arch-llm">
+      <div class="arch-label">⚙️ 裸 LLM 引擎（raw model API）</div>
+      <div class="arch-sub">只會一件事：文字進 → 下一個 token 出</div>
+      <div class="arch-flow">
+        <span class="f">切 token</span><span class="fa">→</span>
+        <span class="f">變數字</span><span class="fa">→</span>
+        <span class="f">幾十層加工</span><span class="fa">→</span>
+        <span class="f">預測機率</span><span class="fa">→</span>
+        <span class="f">抽一個字</span><span class="fa">→</span>
+        <span class="f">重複到講完</span>
+      </div>
+    </div>
+    <div class="arch-arrow">⬆<small>生成的文字，一路傳回車體、渲染成漂亮的訊息泡泡</small></div>
+  </div>
+
+  <h3>🪄 揭曉第 2 章的魔術：「它明明記得我上一句話啊！」</h3>
+  <p>
+    還記得那位<strong>完全失憶的圖書館員</strong>嗎？他真的什麼都不記得。
+    那 ChatGPT 為什麼「記得」你叫什麼名字？機關在<strong>車體層</strong>：
+  </p>
+  <div class="callout blue">
+    <p>
+      每次你送出新訊息，App 會把<strong>整段對話歷史從頭到尾重新抄一遍</strong>，
+      連同你的新訊息一起，「啪」一整包塞給失憶的圖書館員。
+      他看完這疊紙，覺得「哦，照這個劇本，下一句應該是……」然後接下去。
+    </p>
+    <p>
+      <strong>不是模型記得你，是 App 每次都幫模型重新惡補整段劇情。</strong>
+      像陪一位失憶症朋友看連續劇，每一集開播前都要幫他從第一集講到現在。
+      而那疊紙有厚度上限——這個上限就叫 <strong>context window（上下文窗口）</strong>，第 5 章它會變成你的宿敵。
+    </p>
+  </div>
+
+  <h3>同一顆引擎，可以裝很多種車</h3>
+  <table class="cmp">
+    <tr><th>層</th><th>它是什麼</th><th>類比</th></tr>
+    <tr><td>裸模型 API</td><td>GPT、Claude 系列模型本體，文字進字出</td><td>引擎</td></tr>
+    <tr><td>ChatGPT / Claude App</td><td>模型 + 系統提示詞 + 記憶管理 + 工具 + 介面</td><td>整台市售車</td></tr>
+    <tr><td>你未來寫的 Agent</td><td>模型 + <em>你設計的</em>提示詞 + <em>你接的</em>工具</td><td>你自己改裝的賽車 🏎️</td></tr>
+  </table>
+  <p>
+    這就是為什麼你要上這堂課：<strong>做 Agent，就是自己造車體。</strong>
+    OpenAI 和 Anthropic 把引擎用 API 租給你，車體——系統提示詞、記憶、工具——全部由你來裝。
+    不懂引擎特性的人造出來的車,轉彎會解體。
+  </p>
+
+  <!-- 隨堂測驗 3 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>ChatGPT 能「記得」你三句話之前說的內容，是因為？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">模型內部有一顆記憶硬碟，存著你們的對話</button>
+      <button class="quiz-opt" data-a="1">App 層每次都把整段對話歷史重新塞給模型當輸入</button>
+      <button class="quiz-opt" data-a="0">OpenAI 的工程師會即時人工標注重點</button>
+      <button class="quiz-opt" data-a="0">模型跟你聊久了自然產生感情與記憶</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      裸模型是無狀態（stateless）的：每次呼叫都是全新的失憶開局。「記憶」是車體層的把戲——
+      把歷史重新抄一遍塞回輸入。你以後寫 Agent，這個「抄劇本」的工作就是你的程式碼要做的事。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 5 章：Agent 開發者為什麼要懂 -->
+<!-- ================================================================ -->
+<section id="s5">
+  <span class="time-badge">⏱ 15 分鐘</span>
+  <h2><span class="kicker">第 5 章 · 學以致用</span>懂了這些，你的 Agent 才不是玄學</h2>
+
+  <p>
+    前面 40 分鐘不是聽故事。「文字接龍怪獸」這個模型，會直接解釋你未來做 Agent 時
+    遇到的<strong>每一個詭異現象</strong>。以下五條，條條是你之後會親身撞上的牆。
+  </p>
+
+  <h3>① Prompt 不是「命令」，是「幫接龍開頭」</h3>
+  <p>
+    很多新手把 prompt 當成對僕人下指令。錯誤心智模型。
+    正確畫面是：<strong>你在幫一台自動完成機器鋪開頭，讓「順著接下去」的路正好通往你要的答案。</strong>
+  </p>
+  <div class="card">
+    <p style="margin-top:0;">🎤 把 LLM 想成一台<strong>卡拉 OK 伴唱機</strong>：你點什麼歌、起什麼調，它就順著接下去唱。</p>
+    <ul>
+      <li>Prompt 寫「你是一位資深 Python 工程師，用繁體中文回答」→ 你把接龍的開頭鋪在「專業工程對話」的軌道上，後面的字自然往那邊滾。</li>
+      <li>Prompt 亂寫、前後矛盾 → 接龍不知道往哪滾，輸出就飄。</li>
+      <li>所謂 prompt engineering，白話翻譯就是：<strong>「鋪軌道的手藝」</strong>。不是咒語，不是儀式，是統計上的導向。</li>
+    </ul>
+  </div>
+
+  <h3>② Context window 是你的宿敵兼房租</h3>
+  <p>
+    還記得「每次都要把整疊劇本塞回去」嗎？那疊紙的上限（context window）帶來三個殘酷現實：
+  </p>
+  <ul>
+    <li><strong>塞爆了就會忘。</strong>對話太長、文件太厚，最早的內容會被擠出窗外——你的 Agent「忘記」使用者半小時前的設定，不是 bug，是物理。</li>
+    <li><strong>每個 token 都是錢。</strong>API 按 token 計費，而且是<em>每一次呼叫都重算整疊劇本</em>。無腦把所有歷史塞回去 = 錢包燃燒。</li>
+    <li><strong>所以才有那些技術。</strong>摘要壓縮舊對話、RAG（只撈相關片段塞進去）、記憶檔案——全部都是在跟「那疊紙的厚度上限」搏鬥。懂了這點，那些名詞瞬間不玄了。</li>
+  </ul>
+
+  <h3>③ Agent 需要工具，因為模型沒有手</h3>
+  <p>
+    失憶圖書館員不能幫你訂便當——他只會講話。LLM 也一樣：
+    它<strong>不能</strong>上網、查資料庫、寄 email、跑程式。它只能<em>輸出文字</em>。
+  </p>
+  <div class="callout blue">
+    <span class="callout-title">🔧 那 Agent 是怎麼「做事」的？</span>
+    <p>
+      機關又在車體層：你跟模型約好一個暗號——「當你想查天氣，就輸出
+      <code>{"tool": "get_weather", "city": "台北"}</code> 這種格式的文字」。
+      模型輸出這串字（記住，它仍然只是在接龍！），<strong>你的程式碼</strong>看到暗號，
+      真的去呼叫天氣 API，把結果塞回劇本，讓模型繼續接龍。
+    </p>
+    <p>
+      所謂 tool calling / function calling，拆穿了就是：<strong>模型負責喊「我想用鎚子！」，你的程式負責真的拿鎚子去敲。</strong>
+      模型從頭到尾沒有離開過「輸出文字」這件事。
+    </p>
+  </div>
+
+  <h3>④ 幻覺不是故障，是本性</h3>
+  <p>
+    你的 Agent 總有一天會一本正經地告訴使用者一個<strong>不存在的 API、瞎掰的法條、幽靈餐廳的電話</strong>。
+    為什麼？回到根本：模型不是在「查資料」，它在生成「<em>統計上看起來很像正確答案</em>的文字」。
+  </p>
+  <ul>
+    <li>「聽起來對」和「真的對」在它眼裡是同一件事——它只有語感，沒有事實查核器。</li>
+    <li>它給錯誤答案時的自信程度，和給正確答案時<strong>一模一樣</strong>。因為兩者對它來說都只是「機率很高的接龍」。</li>
+    <li>對策從來不是「拜託它不要唬爛」（prompt 只能降低機率），而是<strong>車體層工程</strong>：接搜尋/資料庫工具讓它引用真資料（RAG）、要求附來源、對關鍵輸出做程式驗證。</li>
+  </ul>
+
+  <h3>⑤ 溫度、隨機性與「為什麼 demo 的時候好好的」</h3>
+  <p>
+    每個字都是抽籤抽出來的，代表你的 Agent <strong>天生就是不確定性機器</strong>。
+    Demo 跑十次都對，第十一次在客戶面前爆炸——正常，骰子而已。所以工程上你會學到：
+    需要穩定格式的場景把 temperature 調低、用結構化輸出（JSON schema）綁住它、
+    對重要流程寫驗證與重試。<strong>把它當成「很有才華但會抽風的實習生」來設計系統，你就贏過八成的人了。</strong>
+  </p>
+
+  <div class="callout green">
+    <span class="callout-title">🗺️ 一張表總結：現象 → 根因 → 你該做的事</span>
+    <p style="margin-bottom:0;">
+      「Agent 忘東忘西」→ context window 有限 → 摘要 / RAG / 記憶檔案。<br>
+      「Agent 不會執行動作」→ 模型只會輸出文字 → 接工具，程式碼代勞。<br>
+      「Agent 講幹話」→ 接龍不查證 → 餵真資料 + 驗證輸出。<br>
+      「Agent 時好時壞」→ 抽籤本性 → 降溫度、綁格式、寫重試。<br>
+      「Prompt 沒效果」→ 軌道沒鋪好 → 給角色、給範例、給明確格式。
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 6 章：結業考 -->
+<!-- ================================================================ -->
+<section id="s6">
+  <span class="time-badge">⏱ 5 分鐘</span>
+  <h2><span class="kicker">第 6 章 · 結業考</span>畢業前，四題定生死</h2>
+  <p class="dim">全對的人，正式脫離「對 AI 燒香拜拜」階段。答錯也沒關係，解釋就在下面。</p>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q1.</span>LLM 產生「幻覺」（一本正經講錯誤資訊）的根本原因是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">訓練資料裡有太多假新聞，把它教壞了</button>
+      <button class="quiz-opt" data-a="0">伺服器過熱導致計算錯誤</button>
+      <button class="quiz-opt" data-a="1">它本來就只是在生成「統計上看起來合理」的接龍，並沒有在查證事實</button>
+      <button class="quiz-opt" data-a="0">駭客攻擊污染了模型</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      訓練資料品質確實有影響，但就算資料 100% 正確，幻覺依然會發生——
+      因為模型的任務從頭到尾是「接出最像樣的下一個字」，不是「查出正確答案」。天才鸚鵡，不是百科全書。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q2.</span>你寫的 Agent 想「查資料庫後回覆使用者」。查資料庫這個動作是誰執行的？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">LLM 模型本身直接連進資料庫查詢</button>
+      <button class="quiz-opt" data-a="1">你的程式碼——模型只輸出「我要查資料庫」的暗號文字，實際查詢由程式代勞</button>
+      <button class="quiz-opt" data-a="0">OpenAI / Anthropic 的伺服器自動幫你查</button>
+      <button class="quiz-opt" data-a="0">資料庫會主動把資料推送給模型</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      模型沒有手。它輸出一段格式化文字（tool call），你的車體層程式碼看到後真的去查，
+      再把結果塞回劇本讓它繼續接龍。這就是所有 Agent 框架的核心迴圈。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q3.</span>使用者跟你的 Agent 聊了兩小時後，它開始忘記一開始設定的規則。最可能的原因是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">模型的記憶體壞掉了，重開機就好</button>
+      <button class="quiz-opt" data-a="0">聊太久，模型累了、專注力下降</button>
+      <button class="quiz-opt" data-a="0">使用者觸發了安全過濾，模型拒絕配合</button>
+      <button class="quiz-opt" data-a="1">對話歷史超過 context window，早期內容被擠出「那疊劇本」了</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      模型不會累（它根本沒有「持續存在」，每次呼叫都是新的失憶開局）。
+      是那疊每次重塞的劇本有厚度上限，最早的頁數被抽掉了。解法：摘要壓縮、把關鍵規則常駐在系統提示詞、RAG。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q4.</span>「ChatGPT」和「GPT 模型」的關係，最貼切的比喻是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="1">整台汽車 vs 引擎——App 在模型外面包了系統提示詞、記憶管理、工具和介面</button>
+      <button class="quiz-opt" data-a="0">同一個東西的兩種名字，沒有差別</button>
+      <button class="quiz-opt" data-a="0">哥哥和弟弟——兩個獨立的 AI 互相支援</button>
+      <button class="quiz-opt" data-a="0">正版與盜版的關係</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      ChatGPT / Claude App 是產品（車體），GPT / Claude 模型是引擎。
+      你做 Agent 就是租引擎、自己造車體。分清楚這兩層，是 Agent 開發的第一課。
+    </div>
+  </div>
+
+  <h3>🎓 帶走這 5 句話（其他都可以忘）</h3>
+  <div class="card">
+    <ol style="margin-left: 20px; font-weight: 700;">
+      <li>LLM 是一台練到走火入魔的<strong>文字接龍機</strong>——一次猜一個字，猜到講完。</li>
+      <li>它是<strong>失憶的</strong>：所謂記憶，是 App 每次把整段歷史重新塞回去。</li>
+      <li>ChatGPT / Claude 是<strong>車體</strong>，模型是<strong>引擎</strong>；做 Agent = 自己造車體。</li>
+      <li>它<strong>沒有手</strong>：所有「動作」都是你的程式碼看懂暗號後代勞的。</li>
+      <li>幻覺是<strong>本性不是故障</strong>：它輸出「像對的」，不保證「是對的」——驗證是你的工作。</li>
+    </ol>
+  </div>
+
+  <div class="big-quote">
+    下次有人問你「AI 到底是什麼」，<br>
+    你可以微笑著說：<br>
+    <span class="hl">「一隻讀過整個網際網路、嚴重失憶、<br>手氣很好的接龍鸚鵡。」</span>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  LLM 101 · 為 Vibe Coding / AI Agent 新手打造的一小時基礎課<br>
+  課程中的 token 切分與機率數字皆為教學示意 · 純靜態頁面，無任何追蹤與後端
+</footer>
+
+<script>
+/* ================================================================
+   主題切換
+================================================================ */
+const themeBtn = document.getElementById('theme-toggle');
+themeBtn.addEventListener('click', () => {
+  const isLight = document.documentElement.classList.toggle('light');
+  themeBtn.textContent = isLight ? '🌙 深色' : '☀️ 淺色';
+});
+
+/* ================================================================
+   捲動進度條 + 章節導覽高亮
+================================================================ */
+const scrollbar = document.getElementById('scrollbar');
+const navSteps = [...document.querySelectorAll('.nav-step')];
+const sections = navSteps.map(a => document.getElementById(a.dataset.sec));
+
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+  scrollbar.style.width = pct + '%';
+
+  let activeIdx = -1;
+  sections.forEach((sec, i) => {
+    if (sec.getBoundingClientRect().top < window.innerHeight * 0.45) activeIdx = i;
+  });
+  navSteps.forEach((a, i) => {
+    a.classList.toggle('active', i === activeIdx);
+    a.classList.toggle('done', i < activeIdx);
+  });
+}, { passive: true });
+
+/* ================================================================
+   Pipeline 步進器
+================================================================ */
+const PIPE_STAGES = [
+  {
+    name: 'STEP 0 · 輸入',
+    title: '📨 你的文字抵達工廠門口',
+    visual: `<div style="font-size:24px; font-weight:900; text-align:center; padding: 20px 0;">「今天天氣很」</div>`,
+    note: '你在輸入框打了這五個字，按下 Enter。此刻模型還什麼都沒做——但接下來 0.0 幾秒內，會發生一整條生產線的事。'
+  },
+  {
+    name: 'STEP 1 · TOKENIZE 切塊',
+    title: '🔪 先把句子剁成「token」小塊',
+    visual: `
+      <div style="text-align:center; padding: 8px 0;">
+        <span class="token">今天</span><span class="token">天氣</span><span class="token">很</span>
+      </div>
+      <p class="pipe-note" style="text-align:center; margin-top:10px;">「今天天氣很」→ 3 個 token</p>`,
+    note: '模型不認識「句子」，只認識固定菜單上的小碎塊，叫 token。有點像把樂高作品拆回一顆顆積木。中文有時一個詞一塊、有時一個字被剁成好幾塊——這裡用簡化版示意。你聽過的「這個模型支援 200K token」，講的就是這種積木的數量。'
+  },
+  {
+    name: 'STEP 2 · 變成編號',
+    title: '🔢 每個 token 換成菜單上的編號',
+    visual: `
+      <div style="text-align:center; padding: 8px 0;">
+        <span class="token">今天</span><span class="tid">→ #15234</span>
+        <span class="token">天氣</span><span class="tid">→ #8871</span>
+        <span class="token">很</span><span class="tid">→ #1092</span>
+      </div>`,
+    note: '模型的字典（詞彙表）大約有十幾萬個 token，每個都有固定編號，像超商商品的條碼。從這一步開始，模型眼裡沒有「文字」了——只有數字。它從來沒有「看過中文」，它看的一直都是編號。'
+  },
+  {
+    name: 'STEP 3 · EMBEDDING 座標化',
+    title: '📍 編號變成「意義座標」',
+    visual: `
+      <div style="text-align:center;">
+        <div style="margin-bottom:6px;"><span class="token">今天</span></div>
+        <span class="vec">[0.12, -0.98, 0.44, 0.07, …共幾千個數字]</span>
+      </div>
+      <p class="pipe-note" style="text-align:center; margin-top:10px;">每個 token 都領到一長串數字，代表它在「意義宇宙」中的位置</p>`,
+    note: '每個編號被換成一長串數字（向量），可以想成「意義宇宙裡的 GPS 座標」。神奇的是：意思接近的詞，座標就靠近——「天氣」跟「氣候」是鄰居，「天氣」跟「滷肉飯」隔了十萬八千里。這是模型在訓練時自己排出來的地圖。'
+  },
+  {
+    name: 'STEP 4 · 層層加工',
+    title: '🏭 幾十層加工站，token 們開始「互看」',
+    visual: `
+      <div class="layer-stack" id="layer-stack" style="margin: 0 auto;">
+        ${Array.from({length: 8}, (_, i) => `<div class="layer-bar" data-l="${i}">Layer ${i + 1}${i === 7 ? '（最後一層）' : ''}</div>`).join('')}
+      </div>`,
+    note: '重頭戲。座標流過幾十層（大模型近百層）加工站。每一層裡，token 們透過「注意力機制」互相張望：「很」注意到前面是「天氣」，開始傾向天氣相關的走向。層數越深，整句話的語境被揉得越透。所謂 Transformer，就是這種「大家互看再更新自己」的加工站疊很多層。',
+    onEnter: () => {
+      document.querySelectorAll('#layer-stack .layer-bar').forEach((bar, i) => {
+        setTimeout(() => bar.classList.add('lit'), 150 + i * 180);
+      });
+    }
+  },
+  {
+    name: 'STEP 5 · 預測機率',
+    title: '🎯 產出一張「下一個字」的賭盤',
+    visual: `
+      <div id="stage5-bars">
+        <div class="prob-row"><span class="prob-label">好</span><div class="prob-track"><div class="prob-fill" data-w="32"></div></div><span class="prob-pct">32%</span></div>
+        <div class="prob-row"><span class="prob-label">熱</span><div class="prob-track"><div class="prob-fill" data-w="24"></div></div><span class="prob-pct">24%</span></div>
+        <div class="prob-row"><span class="prob-label">冷</span><div class="prob-track"><div class="prob-fill" data-w="15"></div></div><span class="prob-pct">15%</span></div>
+        <div class="prob-row"><span class="prob-label">舒服</span><div class="prob-track"><div class="prob-fill" data-w="9"></div></div><span class="prob-pct">9%</span></div>
+        <div class="prob-row"><span class="prob-label">香菜</span><div class="prob-track"><div class="prob-fill" data-w="1"></div></div><span class="prob-pct">0.01%</span></div>
+      </div>`,
+    note: '加工完成後，模型對字典裡「每一個」token 打分數，換算成機率。注意：它不是選出「正確答案」，是排出一張賭盤。「香菜」的機率不是零——只是低到近乎不可能。（機率為教學示意值。）',
+    onEnter: () => {
+      document.querySelectorAll('#stage5-bars .prob-fill').forEach(f => {
+        setTimeout(() => f.style.width = f.dataset.w + '%', 100);
+      });
+    }
+  },
+  {
+    name: 'STEP 6 · SAMPLING 抽籤',
+    title: '🎰 從賭盤裡抽一個出來',
+    visual: `
+      <div style="text-align:center; padding: 10px 0;">
+        <div style="font-size:15px; color: var(--text-dim); margin-bottom: 10px;">咚咚咚咚——抽中：</div>
+        <span class="token new" style="font-size: 30px; padding: 8px 24px;">好</span>
+      </div>`,
+    note: '模型照機率「抽籤」（sampling）選出一個 token。機率高的常中，但不保證中——這就是為什麼同一句話問兩次，答案會不一樣。你之後會碰到的「temperature」參數就是在調賭性：調低 → 幾乎都選最高機率、乖乖牌；調高 → 更常抽到黑馬、更有創意也更容易出事。'
+  },
+  {
+    name: 'STEP 7 · 重複到講完',
+    title: '🔁 把新字接上，整條生產線再跑一次',
+    visual: `
+      <div style="text-align:center; line-height: 2.6;">
+        <div><span class="token">今天</span><span class="token">天氣</span><span class="token">很</span><span class="token new">好</span> <span style="color:var(--text-faint)">→ 再猜…</span></div>
+        <div><span class="token">今天</span><span class="token">天氣</span><span class="token">很</span><span class="token">好</span><span class="token new">，</span> <span style="color:var(--text-faint)">→ 再猜…</span></div>
+        <div><span class="token">今天</span><span class="token">天氣</span><span class="token">很</span><span class="token">好</span><span class="token">，</span><span class="token new">適合</span><span class="token new">出去</span><span class="token new">走走</span><span class="token new" style="border-style:dashed;">〔停止〕</span></div>
+      </div>`,
+    note: '剛抽出的「好」被接到句尾，整條生產線（切塊→座標→加工→賭盤→抽籤）從頭再跑一遍，猜下下一個字。一次一個 token，直到抽中特殊的「停止符」。你看到 ChatGPT 一個字一個字蹦出來，不是打字動畫特效——它真的就是這樣一個一個生的。'
+  },
+  {
+    name: 'STEP 8 · DECODE 還原',
+    title: '📬 編號串翻回人話，送回你眼前',
+    visual: `
+      <div style="text-align:center; padding: 16px 0;">
+        <div style="font-size:13px; font-family: var(--mono); color: var(--text-faint); margin-bottom: 8px;">#15234 #8871 #1092 #2201 #… → </div>
+        <div style="font-size:24px; font-weight:900;">「今天天氣很<span style="color:var(--green)">好，適合出去走走</span>」</div>
+        <div style="margin-top:14px; font-size: 32px;">🎉</div>
+      </div>`,
+    note: '最後把 token 編號串翻譯回文字，經過 App 層包裝，出現在你的聊天視窗。整趟旅程結束——而這一切，只是為了回答同一個問題無數遍：「下一個字是什麼？」恭喜你，已經比 95% 的 AI 使用者更懂它肚子裡發生什麼事了。'
+  }
+];
+
+const pipeStepsEl = document.getElementById('pipe-steps');
+PIPE_STAGES.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'pstep';
+  d.textContent = i;
+  d.addEventListener('click', () => renderPipe(i));
+  pipeStepsEl.appendChild(d);
+});
+
+let pipeIdx = 0;
+function renderPipe(i) {
+  pipeIdx = Math.max(0, Math.min(PIPE_STAGES.length - 1, i));
+  const st = PIPE_STAGES[pipeIdx];
+  document.getElementById('pipe-name').textContent = st.name;
+  document.getElementById('pipe-title').textContent = st.title;
+  document.getElementById('pipe-visual').innerHTML = st.visual;
+  document.getElementById('pipe-note').textContent = st.note;
+  document.getElementById('pipe-count').textContent = `${pipeIdx + 1} / ${PIPE_STAGES.length}`;
+  document.getElementById('pipe-prev').disabled = pipeIdx === 0;
+  const nextBtn = document.getElementById('pipe-next');
+  nextBtn.disabled = pipeIdx === PIPE_STAGES.length - 1;
+  nextBtn.textContent = pipeIdx === PIPE_STAGES.length - 1 ? '🏁 完成！' : '下一步 →';
+  [...pipeStepsEl.children].forEach((el, j) => {
+    el.classList.toggle('on', j === pipeIdx);
+    el.classList.toggle('past', j < pipeIdx);
+  });
+  if (st.onEnter) st.onEnter();
+}
+document.getElementById('pipe-prev').addEventListener('click', () => renderPipe(pipeIdx - 1));
+document.getElementById('pipe-next').addEventListener('click', () => renderPipe(pipeIdx + 1));
+renderPipe(0);
+
+/* ================================================================
+   猜 token 小遊戲
+================================================================ */
+const GAME_ROUNDS = [
+  {
+    before: '我家的貓最喜歡吃',
+    after: '。',
+    options: [
+      { w: '罐罐', p: 34 },
+      { w: '魚', p: 28 },
+      { w: '飼料', p: 19 },
+      { w: '紙箱', p: 4 },
+      { w: '微積分', p: 0.01 }
+    ],
+    comment: '「罐罐」「魚」「飼料」都是高機率好答案——模型不在乎哪個「才是真的」，只在乎哪個在訓練文字裡最常這樣接。至於「微積分」……機率不是零喔，只是低到貓自己都不信。'
+  },
+  {
+    before: '人生就像一盒',
+    after: '。',
+    options: [
+      { w: '巧克力', p: 71 },
+      { w: '驚喜', p: 12 },
+      { w: '衛生紙', p: 2 },
+      { w: '樂高', p: 1.5 },
+      { w: '螺絲', p: 0.3 }
+    ],
+    comment: '「巧克力」一枝獨秀——因為《阿甘正傳》這句名言在訓練資料裡出現了成千上萬次。這就是「接龍反映訓練資料的統計」最赤裸的例子：不是它懂人生，是它看過太多次這句話。'
+  },
+  {
+    before: '打開冰箱，我發現裡面只剩一瓶',
+    after: '。',
+    options: [
+      { w: '牛奶', p: 30 },
+      { w: '啤酒', p: 22 },
+      { w: '醬油', p: 14 },
+      { w: '可樂', p: 11 },
+      { w: '洗髮精', p: 0.05 }
+    ],
+    comment: '這題沒有壓倒性贏家——「牛奶」「啤酒」「醬油」都合理，賭盤比較平。溫度調高時，這種題目的答案就會特別多變。至於洗髮精放冰箱……統計上罕見，但世界很大，訓練資料裡搞不好真的有人這樣寫過。'
+  }
+];
+
+let gameIdx = 0;
+function renderGame() {
+  const r = GAME_ROUNDS[gameIdx];
+  document.getElementById('game-sentence').innerHTML =
+    `「${r.before}<span class="game-blank">？？</span>${r.after}」`;
+  const optsEl = document.getElementById('game-options');
+  optsEl.innerHTML = '';
+  // 選項洗牌顯示
+  const shuffled = [...r.options].sort(() => Math.random() - 0.5);
+  shuffled.forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'game-opt';
+    b.textContent = o.w;
+    b.addEventListener('click', () => revealGame(o, b));
+    optsEl.appendChild(b);
+  });
+  document.getElementById('game-probs').style.display = 'none';
+  document.getElementById('game-verdict').textContent = '';
+  document.getElementById('game-next').style.display = 'none';
+}
+
+function revealGame(picked, btn) {
+  const r = GAME_ROUNDS[gameIdx];
+  document.querySelectorAll('.game-opt').forEach(b => b.disabled = true);
+  btn.classList.add('picked');
+  document.getElementById('game-sentence').innerHTML =
+    `「${r.before}<span class="game-blank">${picked.w}</span>${r.after}」`;
+
+  const sorted = [...r.options].sort((a, b) => b.p - a.p);
+  const top = sorted[0];
+  const barsEl = document.getElementById('game-bars');
+  barsEl.innerHTML = sorted.map(o => `
+    <div class="prob-row">
+      <span class="prob-label" ${o.w === picked.w ? 'style="color:var(--accent)"' : ''}>${o.w}${o.w === picked.w ? ' 👈' : ''}</span>
+      <div class="prob-track"><div class="prob-fill ${o.w === top.w ? 'winner' : ''}" data-w="${Math.max(o.p, 1)}"></div></div>
+      <span class="prob-pct">${o.p}%</span>
+    </div>`).join('');
+  document.getElementById('game-probs').style.display = 'block';
+  requestAnimationFrame(() => {
+    barsEl.querySelectorAll('.prob-fill').forEach(f => {
+      setTimeout(() => f.style.width = f.dataset.w + '%', 60);
+    });
+  });
+
+  const v = document.getElementById('game-verdict');
+  if (picked.w === top.w) {
+    v.style.color = 'var(--green)';
+    v.textContent = `🎯 你跟模型想的一樣！「${top.w}」正是賭盤上的第一名。`;
+  } else if (picked.p >= 10) {
+    v.style.color = 'var(--accent)';
+    v.textContent = `😎 「${picked.w}」也是高機率選項——溫度調高一點，模型真的可能抽到它。`;
+  } else {
+    v.style.color = 'var(--pink)';
+    v.textContent = `🎲 「${picked.w}」是超級黑馬（${picked.p}%）——你比模型更有創意（或更混亂）。`;
+  }
+
+  const cmt = document.createElement('p');
+  cmt.className = 'dim';
+  cmt.style.cssText = 'font-size:14.5px; margin-top:12px;';
+  cmt.textContent = '💬 ' + r.comment;
+  document.getElementById('game-bars').appendChild(cmt);
+
+  const nextBtn = document.getElementById('game-next');
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = gameIdx < GAME_ROUNDS.length - 1 ? '下一題 →' : '🔄 再玩一輪';
+}
+
+document.getElementById('game-next').addEventListener('click', () => {
+  gameIdx = (gameIdx + 1) % GAME_ROUNDS.length;
+  renderGame();
+});
+renderGame();
+
+/* ================================================================
+   隨堂測驗（通用）
+================================================================ */
+document.querySelectorAll('[data-quiz]').forEach(quiz => {
+  const opts = quiz.querySelectorAll('.quiz-opt');
+  const expl = quiz.querySelector('.quiz-expl');
+  const verdict = expl.querySelector('.verdict');
+  opts.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const correct = btn.dataset.a === '1';
+      opts.forEach(b => {
+        b.disabled = true;
+        if (b.dataset.a === '1') b.classList.add('correct');
+      });
+      if (!correct) {
+        btn.classList.add('wrong');
+        verdict.textContent = '❌ 差一點！正確答案已標綠。';
+        verdict.style.color = 'var(--red)';
+      } else {
+        verdict.textContent = '✅ 答對了！';
+        verdict.style.color = 'var(--green)';
+      }
+      expl.classList.add('show');
+    });
+  });
+});
+</script>
+</body>
+</html>

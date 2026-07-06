@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hermes Agent 課程</title>
+  <title>AgentVibe — AI Agent 養成課</title>
+  <meta name="description" content="AgentVibe：從搞懂 LLM 是什麼，到裝好你的第一個 AI Agent、接進 Telegram / LINE、每天替你打工。一條路線走到底的中文實作課。">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
   <script>
@@ -14,20 +15,66 @@
       }
     })();
   </script>
+  <style>
+    /* 首頁專用小工具：hero 數據列（沿用 Pico 變數，不另起爐灶） */
+    .hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin: 1.25rem 0 0; }
+    .hero-stats > div { background: var(--pico-card-background-color); border: 1px solid var(--pico-muted-border-color); border-radius: var(--pico-border-radius); padding: 0.75rem 1rem; text-align: center; }
+    .hero-stats .num { display: block; font-size: 1.4rem; font-weight: 700; color: var(--pico-primary); }
+    .hero-stats .lbl { display: block; font-size: 0.85rem; color: var(--pico-muted-color); }
+  </style>
 </head>
 <body>
   <header class="container">
     <hgroup>
-      <h1>Hermes Agent 課程</h1>
-      <p>從零裝好 hermes-agent，串到 Telegram / LINE，學會日常使用</p>
+      <h1>AgentVibe</h1>
+      <p>AI Agent 養成課 — 從「它到底是什麼」到「它每天替你打工」</p>
     </hgroup>
   </header>
 
   <main class="container">
     <section>
       <hgroup>
-        <h2>從這裡開始</h2>
-        <p>挑你的作業系統，跟著精靈一步一步走。</p>
+        <h2>你不缺 AI，你缺的是「知道自己在幹嘛」</h2>
+        <p>大部分人用 AI 的方式，是對著黑盒子燒香拜拜——靈驗就截圖發文，不靈就罵它笨。</p>
+      </hgroup>
+      <p>
+        AgentVibe 是一條完整的養成路線：先搞懂 LLM 這頭「文字接龍怪獸」的真面目，
+        再親手裝起一個真正的 AI Agent、把它接進你的 Telegram / LINE，
+        教它排程、造 skill、每天早上自動交報告，最後用 vibe coding 做出真正屬於你的工具。
+        不用會寫程式才能開始，但走完之後，你會比 90% 的 AI 使用者更知道自己在跟什麼東西講話。
+      </p>
+      <div class="hero-stats">
+        <div><span class="num">11 堂課</span><span class="lbl">全中文・步驟精靈帶路</span></div>
+        <div><span class="num">5 個階段</span><span class="lbl">觀念 → 安裝 → 整合 → 自動化 → 實戰</span></div>
+        <div><span class="num">2 大平台</span><span class="lbl">Telegram 與 LINE 都能接</span></div>
+        <div><span class="num">0 基礎</span><span class="lbl">看得懂中文就能上車</span></div>
+      </div>
+    </section>
+
+    <section>
+      <hgroup>
+        <h2>先懂再上手 · LLM 是什麼</h2>
+        <p>所有課程的起點。沒上這堂就往下衝，等於還沒學會看地圖就出海。</p>
+      </hgroup>
+
+      <div class="grid">
+        <article>
+          <header>
+            <h3>LLM 101 · 文字接龍怪獸解剖課</h3>
+          </header>
+          <p>你每天聊天的那個 AI，其實不會思考——它在賭下一個字。一小時互動課程講清楚 LLM 的真面目：巨大字典比喻、一句話進去之後發生的事、ChatGPT 跟裸模型差在哪。保證零數學、零公式。</p>
+          <p><small>⏱ 60 分鐘 · 6 個章節 · 互動實驗</small></p>
+          <footer>
+            <a href="llm-basics.html" role="button">從這裡開始</a>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <hgroup>
+        <h2>安裝你的第一個 Agent（Hermes 路線）</h2>
+        <p>觀念懂了，該讓怪獸住進你的電腦了。這裡用 hermes-agent 當教材——它是我們挑的其中一條路線，不是唯一解，但夠好上手、夠能打。</p>
       </hgroup>
 
       <div class="grid">
@@ -46,7 +93,7 @@
           <header>
             <h3>macOS</h3>
           </header>
-          <p>macOS 路徑無需 WSL2，直接安裝即可。</p>
+          <p>macOS 路徑無需 WSL2，直接安裝即可，半小時收工。</p>
           <p><small>⏱ 30 分鐘</small></p>
           <footer>
             <a href="mac.html" role="button">開始 macOS 課程</a>
@@ -58,7 +105,7 @@
     <section>
       <hgroup>
         <h2>基礎工具</h2>
-        <p>開始開發前先把這些工具學起來，後面每一堂都會用到。</p>
+        <p>不管你走哪條 Agent 路線，這些工具都躲不掉——遲早要學，不如現在。</p>
       </hgroup>
 
       <div class="grid">
@@ -77,8 +124,8 @@
 
     <section>
       <hgroup>
-        <h2>進階整合與日常使用</h2>
-        <p>裝好 hermes-agent 之後，挑你想先學的那一塊。建議順序 Lesson 2 → 3 → 5（自動化）；Lesson 4（LINE）可與 Telegram 平行。</p>
+        <h2>進階整合與日常使用（Hermes）</h2>
+        <p>裝好只是開始，接下來讓它進到你的生活裡。建議順序 Lesson 2 → 3 → 5（自動化）；Lesson 4（LINE）可與 Telegram 平行。走 Hermes 路線的人，這區就是你的主線任務。</p>
       </hgroup>
 
       <div class="grid">
@@ -131,7 +178,7 @@
     <section>
       <hgroup>
         <h2>實戰工作坊</h2>
-        <p>用 hermes 做出真正屬於你的工具。</p>
+        <p>學了不用等於沒學。這一區直接動手：做出真正屬於你的工具，順便搞懂市面上那堆 skill 包到底在紅什麼。</p>
       </hgroup>
 
       <div class="grid">
@@ -170,7 +217,7 @@
   </main>
 
   <footer class="container">
-    <small>對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="CHANGELOG.md">v1.0.0</a></small>
+    <small>AgentVibe 課程 · Hermes 路線對應 hermes-agent <span id="version-tag">（待 smoke test 確認）</span> · <a href="https://github.com/Lewsiafat/hermes-windows-course">GitHub</a> · <a href="CHANGELOG.md">v1.0.0</a></small>
   </footer>
 </body>
 </html>

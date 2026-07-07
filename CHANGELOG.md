@@ -4,6 +4,21 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-07-07
+
+重構文件與課程資訊架構：新增 `course.json` 作為課程地圖的單一事實來源（SSOT），補齊自 v1.2.0 以來未記錄的內容（AI Agent 101 / RAG 101 / Git 基礎 / Hermes Vibe Coding / Skill 比較系列等），並修正 README.md、CLAUDE.md 中過時或錯誤的資訊。**未變動任何課程 HTML 頁面內容**，僅同步 `index.html` footer 版號。
+
+### Added
+
+- **`course.json`**：新增課程地圖 manifest，記錄 5 個階段、13 個頁面的 file / title / type（wizard 或 article）/ storageKey / stepsTotal / added（新增日期），作為往後新增或調整課程頁時第一個要改的檔案。
+- **`scripts/check-course-map.mjs`**：零依賴 Node 腳本，檢查 `course.json`、`index.html`、實際 HTML 檔案三者是否一致（頁面存在性、`index.html` 連結、footer 版號）。
+
+### Changed
+
+- **README.md**：改寫為 AgentVibe 品牌定位，改用 5 階段總覽表格取代逐頁手寫清單，指向 `course.json` 作為 SSOT，誠實記錄「兩套設計文件並存、不整併」現況，修正過時的部署段落（auto-deploy 已確認正常運作）。
+- **CLAUDE.md**：改寫「專案性質」「由來與走向」「Lesson／頁面地圖」等段落以反映實際 13 頁架構；新增「課程地圖 SSOT」與「新增課程頁的命名慣例」（root-level + kebab-case）說明；修正過時的 `assets/screenshots/` 參照（該目錄實際不存在）；Release 段落補充版號需同步的 3 處位置。所有安全關鍵的跨步驟引用合約、runbook 合約、mac.html 平行維護合約均保留原文，未變動語意。
+- **index.html**：footer 版號由 `v1.0.0` 更新為 `v1.3.0`（唯一改動的課程頁面內容）。
+
 ## [1.2.0] - 2026-06-09
 
 新增「桌面安裝程式」簡單路線（Hermes Desktop Installer），並把安裝指令的 install.sh 改用官方現行 vanity URL。

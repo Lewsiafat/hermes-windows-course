@@ -1,0 +1,61 @@
+{
+  "site": {
+    "name": "AgentVibe — AI Agent 養成課",
+    "url": "https://lewsiafat.github.io/hermes-windows-course/",
+    "version": "1.3.0"
+  },
+  "conventions": {
+    "stepsTotal": "Highest data-step value on the page, equal to <body data-total-steps>. Every wizard page also has a Step 0 (前言) which is NOT counted in stepsTotal.",
+    "added": "First-commit date (YYYY-MM-DD) for pages added after v1.2.0 (2026-06-09). Pages without this field predate v1.2.0."
+  },
+  "stages": [
+    {
+      "id": "concepts",
+      "order": 1,
+      "title": "觀念三部曲",
+      "pages": [
+        { "file": "llm-basics.html", "title": "LLM 101", "type": "article", "added": "2026-07-07" },
+        { "file": "agent-basics.html", "title": "AI Agent 101", "type": "article", "added": "2026-07-07" },
+        { "file": "rag-basics.html", "title": "RAG 101", "type": "article", "added": "2026-07-07" }
+      ]
+    },
+    {
+      "id": "install-hermes",
+      "order": 2,
+      "title": "安裝 Hermes 路線",
+      "pages": [
+        { "file": "lesson-1.html", "title": "Windows + WSL2 安裝", "type": "wizard", "storageKey": "hermes-course-step", "stepsTotal": 9 },
+        { "file": "mac.html", "title": "macOS 安裝", "type": "wizard", "storageKey": "hermes-mac-course-step", "stepsTotal": 7 }
+      ]
+    },
+    {
+      "id": "fundamentals",
+      "order": 3,
+      "title": "基礎工具",
+      "pages": [
+        { "file": "git.html", "title": "Git 基礎", "type": "wizard", "storageKey": "git-course-step", "stepsTotal": 7, "added": "2026-06-30" }
+      ]
+    },
+    {
+      "id": "hermes-advanced",
+      "order": 4,
+      "title": "進階整合與日常使用（Hermes）",
+      "pages": [
+        { "file": "lesson-2.html", "title": "Telegram 整合", "type": "wizard", "storageKey": "hermes-lesson2-step", "stepsTotal": 8 },
+        { "file": "lesson-3.html", "title": "日常使用入門", "type": "wizard", "storageKey": "hermes-lesson3-step", "stepsTotal": 5 },
+        { "file": "lesson-4.html", "title": "LINE 整合", "type": "wizard", "storageKey": "hermes-lesson4-step", "stepsTotal": 7 },
+        { "file": "lesson-5.html", "title": "每日晨報自動化", "type": "wizard", "storageKey": "hermes-lesson5-step", "stepsTotal": 5 }
+      ]
+    },
+    {
+      "id": "workshops",
+      "order": 5,
+      "title": "實戰工作坊",
+      "pages": [
+        { "file": "hermes-vibe-coding.html", "title": "Hermes Vibe Coding（SDD + Superpower）", "type": "wizard", "storageKey": "hermes-vibe-coding-step", "stepsTotal": 5, "added": "2026-06-04" },
+        { "file": "skill-comparison.html", "title": "Claude Code Skills 比較指南", "type": "wizard", "storageKey": "skill-comparison-step", "stepsTotal": 5, "added": "2026-06-24" },
+        { "file": "agent-skill-series.html", "title": "Agent Skill 系列比較", "type": "wizard", "storageKey": "agent-skill-series-step", "stepsTotal": 6, "added": "2026-06-24" }
+      ]
+    }
+  ]
+}

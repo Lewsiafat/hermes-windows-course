@@ -4,25 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 專案性質
 
-純靜態 GitHub Pages 教學站，**已上線於 https://lewsiafat.github.io/hermes-windows-course/**。教材語言為繁體中文 (zh-Hant)。
+純靜態 GitHub Pages 教學站，**已上線於 https://lewsiafat.github.io/hermes-windows-course/**（品牌名 AgentVibe — AI Agent 養成課）。教材語言為繁體中文 (zh-Hant)。
 
-**沒有 build step、沒有 framework、沒有測試套件、沒有 package.json。** 只有一個 landing `index.html` + 多支 `lesson-N.html` / `mac.html` + 一支 CSS + 一支 JS + 兩份 markdown runbook。
+**沒有 build step、沒有 framework、沒有測試套件、沒有 package.json。** 目前共 13 個課程頁 + 1 個 landing `index.html`，分兩種類型：**wizard 頁**（10 支，載入 `wizard.js`，有步驟切換機制）與 **article 頁**（3 支「觀念三部曲」，純 HTML 無 wizard 機制）。另有共用的 `style.css` / `wizard.js` 與兩份 markdown runbook。
 
 ### 由來與走向
 
 - **由來**：本 repo 最初由另一個 spec/plan 專案產出（見 `docs/superpowers/{specs,plans}/`），現在是獨立維護。改動時若要回溯設計意圖，先翻 specs，但**不要把 specs 當成限制當下方向的法律**。
 - **原本範圍**：60 分鐘從零裝好 [hermes-agent](https://github.com/NousResearch/hermes-agent)、完成第一次對話。
-- **現在走向**：擴展成 **「如何使用 hermes-agent 的完整教材」**，安裝只是其中一塊。新增內容時要意識到：這不再只是「安裝精靈」，而是 hermes 的整體入門教材，未來會涵蓋使用層面的章節。
+- **現在走向**：已從單純安裝教材擴展、並在 2026-07 改名為 **AgentVibe — AI Agent 養成課**，涵蓋觀念（LLM/Agent/RAG 101）、安裝、日常使用、到實戰工作坊的完整教材。新增內容時要意識到：這是 hermes 的整體入門教材，安裝只是其中一塊。
 
-### Lesson／頁面地圖
+## 課程地圖 SSOT：`course.json`
 
-- `index.html` — 課程目錄（landing hub）
-- `lesson-1.html` — **Windows 安裝**（9 步，storage key `hermes-course-step`）
-- `mac.html` — **macOS 安裝**，lesson-1 的平行版（7 步，`hermes-mac-course-step`），從 index/lesson-1 的「macOS 版本」連入
-- `lesson-2.html` — **Telegram 整合**（7 步）
-- `lesson-3.html` — **日常使用 / cron + tool-use**（5 步，假設 Lesson 1+2 已完成）
-- `lesson-4.html` — **LINE 整合**（7 步）
-- `lesson-5.html` — **進階使用 / 每日晨報自動化**（5 步，`hermes-lesson5-step`，假設 Lesson 1+2+3 已完成）
+**新增或調整任何課程頁，第一步是改 `course.json`，其次才是改 `index.html` 和頁面本身。** 這份檔案記錄每個頁面的 `file` / `title` / `type`（`wizard` 或 `article`）/ `storageKey` / `stepsTotal` / `added`（新增日期），是頁面 metadata 的單一事實來源——不要再靠這份 CLAUDE.md 或 README.md 手寫逐頁清單，那樣一定會漂移。
+
+跑 `node scripts/check-course-map.mjs` 可以檢查 `course.json`、`index.html`、實際 HTML 檔案三者是否一致（頁面存在性、`index.html` 連結、footer 版號），改完課程地圖後應該跑一次。
+
+## 新增課程頁的命名慣例
+
+新頁一律放在 repo root、檔名 **kebab-case**（例如 `new-topic.html`），**不要再用 `lesson-N` 編號**、也不要建立子資料夾分階段。階段分類只存在於 `course.json` 的 `stages[]` 裡，跟實際檔案位置無關。新增頁面的步驟：1) 在 `course.json` 對應 stage 加一筆 2) 在 `index.html` 加卡片與連結 3) 跑 `node scripts/check-course-map.mjs` 確認一致。
 
 ## 開發指令
 
@@ -32,40 +32,38 @@ open index.html          # macOS（本 repo 維護機）
 xdg-open index.html      # Linux
 # 或瀏覽器手動開啟此檔
 
-# 部署（⚠️ Pages auto-deploy 自 2026-05-23 失效，push 後「不會」自動上線）
+# 部署（push 到 main 後 GitHub Actions/Pages 自動 build 上線）
 git push --follow-tags
-gh api --method POST repos/Lewsiafat/hermes-windows-course/pages/builds   # 手動觸發 build，約 30–60s 上線
+gh api --method POST repos/Lewsiafat/hermes-windows-course/pages/builds   # 選用，手動觸發一次 build 或確認上線
 ```
 
 不需要 `npm install`、不需要起任何 dev server。Pico CSS 從 jsdelivr CDN 載入。
 
-> **⚠️ 部署陷阱**：GitHub Pages 的 push 後自動 build 從 2026-05-23 起就沒再觸發（root cause 未修，維護者更新不頻繁、選擇手動）。**光 `git push` 不會讓網站更新**，必須接著手動 `gh api --method POST .../pages/builds`。驗證上線：`curl -sI https://lewsiafat.github.io/hermes-windows-course/<page>.html` 看是否 200。
-
 ### Release
 
-版本記錄在 `CHANGELOG.md`（Keep a Changelog 格式），對應 git annotated tag `vX.Y.Z`。Semver：lesson 新增 / 大改 = minor，bug fix / 文字修正 = patch。release 時 README.md 的「目前版本」連結要一併更新。
+版本記錄在 `CHANGELOG.md`（Keep a Changelog 格式），對應 git annotated tag `vX.Y.Z`。Semver：課程頁新增 / 大改 = minor，bug fix / 文字修正 = patch。**release 時有 3 處版號要同步**：`course.json` 的 `site.version`、README.md 的「目前版本」連結、`index.html` footer 的 `<a href="CHANGELOG.md">vX.Y.Z</a>`。改完跑 `node scripts/check-course-map.mjs` 確認三者一致。
 
 ## 架構重點（big picture）
 
 ### Landing page (`index.html`)
 
 - `index.html` 是課程目錄（landing hub），**不載入 `wizard.js`**、沒有 `<body data-total-steps>` / `data-storage-key`。
-- 只有兩件事：列出所有 lesson 卡片、以及把舊 deep link `#step-N` 用 inline `<script>` 重導到 `lesson-1.html#step-N`（保留舊書籤）。
-- 改 landing 卡片內容直接編輯 `index.html` 的 `<article>`；不要把 wizard 機制塞進來。
+- 依 `course.json` 的 stages 列出所有課程頁卡片，並把舊 deep link `#step-N` 用 inline `<script>` 重導到 `lesson-1.html#step-N`（保留舊書籤）。
+- 改 landing 卡片內容直接編輯 `index.html` 的 `<article>`；不要把 wizard 機制塞進來；新增頁面記得同步 `course.json`。
 
 ### Lesson 精靈的運作（以 Lesson 1 為例：Step 0 + 9 個安裝步驟）
 
 1. `lesson-1.html` 用 `<section class="step" data-step="N">` 切出區塊：`data-step="0"` 是前言（為什麼選 hermes），`data-step="1"` 到 `data-step="9"` 是安裝流程。**只有當前步驟 visible，其他 `hidden`。**
 2. `wizard.js` 用 URL hash (`#step-N`) 當 source of truth，配合 `localStorage['hermes-course-step']` 記住進度（學員重啟 Windows 後回來會自動跳回正確步驟）。預設首頁是 Step 0；範圍檢查為 `n >= 0 && n <= TOTAL_STEPS`。
-3. **`TOTAL_STEPS` 與 `STORAGE_KEY` 從 `<body>` data-attributes 讀**：`wizard.js` 不再硬編碼，每支 lesson HTML 用 `<body data-total-steps="N" data-storage-key="...">` 自己宣告。新增 / 刪除 lesson 步驟時改 `<body>` attribute + 同步改該頁所有 `Step N / X` 文字。**不要在 wizard.js 寫 fallback**：fail loud 是設計，attribute 漏寫應該讓 console 噴錯而不是降級。
+3. **`TOTAL_STEPS` 與 `STORAGE_KEY` 從 `<body>` data-attributes 讀**：`wizard.js` 不再硬編碼，每支 lesson HTML 用 `<body data-total-steps="N" data-storage-key="...">` 自己宣告。新增 / 刪除 lesson 步驟時改 `<body>` attribute + 同步改該頁所有 `Step N / X` 文字，並同步更新 `course.json` 的 `stepsTotal`。**不要在 wizard.js 寫 fallback**：fail loud 是設計，attribute 漏寫應該讓 console 噴錯而不是降級。
 4. 進度文字 (`#progress-text`)：Step 0 顯示「前言」，Step 1–9 顯示 `Step N / 9`。
 5. 任何 `<pre data-copy>` 區塊會被 `wizard.js` 自動注入「Copy」按鈕。新增可複製指令時用這個 attribute，不要自行加按鈕 markup。
 
 ### 內容編輯流程
 
-- 改步驟內容 = 編輯對應的 `lesson-N.html` / `mac.html` 的 `<section data-step="N">`。零 build。改課程目錄則改 `index.html` 的 `<article>`。
+- 改步驟內容 = 編輯對應課程頁的 `<section data-step="N">`（wizard 頁）或內文（article 頁）。零 build。改課程目錄則改 `index.html` 的 `<article>` 與 `course.json`。
 - 樣式只調 `style.css` 裡的覆寫；版面骨架靠 Pico CSS 的 default styles。
-- **截圖存 `assets/screenshots/<filename>.png`**，檔名規則嚴格遵守 `ai-runbook.md` §截圖規範（小寫、連字號、`step-N-*`）。
+- **截圖檔名規則**嚴格遵守 `ai-runbook.md` §截圖規範（小寫、連字號、`step-N-*`）；目前 repo 內無截圖目錄，若要新增截圖請先確認實際存放路徑，不要假設既有目錄存在。
 
 ### 兩份必讀的 runbook
 
@@ -82,12 +80,13 @@ gh api --method POST repos/Lewsiafat/hermes-windows-course/pages/builds   # 手�
 
 兩頁的 **Step 1 都有「簡單路線（桌面安裝程式）↔ 完整路線（WSL2／終端機）」分岔**（雙欄卡片 + 簡單路線清單），改其中一頁的分岔文案時另一頁要同步。簡單路線用的是官方 Hermes Desktop Installer（Windows `.exe` / macOS `.dmg`，需 macOS 12+），**此路線無法在維護機 smoke test、內容依官方文件撰寫**——頁面已有誠實揭露摺疊，修改時保留該揭露、且**不要**因為它而更新 README「上次驗證」或 footer 版本（那兩處只反映 WSL2／終端機路線的實測結果）。簡單路線靠 `#step-N` 跨步連結導航（拿 key / 看對話技巧），不用自訂頁內錨點（`wizard.js` hashchange 會 `scrollTo top`，自訂錨點會被打回頂端）。
 
-### 設計與實作文件
+### 設計與實作文件（兩套並存，皆保留、不整併）
 
 - `docs/superpowers/specs/` — 課程設計規格（學員定位、時間表、教學原則）
 - `docs/superpowers/plans/` — 實作計畫
+- 另外還有一組根目錄 `specs/`、`docs/improvements/`、`docs/smoke-test-lesson2-group.md` 等零散設計/改進文件，是不同階段建立、彼此獨立的紀錄。
 
-改動方向有疑慮時先去 specs 確認原始設計意圖（特別是「為什麼選 OpenRouter free model」「為什麼 9 步而不是更少」這類問題）。
+**這兩套（以及其他零散文件）刻意不整併、不搬移、不改名**——它們各自對應建立當下的時空脈絡，強行統一會抹掉歷史決策紀錄。改動方向有疑慮時先去對應的 specs 確認原始設計意圖（特別是「為什麼選 OpenRouter free model」「為什麼 9 步而不是更少」這類問題），但**不要**把翻找這些文件當成重構這份 repo 文件結構的理由。
 
 ## 重要慣例
 

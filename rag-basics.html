@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG 101 — 一小時搞懂怎麼讓 AI 帶小抄進考場</title>
+<meta name="description" content="給 Vibe Coding 與 AI Agent 新手的一小時 RAG 基礎課：檢索、生成、向量資料庫，全程人話零公式，一次講清楚 RAG 跟純資料庫到底差在哪。">
+<style>
+/* ============ 主題變數（深色為預設） ============ */
+:root {
+  --bg: #0d1117;
+  --bg-soft: #161b22;
+  --bg-card: #1c2333;
+  --bg-card-hover: #232c40;
+  --border: #2d3748;
+  --text: #e6edf3;
+  --text-dim: #9aa7b8;
+  --text-faint: #6b7688;
+  --accent: #2dd4bf;       /* 主色：青綠（檢索雷達色） */
+  --accent-soft: rgba(45, 212, 191, 0.13);
+  --accent2: #f0883e;      /* 次色：橘 */
+  --accent2-soft: rgba(240, 136, 62, 0.13);
+  --green: #3fb950;
+  --green-soft: rgba(63, 185, 80, 0.14);
+  --red: #f85149;
+  --red-soft: rgba(248, 81, 73, 0.13);
+  --purple: #bc8cff;
+  --purple-soft: rgba(188, 140, 255, 0.13);
+  --pink: #ff7b9c;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --mono: "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+}
+html.light {
+  --bg: #f6f8fa;
+  --bg-soft: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f3f7;
+  --border: #d7dde5;
+  --text: #1f2733;
+  --text-dim: #4b5768;
+  --text-faint: #7b8798;
+  --accent: #0d9488;
+  --accent2: #d9730d;
+  --accent-soft: rgba(13, 148, 136, 0.13);
+  --accent2-soft: rgba(217, 115, 13, 0.13);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", -apple-system, sans-serif;
+  line-height: 1.75;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ 頂部進度導覽 ============ */
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+#scrollbar { height: 3px; background: linear-gradient(90deg, var(--accent), var(--purple)); width: 0%; transition: width 0.1s linear; }
+.nav-inner {
+  max-width: 960px; margin: 0 auto; padding: 8px 16px;
+  display: flex; align-items: center; gap: 6px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo { font-weight: 800; color: var(--accent); white-space: nowrap; margin-right: 8px; font-size: 15px; text-decoration: none; }
+.nav-step {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  font-size: 13px; color: var(--text-faint); text-decoration: none;
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.nav-step .dot {
+  width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--bg-card); border: 1px solid var(--border);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+}
+.nav-step:hover { color: var(--text); background: var(--bg-card); }
+.nav-step.active { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.nav-step.active .dot { background: var(--accent); color: #04211c; border-color: var(--accent); }
+.nav-step.done .dot { background: var(--green-soft); color: var(--green); border-color: var(--green); }
+#theme-toggle {
+  margin-left: auto; flex: 0 0 auto; background: var(--bg-card); color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  cursor: pointer; font-size: 13px; font-family: inherit;
+}
+#theme-toggle:hover { color: var(--text); }
+
+/* ============ 版面 ============ */
+main { max-width: 960px; margin: 0 auto; padding: 90px 20px 60px; }
+section { padding: 44px 0; border-bottom: 1px dashed var(--border); scroll-margin-top: 70px; }
+section:last-of-type { border-bottom: none; }
+
+.time-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent2-soft); color: var(--accent2);
+  font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+  margin-bottom: 12px; letter-spacing: 0.5px;
+}
+h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.25; font-weight: 900; letter-spacing: -0.5px; }
+h2 { font-size: clamp(24px, 4.5vw, 36px); line-height: 1.3; font-weight: 800; margin-bottom: 18px; }
+h3 { font-size: 21px; font-weight: 700; margin: 30px 0 10px; }
+h2 .kicker { display: block; font-size: 14px; color: var(--accent); letter-spacing: 2px; font-weight: 700; margin-bottom: 6px; }
+p { margin: 14px 0; color: var(--text); }
+p.dim, li.dim { color: var(--text-dim); }
+strong { color: var(--accent); font-weight: 700; }
+em { color: var(--pink); font-style: normal; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 8px 0; }
+code { font-family: var(--mono); background: var(--bg-card); border: 1px solid var(--border); padding: 1px 7px; border-radius: 6px; font-size: 0.88em; color: var(--accent2); }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px; margin: 20px 0;
+}
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 20px 0; }
+.callout.orange { border-left-color: var(--accent2); background: var(--accent2-soft); }
+.callout.red { border-left-color: var(--red); background: var(--red-soft); }
+.callout.green { border-left-color: var(--green); background: var(--green-soft); }
+.callout.purple { border-left-color: var(--purple); background: var(--purple-soft); }
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-title { font-weight: 800; font-size: 15px; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+
+button.primary {
+  background: var(--accent); color: #04211c; border: none; font-family: inherit;
+  font-size: 16px; font-weight: 800; padding: 11px 26px; border-radius: 999px;
+  cursor: pointer; transition: transform 0.12s, filter 0.2s;
+}
+button.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+button.primary:active { transform: translateY(1px); }
+button.primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+button.ghost {
+  background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+  font-family: inherit; font-size: 15px; padding: 10px 20px; border-radius: 999px; cursor: pointer;
+}
+button.ghost:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* ============ Hero ============ */
+#hero { padding-top: 30px; border-bottom: 1px dashed var(--border); }
+.hero-tag { color: var(--accent2); font-weight: 700; letter-spacing: 3px; font-size: 14px; margin-bottom: 14px; }
+.hero-sub { font-size: 19px; color: var(--text-dim); margin-top: 18px; max-width: 720px; }
+.hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 30px; }
+.hero-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; text-align: center; }
+.hero-stat .num { font-size: 26px; font-weight: 900; color: var(--accent); }
+.hero-stat .lbl { font-size: 13px; color: var(--text-faint); }
+.agenda { margin-top: 26px; }
+.agenda-row { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 15.5px; }
+.agenda-row:last-child { border-bottom: none; }
+.agenda-row .t { flex: 0 0 62px; color: var(--accent2); font-weight: 700; font-family: var(--mono); font-size: 13.5px; }
+.agenda-row a { color: var(--text); text-decoration: none; }
+.agenda-row a:hover { color: var(--accent); }
+
+/* ============ 知識卡片視覺（chunk） ============ */
+.chunk {
+  display: inline-block; padding: 3px 10px; margin: 3px; border-radius: 8px;
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  color: var(--accent); font-weight: 700; font-size: 15px;
+}
+.chunk.hot { background: var(--accent2-soft); border-color: var(--accent2); color: var(--accent2); }
+.chunk.new { background: var(--green-soft); border-color: var(--green); color: var(--green); animation: pop 0.4s; }
+.chunk.dimmed { opacity: 0.35; }
+@keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+.vec { font-family: var(--mono); font-size: 12.5px; color: var(--purple); background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 8px; padding: 4px 8px; display: inline-block; margin: 3px; }
+
+/* ============ 相似度長條 ============ */
+.prob-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+.prob-label { flex: 0 0 118px; text-align: right; font-weight: 700; font-size: 14.5px; }
+.prob-track { flex: 1; background: var(--bg-soft); border-radius: 999px; height: 22px; overflow: hidden; border: 1px solid var(--border); }
+.prob-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--purple)); width: 0%; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.prob-fill.winner { background: linear-gradient(90deg, var(--accent2), var(--pink)); }
+.prob-pct { flex: 0 0 64px; font-family: var(--mono); font-size: 13.5px; color: var(--text-dim); }
+
+/* ============ Pipeline 步進器 ============ */
+#pipeline { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 24px 0; }
+.pipe-head { background: var(--bg-soft); padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pipe-head .title { font-weight: 800; font-size: 16px; }
+.pipe-steps { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.pipe-steps .pstep {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; background: var(--bg-card); color: var(--text-faint);
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+}
+.pipe-steps .pstep.on { background: var(--accent); color: #04211c; border-color: var(--accent); }
+.pipe-steps .pstep.past { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.pipe-body { padding: 24px; min-height: 330px; }
+.pipe-phase { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; border-radius: 999px; padding: 2px 12px; margin-bottom: 8px; }
+.pipe-phase.build { background: var(--purple-soft); color: var(--purple); border: 1px solid var(--purple); }
+.pipe-phase.query { background: var(--accent2-soft); color: var(--accent2); border: 1px solid var(--accent2); }
+.pipe-stage-name { color: var(--accent); font-weight: 800; font-size: 14px; letter-spacing: 2px; margin-bottom: 4px; }
+.pipe-stage-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+.pipe-visual { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px; margin: 14px 0; min-height: 110px; }
+.pipe-note { color: var(--text-dim); font-size: 15.5px; }
+.pipe-foot { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg-soft); display: flex; gap: 10px; align-items: center; }
+.pipe-foot .count { margin-left: auto; color: var(--text-faint); font-size: 13.5px; font-family: var(--mono); }
+
+/* ============ 語意 vs 關鍵字 互動實驗 ============ */
+.lab-questions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 18px 0; }
+.lab-q-btn {
+  background: var(--bg-soft); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 15.5px; font-weight: 700; padding: 10px 20px;
+  border-radius: 12px; cursor: pointer; transition: all 0.15s;
+}
+.lab-q-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.lab-q-btn.picked { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.lab-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.lab-col { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+.lab-col h4 { font-size: 15px; margin-bottom: 10px; }
+.lab-col.keyword h4 { color: var(--red); }
+.lab-col.vector h4 { color: var(--accent); }
+.lab-result { font-size: 14.5px; color: var(--text-dim); }
+.lab-miss { color: var(--red); font-weight: 800; font-size: 17px; text-align: center; padding: 18px 0; }
+.lab-hit { color: var(--green); font-weight: 700; }
+@media (max-width: 640px) { .lab-cols { grid-template-columns: 1fr; } }
+
+/* ============ 組裝 prompt 架構圖 ============ */
+.arch { margin: 26px 0; }
+.arch-box { border-radius: var(--radius); padding: 16px 18px; margin: 0 auto; text-align: center; position: relative; }
+.arch-user { background: var(--green-soft); border: 2px solid var(--green); max-width: 320px; font-weight: 800; }
+.arch-app { background: var(--accent-soft); border: 2px solid var(--accent); max-width: 660px; }
+.arch-llm { background: var(--purple-soft); border: 2px solid var(--purple); max-width: 560px; margin-top: 14px; }
+.arch-label { font-weight: 900; font-size: 17px; margin-bottom: 4px; }
+.arch-app .arch-label { color: var(--accent); }
+.arch-llm .arch-label { color: var(--purple); }
+.arch-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
+.arch-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.arch-chip { background: var(--bg-card); border: 1px solid var(--border); border-radius: 999px; padding: 4px 13px; font-size: 13.5px; color: var(--text-dim); }
+.arch-chip.hl { border-color: var(--accent2); color: var(--accent2); }
+.arch-arrow { text-align: center; font-size: 22px; color: var(--text-faint); line-height: 1.2; padding: 6px 0; }
+.arch-arrow small { display: block; font-size: 12px; letter-spacing: 1px; }
+
+/* ============ 組好的 prompt 示意 ============ */
+.prompt-sheet { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; font-size: 14.5px; margin: 16px 0; }
+.prompt-sheet .seg { border-left: 3px solid var(--border); padding: 6px 12px; margin: 8px 0; border-radius: 0 8px 8px 0; }
+.prompt-sheet .seg.sys { border-left-color: var(--purple); background: var(--purple-soft); }
+.prompt-sheet .seg.ctx { border-left-color: var(--accent); background: var(--accent-soft); }
+.prompt-sheet .seg.usr { border-left-color: var(--green); background: var(--green-soft); }
+.prompt-sheet .seg-tag { font-size: 11.5px; font-weight: 800; letter-spacing: 1.5px; font-family: var(--mono); display: block; margin-bottom: 2px; color: var(--text-faint); }
+
+/* ============ 測驗 ============ */
+.quiz { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 20px 0; background: var(--bg-card); }
+.quiz-q { font-weight: 800; font-size: 17.5px; margin-bottom: 14px; }
+.quiz-q .qnum { color: var(--accent); margin-right: 6px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  text-align: left; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 15.5px; padding: 11px 16px; border-radius: 10px; cursor: pointer;
+  transition: all 0.15s; line-height: 1.5;
+}
+.quiz-opt:hover:not(:disabled) { border-color: var(--accent2); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.correct { border-color: var(--green); background: var(--green-soft); color: var(--green); font-weight: 700; }
+.quiz-opt.wrong { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+.quiz-expl { margin-top: 12px; font-size: 15px; color: var(--text-dim); display: none; border-top: 1px dashed var(--border); padding-top: 12px; }
+.quiz-expl.show { display: block; animation: pop 0.3s; }
+.quiz-expl .verdict { font-weight: 900; }
+
+/* ============ 對照表 ============ */
+table.cmp { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 15px; }
+table.cmp th, table.cmp td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; vertical-align: top; }
+table.cmp th { background: var(--bg-soft); font-size: 14px; letter-spacing: 1px; }
+table.cmp td:first-child { font-weight: 700; white-space: nowrap; }
+
+.big-quote { font-size: clamp(20px, 3.6vw, 28px); font-weight: 900; text-align: center; padding: 30px 18px; line-height: 1.5; }
+.big-quote .hl { color: var(--accent); }
+
+footer { text-align: center; color: var(--text-faint); font-size: 13.5px; padding: 30px 16px 50px; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .pipe-body { padding: 16px; }
+  .prob-label { flex-basis: 88px; font-size: 13px; }
+  .nav-step span.nm { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <div id="scrollbar"></div>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#hero">RAG&nbsp;101</a>
+    <a class="nav-step" href="#s1" data-sec="s1"><span class="dot">1</span><span class="nm">閉卷 vs 開卷</span></a>
+    <a class="nav-step" href="#s2" data-sec="s2"><span class="dot">2</span><span class="nm">考場神隊友</span></a>
+    <a class="nav-step" href="#s3" data-sec="s3"><span class="dot">3</span><span class="nm">檢索階段</span></a>
+    <a class="nav-step" href="#s4" data-sec="s4"><span class="dot">4</span><span class="nm">生成階段</span></a>
+    <a class="nav-step" href="#s5" data-sec="s5"><span class="dot">5</span><span class="nm">RAG vs 資料庫</span></a>
+    <a class="nav-step" href="#s6" data-sec="s6"><span class="dot">6</span><span class="nm">學以致用</span></a>
+    <a class="nav-step" href="#s7" data-sec="s7"><span class="dot">7</span><span class="nm">結業考</span></a>
+    <button id="theme-toggle" title="切換深淺色">☀️ 淺色</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================================================================ -->
+<!-- HERO -->
+<!-- ================================================================ -->
+<section id="hero">
+  <div class="hero-tag">VIBE CODING 新手村 · 第 1 課</div>
+  <h1>RAG：合法讓 AI<br><span style="color:var(--accent)">帶小抄進考場</span>的技術</h1>
+  <p class="hero-sub">
+    一小時，搞懂 RAG（Retrieval-Augmented Generation，檢索增強生成）到底在幹嘛。
+    上完這堂課，「向量資料庫」「embedding」「語意檢索」這些名詞會從咒語變成常識——
+    而且你會知道它跟「建一個資料庫」根本是兩回事。
+  </p>
+  <div class="hero-grid">
+    <div class="hero-stat"><div class="num">60 分鐘</div><div class="lbl">課程總長</div></div>
+    <div class="hero-stat"><div class="num">7 個章節</div><div class="lbl">循序漸進</div></div>
+    <div class="hero-stat"><div class="num">0 行數學</div><div class="lbl">保證無公式</div></div>
+    <div class="hero-stat"><div class="num">3 個互動</div><div class="lbl">動手玩、不用背</div></div>
+  </div>
+
+  <div class="card agenda">
+    <strong style="color:var(--text)">📋 課程時間表（帶課或自學都照這個節奏走）</strong>
+    <div class="agenda-row"><span class="t">5 min</span><a href="#s1">第 1 章 · 開場破題：閉卷考的天才，為什麼一直唬爛</a></div>
+    <div class="agenda-row"><span class="t">9 min</span><a href="#s2">第 2 章 · 核心比喻：考場裡的神隊友</a></div>
+    <div class="agenda-row"><span class="t">12 min</span><a href="#s3">第 3 章 · 檢索 Retrieval：神隊友怎麼在 200 頁裡秒翻到那一頁（互動實驗）</a></div>
+    <div class="agenda-row"><span class="t">10 min</span><a href="#s4">第 4 章 · 生成 Generation：拿到小抄之後，換學霸上場</a></div>
+    <div class="agenda-row"><span class="t">10 min</span><a href="#s5">第 5 章 · 核心對決：RAG vs 純資料庫，差在哪？</a></div>
+    <div class="agenda-row"><span class="t">9 min</span><a href="#s6">第 6 章 · 學以致用：你的 Agent 跟知識庫專案會用在哪</a></div>
+    <div class="agenda-row"><span class="t">5 min</span><a href="#s7">第 7 章 · 結業考 + 帶走的 5 句話</a></div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 1 章：開場破題 -->
+<!-- ================================================================ -->
+<section id="s1">
+  <span class="time-badge">⏱ 5 分鐘</span>
+  <h2><span class="kicker">第 1 章 · 開場破題</span>閉卷考的天才，為什麼一直唬爛</h2>
+
+  <p>先想像一個場景：</p>
+  <p>
+    你認識一位超狂的學霸。他讀過的書多到嚇死人，講話頭頭是道，寫作文行雲流水。
+    但他有兩個致命弱點：第一，他的知識停在<strong>畢業那一天</strong>——之後世界發生什麼事他一概不知；
+    第二，考試的時候如果碰到不會的題目，他<em>不會空白，他會用超有自信的語氣掰一個答案給你</em>，
+    掰得有模有樣，連他自己都信了。
+  </p>
+  <p>這位學霸，就是 LLM。而他考的每一場試，都是<strong>閉卷考</strong>——只能靠腦袋裡訓練時記下的東西作答。</p>
+
+  <div class="big-quote">
+    問他「我們公司的請假規則是什麼？」<br>
+    他沒讀過你公司的員工手冊，<br>
+    但他<span class="hl">還是會回答</span>。<br>
+    這就是問題所在。
+  </div>
+
+  <p>所以閉卷考的學霸有三大死穴：</p>
+  <ul>
+    <li><strong>不知道你的私有資料。</strong>你的公司文件、你的筆記、你的產品手冊——訓練資料裡通通沒有。</li>
+    <li><strong>知識過期。</strong>訓練截止日之後的事，他一律不知道，但不妨礙他發表意見。</li>
+    <li><strong>不會就掰。</strong>他的本性是「生成看起來合理的文字」，不是「查證事實」——這就是「幻覺」的來源。</li>
+  </ul>
+
+  <p>
+    那怎麼辦？重新訓練一個懂你公司文件的模型？太貴，而且文件一改又要重練。
+    把全部文件每次都貼進對話？文件一多就塞爆（而且貴到哭）。
+  </p>
+
+  <div class="callout">
+    <span class="callout-title">💡 RAG 的解法：把閉卷考改成開卷考</span>
+    <p>
+      與其逼學霸「背下你的所有資料」，不如<strong>讓他考試的時候可以翻資料</strong>。
+      每次有人提問，先去你的文件堆裡把「跟這題最相關的幾段」翻出來，
+      夾在考卷旁邊給他看，再讓他作答。這就是 RAG——
+      <strong>R</strong>etrieval（檢索：把相關資料翻出來）+
+      <strong>A</strong>ugmented（增強：夾進考卷）+
+      <strong>G</strong>eneration（生成：學霸看著資料寫答案）。
+    </p>
+  </div>
+
+  <p class="dim">
+    整堂課抓住這一句就夠了：<strong>「RAG = 先翻書、再作答。」</strong>
+    前半段「翻書」叫檢索，後半段「作答」叫生成。接下來我們把這兩段拆開講透。
+  </p>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 2 章：核心比喻 -->
+<!-- ================================================================ -->
+<section id="s2">
+  <span class="time-badge">⏱ 9 分鐘</span>
+  <h2><span class="kicker">第 2 章 · 核心比喻</span>考場裡的神隊友</h2>
+
+  <p>
+    開卷考聽起來很美好，但考過開卷考的人都知道一個殘酷真相：
+    <strong>資料帶得越多，越翻不到重點。</strong>
+    抱一整箱講義進考場，鐘響開始翻，翻到交卷還在翻——開卷考死最慘的，往往是資料帶最多的人。
+  </p>
+  <p>
+    LLM 也一樣。它的「桌面」（context window，一次能讀的文字量）有限，
+    你不可能把 200 頁的文件整箱倒給它，而且就算塞得下，資訊太雜它也會抓錯重點。
+    所以真正的關鍵不是「能不能翻書」，而是——<strong>誰幫你翻到對的那一頁？</strong>
+  </p>
+
+  <h3>登場：兩人一組的考試小隊</h3>
+  <div class="card">
+    <p style="margin-top:0;">想像這場開卷考不是一個人考，是<strong>兩人小隊</strong>：</p>
+    <ul style="margin-left: 20px;">
+      <li>🔍 <strong>翻書手</strong>——考前就把你的所有資料讀過一輪，剪成一張張<em>小抄卡片</em>，
+        並且按照「內容意思」整理好。考試鐘一響，他聽完題目，唰唰唰三秒抽出最相關的三張卡片，拍在桌上。
+        他<strong>不負責作答</strong>，他只負責找。他甚至不用很聰明，但手要快、要準。</li>
+      <li>✍️ <strong>寫手</strong>——就是第 1 章那位文筆爆棚的學霸（LLM）。他看著翻書手遞來的卡片，
+        用自己的話把答案<strong>寫得漂亮、講得白話、統整成一段人話</strong>。
+        卡片上沒有的，他（理論上）不該自己加戲。</li>
+    </ul>
+  </div>
+
+  <p>
+    這個分工就是 RAG 的全部靈魂：
+  </p>
+  <ul>
+    <li><strong>翻書手 = 檢索（Retrieval）階段</strong>：從一大堆資料裡，快速找出跟問題最相關的幾段。</li>
+    <li><strong>寫手 = 生成（Generation）階段</strong>：把找出來的內容消化，生成自然語言的回答。</li>
+    <li><strong>兩人之間傳遞的卡片 = 交棒點</strong>：檢索的輸出，就是生成的輸入。整個 RAG 系統的品質，
+      取決於卡片找得準不準、寫手守不守規矩。</li>
+  </ul>
+
+  <div class="callout orange">
+    <span class="callout-title">🧠 為什麼一定要兩個人？一個人不行嗎？</span>
+    <p>
+      因為這兩件事需要的能力完全不同。「在一百萬張卡片裡三秒找到對的那張」需要的是<strong>又快又便宜的比對能力</strong>，
+      根本不需要會寫作文；「把三張卡片寫成一段通順人話」需要的是<strong>語言能力</strong>，但不需要記得一百萬張卡片。
+      讓學霸自己翻一百萬張卡片？慢、貴、桌子還放不下。讓翻書手自己寫答案？他只會把卡片原文丟你臉上。
+      <strong>分工，才是 RAG 聰明的地方。</strong>
+    </p>
+  </div>
+
+  <h3>本課的貫穿範例：滷味店秘笈</h3>
+  <p>
+    接下來全程用同一個例子。假設你開了一家滷味店，多年心血寫成一本 200 頁的<strong>《滷味秘笈》</strong>：
+    配方、滷製時間、客訴處理、每日 SOP 全在裡面。
+    現在你想做一個「新員工問答機器人」——員工用 LINE 問問題，機器人根據秘笈回答。
+  </p>
+  <p class="dim">
+    直接把問題丟給 LLM？它沒讀過你的秘笈，會掰一套「通用滷味理論」給你。
+    這正是 RAG 的主場：<strong>翻書手負責翻秘笈，寫手負責回 LINE。</strong>
+    下一章，我們先解剖翻書手。
+  </p>
+
+  <!-- 隨堂測驗 1 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>RAG 系統裡，「檢索」和「生成」兩個階段的分工是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">檢索負責寫答案初稿，生成負責潤稿</button>
+      <button class="quiz-opt" data-a="1">檢索負責從資料堆裡找出相關段落，生成負責把這些段落消化成自然語言回答</button>
+      <button class="quiz-opt" data-a="0">檢索是白天執行的，生成是晚上批次執行的</button>
+      <button class="quiz-opt" data-a="0">檢索處理中文資料，生成處理英文資料</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      翻書手（檢索）只找不寫，寫手（生成）只寫不找。
+      兩人之間的交棒物就是「找出來的那幾段文字」——它是檢索的輸出，也是生成的輸入。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 3 章：檢索 Retrieval -->
+<!-- ================================================================ -->
+<section id="s3">
+  <span class="time-badge">⏱ 12 分鐘</span>
+  <h2><span class="kicker">第 3 章 · 檢索 RETRIEVAL</span>神隊友怎麼在 200 頁裡秒翻到那一頁</h2>
+
+  <p>
+    翻書手的工作分成兩個時期：<strong>考前準備</strong>（一次做好，之後重複用）和
+    <strong>考試當下</strong>（每次有人提問就跑一遍）。我們用步進器全程跟拍——
+    按「下一步」，看《滷味秘笈》怎麼一路變成三秒可查的小抄系統。
+  </p>
+
+  <!-- 互動 pipeline -->
+  <div id="pipeline">
+    <div class="pipe-head">
+      <span class="title">🔬 RAG 生產線直播</span>
+      <div class="pipe-steps" id="pipe-steps"></div>
+    </div>
+    <div class="pipe-body">
+      <div id="pipe-phase"></div>
+      <div class="pipe-stage-name" id="pipe-name"></div>
+      <div class="pipe-stage-title" id="pipe-title"></div>
+      <div class="pipe-visual" id="pipe-visual"></div>
+      <div class="pipe-note" id="pipe-note"></div>
+    </div>
+    <div class="pipe-foot">
+      <button class="ghost" id="pipe-prev">← 上一步</button>
+      <button class="primary" id="pipe-next">下一步 →</button>
+      <span class="count" id="pipe-count"></span>
+    </div>
+  </div>
+
+  <h3>重點放大：什麼是 embedding？（保證無公式版）</h3>
+  <p>
+    剛剛生產線裡最玄的一步，就是「把文字變成意義座標」——術語叫 <code>embedding</code>（嵌入向量）。
+    別怕，它的直覺其實超簡單：
+  </p>
+  <div class="card">
+    <p style="margin-top:0;">
+      想像一張巨大的<strong>「意義地圖」</strong>。每一段文字，都可以在這張地圖上釘一根圖釘。
+      釘的位置不是照筆畫、不是照注音，而是照<strong>「意思」</strong>：
+    </p>
+    <ul style="margin-left:20px;">
+      <li>「太鹹了怎麼補救」和「鹹度過高之補救措施」——用字幾乎沒重疊，但意思像雙胞胎，圖釘<strong>釘在隔壁</strong>。</li>
+      <li>「豆干滷 45 分鐘」和「本月營業額報表」——意思八竿子打不著，圖釘隔了<strong>十萬八千里</strong>。</li>
+      <li>embedding 模型（一種專門做這件事的 AI）負責幫每段文字算出圖釘座標——實際上是一長串數字，但你只要記得「<strong>意思越近、座標越近</strong>」就夠用一輩子。</li>
+    </ul>
+  </div>
+  <p>
+    有了意義地圖，「找相關資料」就從「比對字面」變成「<strong>比距離</strong>」：
+    把使用者的問題也釘上地圖，看哪幾張卡片的圖釘離它最近，抽出來就對了。
+    這就是所謂的<strong>向量相似度搜尋</strong>——聽起來很厲害，本質就是在地圖上找鄰居。
+    而專門存這些座標、負責快速找鄰居的資料庫，就叫<strong>向量資料庫</strong>。
+  </p>
+
+  <h3>🎮 動手實驗：關鍵字警衛 vs 語意雷達</h3>
+  <p>
+    口說無憑，直接玩。下面是《滷味秘笈》切出來的五張卡片，
+    請你挑一個「新員工會問的問題」，看看<strong>傳統關鍵字搜尋</strong>（比對字面，像 Ctrl+F）
+    和<strong>語意檢索</strong>（比意義距離）各自交出什麼成績。
+  </p>
+
+  <div class="card" id="lab">
+    <p style="font-weight:800; margin-top:0;">📇 知識庫裡的五張卡片：</p>
+    <div id="lab-chunks" style="line-height:2.2;"></div>
+    <p style="font-weight:800; margin-top:18px;">👇 選一個問題丟進去：</p>
+    <div class="lab-questions" id="lab-questions"></div>
+    <div id="lab-output" style="display:none;">
+      <div class="lab-cols">
+        <div class="lab-col keyword">
+          <h4>🚧 關鍵字警衛（字面比對）</h4>
+          <div class="lab-result" id="lab-kw"></div>
+        </div>
+        <div class="lab-col vector">
+          <h4>📡 語意雷達（意義距離）</h4>
+          <div class="lab-result" id="lab-vec"></div>
+        </div>
+      </div>
+      <p class="dim" id="lab-comment" style="font-size:14.5px; margin-top:14px;"></p>
+    </div>
+    <p class="dim" style="font-size:13.5px; text-align:center; margin-top:14px;">
+      ※ 相似度百分比為教學示意值，非真實模型即時計算。
+    </p>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-title">💡 你剛剛看到的三件事</span>
+    <p>
+      1️⃣ <strong>字面一樣時，關鍵字搜尋也能贏。</strong>問「豆干」查「豆干」，Ctrl+F 又快又準——關鍵字搜尋不是廢物。<br>
+      2️⃣ <strong>換句話說，關鍵字就瞎了。</strong>「太鹹」vs「鹹度過高」、「奧客」vs「客訴」——人類換個說法毫無壓力，字面比對直接暴斃。<br>
+      3️⃣ <strong>語意雷達給的是「排行榜」，不是「有／沒有」。</strong>它永遠能排出最近的幾張卡片——這也是雙面刃：就算庫裡根本沒有答案，它還是會硬撈幾張「最不遠」的給你。檢索品質是 RAG 的第一道生死關。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 2 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>RAG 為什麼要把文件切塊後轉成 embedding（意義座標）？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">為了加密文件內容，避免商業機密外洩</button>
+      <button class="quiz-opt" data-a="0">為了壓縮檔案大小，省硬碟空間</button>
+      <button class="quiz-opt" data-a="1">為了讓「找相關資料」變成「在意義地圖上找鄰居」，就算問題換了說法也找得到</button>
+      <button class="quiz-opt" data-a="0">因為 LLM 只看得懂數字，看不懂中文</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      核心目的就是<strong>語意檢索</strong>：意思相近的文字在地圖上是鄰居，所以「太鹹怎麼辦」能撈到「鹹度過高之補救措施」。
+      這是關鍵字比對永遠做不到的事。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 4 章：生成 Generation -->
+<!-- ================================================================ -->
+<section id="s4">
+  <span class="time-badge">⏱ 10 分鐘</span>
+  <h2><span class="kicker">第 4 章 · 生成 GENERATION</span>拿到小抄之後，換學霸上場</h2>
+
+  <p>
+    翻書手把三張卡片拍在桌上了。接下來的問題是：<strong>這些卡片怎麼「餵」給 LLM？</strong>
+    答案樸實到你可能會失望——<em>就是把卡片內容當成文字，直接夾進 prompt 裡。</em>
+    沒有神秘通道、沒有把知識「灌進模型腦袋」，就是複製貼上等級的操作。
+  </p>
+
+  <p>員工問「客人說太鹹怎麼辦？」，你的程式實際送給 LLM 的考卷長這樣：</p>
+
+  <div class="prompt-sheet">
+    <div class="seg sys">
+      <span class="seg-tag">SYSTEM · 考試規則</span>
+      你是滷味店的新人訓練助手。請「只根據」下方參考資料回答問題；
+      資料裡沒有的，就老實說不知道，不准自己發揮。
+    </div>
+    <div class="seg ctx">
+      <span class="seg-tag">CONTEXT · 翻書手剛撈到的三張卡片</span>
+      【卡片 A】鹹度過高之補救措施：立即加入等量清水與少許冰糖，回滷十分鐘…<br>
+      【卡片 C】客訴處理原則：先道歉、再補償小菜一份、最後記錄於交接本…<br>
+      【卡片 D】每日打烊前，滷汁需過濾並冷藏保存…
+    </div>
+    <div class="seg usr">
+      <span class="seg-tag">USER · 員工的原始問題</span>
+      客人說太鹹怎麼辦？
+    </div>
+  </div>
+
+  <p>
+    LLM 收到這張「組裝考卷」之後，做它最擅長的事：<strong>讀懂、消化、統整、用人話回答</strong>——
+  </p>
+  <div class="callout purple">
+    <p style="font-weight:700;">🗣️ 模型的回答（示意）：</p>
+    <p>
+      「別慌，分兩件事處理：<strong>對客人</strong>——先道歉，補一份小菜，並記錄到交接本（卡片 C）；
+      <strong>對那鍋滷汁</strong>——加等量清水和少許冰糖回滷十分鐘補救（卡片 A）。」
+    </p>
+  </div>
+  <p>
+    注意它做了幾件關鍵字搜尋永遠做不到的事：
+    把<strong>兩張不同卡片</strong>的內容組合成一個完整答案、
+    自動忽略不相關的卡片 D（打烊 SOP 跟這題無關）、
+    而且是用<strong>回答問題的口吻</strong>講，不是把原文丟你臉上。
+    這就是「Generation」三個音節的全部價值：<strong>開卷考不是抄書比賽，是看著資料寫出自己的答案。</strong>
+  </p>
+
+  <h3>兩階段怎麼銜接？一張圖看懂</h3>
+  <div class="arch">
+    <div class="arch-box arch-user">🧑 員工：「客人說太鹹怎麼辦？」</div>
+    <div class="arch-arrow">⬇<small>問題進來</small></div>
+    <div class="arch-box arch-app">
+      <div class="arch-label">🔍 檢索階段（你的程式 + 向量資料庫）</div>
+      <div class="arch-sub">翻書手上工：這一段完全沒有 LLM 參與</div>
+      <div class="arch-chips">
+        <span class="arch-chip">把問題釘上意義地圖</span>
+        <span class="arch-chip">找出座標最近的卡片</span>
+        <span class="arch-chip hl">輸出：3 段最相關的原文</span>
+      </div>
+    </div>
+    <div class="arch-arrow">⬇<small>交棒！卡片 + 規則 + 原問題，組裝成一份 prompt</small></div>
+    <div class="arch-box arch-llm">
+      <div class="arch-label">✍️ 生成階段（LLM）</div>
+      <div class="arch-sub">寫手上工：讀卡片 → 統整 → 生成自然語言回答</div>
+      <div class="arch-chips">
+        <span class="arch-chip">跨卡片整合</span>
+        <span class="arch-chip">忽略無關內容</span>
+        <span class="arch-chip">用人話回答</span>
+      </div>
+    </div>
+    <div class="arch-arrow">⬇<small>回答送回員工的 LINE</small></div>
+  </div>
+
+  <div class="callout red">
+    <span class="callout-title">☠️ 生成階段的鐵律：垃圾進，垃圾出</span>
+    <p>
+      寫手再會寫，<strong>翻書手翻錯頁就全毀了</strong>。如果檢索撈回來的是打烊 SOP 和營業額報表，
+      LLM 也只能對著錯的資料硬寫——而且寫得跟真的一樣流暢。
+      所以 RAG 系統出包時，<strong>永遠先檢查檢索撈到了什麼</strong>，再來怪模型。
+      八成的「RAG 回答很爛」，兇手是翻書手，不是寫手。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 3 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>檢索到的資料是「怎麼」進到 LLM 的？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">寫進模型的參數裡，模型從此永久記住這些知識</button>
+      <button class="quiz-opt" data-a="1">當成普通文字，跟指示與使用者問題一起組裝進 prompt，模型當場讀、當場答</button>
+      <button class="quiz-opt" data-a="0">透過向量資料庫和模型之間的專用神經連線傳輸</button>
+      <button class="quiz-opt" data-a="0">模型自己伸手進資料庫翻找需要的段落</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      沒有魔法，就是「夾進 prompt」。模型讀完這一次就忘（它是無狀態的），
+      下一個問題來，翻書手重新撈、重新組裝、重新夾。RAG 沒有改變模型本身一絲一毫。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 5 章：RAG vs 純資料庫 -->
+<!-- ================================================================ -->
+<section id="s5">
+  <span class="time-badge">⏱ 10 分鐘</span>
+  <h2><span class="kicker">第 5 章 · 核心對決</span>「我建個資料庫就好了吧？」——差很多，差在這</h2>
+
+  <p>
+    每次講完 RAG，一定有同學舉手：「等等，我把秘笈打進資料庫，做個搜尋功能，不就好了？
+    幹嘛搞什麼向量、什麼 LLM？」
+    好問題，這正是本課的大魔王題。我們讓兩位選手<strong>同場競技三回合</strong>，你自己看差在哪。
+  </p>
+  <p class="dim">
+    左邊選手：<strong>純知識資料庫</strong>（文件存好 + 關鍵字搜尋，像公司內網的文件系統）。
+    右邊選手：<strong>RAG</strong>（語意檢索 + LLM 生成）。
+  </p>
+
+  <h3>第一回合：換句話說 —— 「太鹹」事件</h3>
+  <p>
+    新員工小美在 LINE 上問：「<em>客人說太鹹怎麼辦？</em>」
+  </p>
+  <ul>
+    <li>🗄️ <strong>純資料庫</strong>：在文件裡搜尋「太鹹」……秘笈裡寫的是「<strong>鹹度過高</strong>之補救措施」。
+      字面對不上，系統回：<code>查無資料</code>。小美再試「很鹹」「好鹹」「鹹爆」——通通查無資料。
+      小美放棄系統，直接打給你。你半夜十一點接到電話。<strong>系統宣告死亡。</strong></li>
+    <li>📡 <strong>RAG</strong>：「太鹹怎麼辦」和「鹹度過高之補救措施」在意義地圖上是<strong>鄰居</strong>，
+      一撈就中。小美三秒拿到答案，你繼續睡覺。</li>
+  </ul>
+  <p class="dim">
+    → 差異一：<strong>純資料庫比對「字」，RAG 比對「意思」。</strong>
+    人類天生就是換句話說的生物，沒有人會照著你文件裡的措辭提問。
+    這不是小缺陷，這是關鍵字系統在真實世界的第一死因。
+  </p>
+
+  <h3>第二回合：就算找到了 —— 「40 頁 PDF」事件</h3>
+  <p>
+    這回合我們讓純資料庫贏在起跑點：小美這次搜「客訴」，真的命中了！系統回傳——
+    <em>《客訴暨異常事件處理辦法（v3，含附錄）》，40 頁。</em>
+  </p>
+  <ul>
+    <li>🗄️ <strong>純資料庫</strong>：它的工作到此結束。它是個誠實的倉庫管理員：
+      你報貨號，它把<strong>整箱原封不動</strong>搬給你。要在 40 頁裡找到「先道歉還是先補償」？
+      <em>自己讀，孩子。</em>客人在櫃檯等著，小美在翻目錄。</li>
+    <li>📡 <strong>RAG</strong>：檢索只撈出<strong>相關的那幾段</strong>，LLM 再把它們濃縮成
+      「先道歉 → 補小菜 → 記交接本」三步驟，直接回答小美問的那個問題。
+      <strong>還能追問</strong>：「如果客人要退錢呢？」——再檢索、再回答，像對話，不像查檔案。</li>
+  </ul>
+  <p class="dim">
+    → 差異二：<strong>純資料庫交付「原文」，RAG 交付「答案」。</strong>
+    找到文件只是完成一半——「從文件到答案」中間那段理解、篩選、統整的工，
+    純資料庫留給人類，RAG 交給 LLM。
+  </p>
+
+  <h3>第三回合：跨文件整合 —— 「開新分店」事件</h3>
+  <p>
+    店長問了一個大題目：「<em>如果我要開第二家分店，秘笈裡哪些 SOP 需要先標準化？</em>」
+  </p>
+  <ul>
+    <li>🗄️ <strong>純資料庫</strong>：搜「分店」……秘笈裡根本沒有「分店」這個詞（你又還沒開過）。查無資料。
+      就算你手動翻，答案也散落在滷汁保存、員工訓練、供應商名單等<strong>十幾個不同章節</strong>裡——
+      資料庫沒有能力把它們「湊成一個答案」，因為它根本不理解問題在問什麼。</li>
+    <li>📡 <strong>RAG</strong>：語意檢索撈出所有跟「流程、標準、交接」意思相近的段落，
+      LLM 讀完後生成：「建議優先標準化三件事：滷汁配方計量化（目前寫『適量』的有 12 處）、
+      每日 SOP 檢查表、客訴處理流程……」——<strong>一個秘笈裡沒有現成答案、卻是從秘笈內容推出來的回答。</strong></li>
+  </ul>
+  <p class="dim">
+    → 差異三：<strong>純資料庫只能回答「文件裡寫過的」，RAG 能回答「文件內容能推出來的」。</strong>
+    因為多了一顆會理解、會綜合的腦（LLM），零散的段落才能變成觀點。
+  </p>
+
+  <div class="callout">
+    <span class="callout-title">🤝 講句公道話：它們不是敵人，是上下游</span>
+    <p>
+      別誤會這是「資料庫過時了」的故事。RAG 的肚子裡<strong>就有一個資料庫</strong>（向量資料庫，存卡片和座標），
+      很多正經系統還會關鍵字＋語意<strong>兩路並用</strong>（術語叫混合檢索）——查貨號、查訂單編號這種精確比對，
+      關鍵字反而是王者。正確的理解是：<br>
+      <strong>RAG = 資料庫（存）＋ 語意檢索（懂你在問什麼）＋ LLM（把找到的變成答案）。</strong><br>
+      純資料庫是一座圖書館；RAG 是圖書館<em>加上一位聽得懂人話的館員</em>。差的從來不是那些書，是那個人。
+    </p>
+  </div>
+
+  <table class="cmp">
+    <tr><th>情境</th><th>🗄️ 純知識資料庫</th><th>📡 RAG</th></tr>
+    <tr><td>換句話說提問</td><td>字面對不上 → 查無資料</td><td>意義地圖找鄰居 → 照樣命中</td></tr>
+    <tr><td>找到之後</td><td>丟給你整份原文，自己讀</td><td>LLM 消化成直接回答問題的人話</td></tr>
+    <tr><td>答案散在多份文件</td><td>無法整合，逐份自己翻</td><td>跨段落統整成一個答案</td></tr>
+    <tr><td>擅長的事</td><td>精確查找（編號、庫存、報表）</td><td>用自然語言問知識、要解釋</td></tr>
+  </table>
+  <p class="dim" style="font-size:14px;">（這張表是給你考前抽背用的——上面三回合的故事才是本體。）</p>
+
+  <!-- 隨堂測驗 4 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>「建 RAG」和「建一個純知識資料庫」最核心的差別是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">RAG 的資料容量比較大，資料庫塞不下太多文件</button>
+      <button class="quiz-opt" data-a="1">RAG 用語意找資料（換句話說也找得到），並由 LLM 把找到的內容統整成自然語言答案；純資料庫只能字面比對、丟回原文</button>
+      <button class="quiz-opt" data-a="0">RAG 不需要儲存資料，全部靠 LLM 的記憶</button>
+      <button class="quiz-opt" data-a="0">純資料庫比較貴，RAG 比較便宜</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      兩大差異缺一不可：<strong>檢索端</strong>從「比對字」升級成「比對意思」（embedding 立功），
+      <strong>輸出端</strong>從「丟原文」升級成「生成答案」（LLM 立功）。
+      注意 RAG 內部仍然有資料庫——向量資料庫，所以「不需要儲存資料」是錯的。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 6 章：學以致用 -->
+<!-- ================================================================ -->
+<section id="s6">
+  <span class="time-badge">⏱ 9 分鐘</span>
+  <h2><span class="kicker">第 6 章 · 學以致用</span>你下個專案，大概率就會撞到它</h2>
+
+  <p>
+    這堂課不是通識課。你是用 AI 工具寫程式、想做 Agent 的人——
+    以下四個場景，就是 RAG 會出現在你人生裡的地方。
+  </p>
+
+  <h3>① 「幫我的文件做一個問答機器人」——經典 RAG 專案</h3>
+  <p>
+    個人筆記庫、公司內部文件、產品說明書、課程講義……只要有人說出
+    「<em>我想直接用問的，不想自己翻</em>」，就是 RAG 的招牌案型。
+    你現在已經知道整條生產線：<strong>切塊 → 算座標 → 存向量資料庫 → 問題進來 → 撈卡片 → 組 prompt → 生成</strong>。
+    Vibe coding 的好消息是：每一步都有現成的函式庫和服務，你不需要自己實作任何一步的內部細節——
+    但<strong>你需要懂每一步在幹嘛</strong>，不然出了問題連該罵哪一段都不知道。
+  </p>
+
+  <h3>② Agent 的「查資料」工具——RAG 是 Agent 的外接大腦</h3>
+  <p>
+    做 Agent 時，檢索通常被包裝成一個<strong>工具（tool）</strong>——
+    例如透過 MCP 這類協定掛給 Agent 一個「搜尋知識庫」的工具。差別在於：
+  </p>
+  <ul>
+    <li><strong>傳統 RAG</strong>：每個問題進來都<em>固定先檢索</em>，流程寫死。</li>
+    <li><strong>Agent + 檢索工具</strong>：Agent <em>自己決定</em>要不要查、查什麼、查幾次。
+      問「你好嗎」它不查；問「我們的退貨政策」它會呼叫檢索工具，甚至換幾組說法多查幾輪。</li>
+  </ul>
+  <p class="dim">
+    你會發現這只是把「翻書手」從流水線工人升級成「學霸可以隨時使喚的助手」——
+    概念一模一樣，只是誰握有「要不要翻書」的決定權變了。
+  </p>
+
+  <h3>③ Context window 的救星——為什麼不「全部塞進去」</h3>
+  <p>
+    你一定會想：「現在模型的 context window 那麼大，把整份文件塞進去不就好了？」
+    小文件——<strong>對，就這麼做</strong>，十頁的東西別折腾什麼向量資料庫，直接全文貼進去又準又省事。
+    但文件一旦上了量級：
+  </p>
+  <ul>
+    <li><strong>錢</strong>：每問一題都把 200 頁重新塞一次，token 費用按次燃燒。RAG 每次只塞最相關的幾段。</li>
+    <li><strong>塞不下</strong>：知識庫成長到幾千份文件時，再大的窗口也是杯水車薪。</li>
+    <li><strong>雜訊</strong>：塞一堆無關內容，模型反而容易被帶偏。開卷考帶一整箱講義進場的下場，第 2 章講過了。</li>
+  </ul>
+
+  <h3>④ Debug 心法：出事先驗「翻書手」</h3>
+  <p>你的 RAG 專案上線後回答很爛，怎麼辦？記住第 4 章的鐵律，照這個順序查：</p>
+  <div class="card">
+    <ol style="margin-left:20px;">
+      <li><strong>先印出檢索結果。</strong>看撈回來的卡片跟問題有沒有關係。八成的爛答案，兇手在這裡：
+        切塊切得太碎（卡片語意殘缺）、切太大（一張卡片混了三個主題）、或庫裡根本沒這份資料。</li>
+      <li><strong>再看組裝的 prompt。</strong>指示有沒有講清楚「只根據參考資料回答、沒有就說不知道」？</li>
+      <li><strong>最後才調模型。</strong>換更強的模型是最貴、也最常被高估的解法。
+        給學霸換一個更貴的學霸，救不了翻錯頁的翻書手。</li>
+    </ol>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-title">🗺️ 一張表總結：需求 → 你該想到什麼</span>
+    <p style="margin-bottom:0;">
+      「想用問的查自己的文件」→ 經典 RAG 管線。<br>
+      「Agent 需要查外部知識」→ 把檢索包成工具掛給它。<br>
+      「文件只有幾頁」→ 別建 RAG，全文塞 context 就好。<br>
+      「查訂單編號、精確欄位」→ 用傳統資料庫查詢，別硬上語意檢索。<br>
+      「RAG 答得很爛」→ 先印檢索結果，再檢查 prompt，最後才換模型。
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 7 章：結業考 -->
+<!-- ================================================================ -->
+<section id="s7">
+  <span class="time-badge">⏱ 5 分鐘</span>
+  <h2><span class="kicker">第 7 章 · 結業考</span>畢業前，五題定生死</h2>
+  <p class="dim">全對的人，從此聽到「向量資料庫」不再肅然起敬。答錯也沒關係，解釋就在下面。</p>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q1.</span>RAG 裡「檢索（Retrieval）」階段的任務是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">把使用者的問題翻譯成 SQL 指令去查資料表</button>
+      <button class="quiz-opt" data-a="1">從知識庫中找出跟問題「意思最相關」的幾段文字，交給生成階段使用</button>
+      <button class="quiz-opt" data-a="0">先用小模型寫一版草稿答案，再給大模型潤飾</button>
+      <button class="quiz-opt" data-a="0">過濾掉使用者問題裡的敏感詞</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      檢索 = 翻書手：只負責「找出最相關的卡片」，不負責作答。
+      它的輸出（幾段原文）就是下一棒生成階段的輸入——這就是兩階段的銜接點。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q2.</span>員工手冊寫「鹹度過高之補救措施」，使用者問「太鹹怎麼辦」。RAG 為什麼找得到、關鍵字搜尋找不到？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">因為 RAG 的資料庫比較大，收錄了更多同義詞辭典</button>
+      <button class="quiz-opt" data-a="0">因為 RAG 會先把使用者的問題改寫成標準公文用語</button>
+      <button class="quiz-opt" data-a="1">因為 embedding 把文字釘在「意義地圖」上，「太鹹」和「鹹度過高」意思相近、座標相鄰，比距離就能找到</button>
+      <button class="quiz-opt" data-a="0">因為 RAG 使用模糊比對，容忍錯字</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      關鍵是<strong>語意檢索</strong>：比的是「意思的距離」而不是「字面有沒有出現」。
+      不需要同義詞辭典、不需要改寫——意義地圖上它們天生就是鄰居。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q3.</span>「建 RAG」比「建純知識資料庫」多出來的兩件關鍵能力是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">資料加密能力＋自動備份能力</button>
+      <button class="quiz-opt" data-a="0">更快的查詢速度＋更省的儲存空間</button>
+      <button class="quiz-opt" data-a="0">支援更多檔案格式＋支援多人同時查詢</button>
+      <button class="quiz-opt" data-a="1">聽得懂換句話說的「語意檢索」＋把找到的內容統整成人話答案的「LLM 生成」</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      一個在輸入端（懂你在問什麼），一個在輸出端（把原文變答案）。
+      速度和儲存反而常是純資料庫贏——所以查訂單編號這種精確任務，別硬上 RAG。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q4.</span>檢索到的三段文字，是怎麼讓 LLM「知道」的？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="1">組裝進這一次的 prompt 裡（和指示、原問題放一起），模型當場讀、當場答，讀完即忘</button>
+      <button class="quiz-opt" data-a="0">上傳到模型官方伺服器，觸發一次微型再訓練</button>
+      <button class="quiz-opt" data-a="0">存入模型的長期記憶區，之後所有人提問都能用到</button>
+      <button class="quiz-opt" data-a="0">LLM 收到向量資料庫的連線帳號密碼，自己進去查</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      RAG 完全不改變模型本身——沒有訓練、沒有永久記憶、模型也沒有伸手查庫。
+      一切都是「這一回合的 prompt 夾帶」，下一題來就整套重跑。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q5.</span>你的 RAG 機器人回答品質很差。根據本課心法，第一步該做什麼？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">立刻換一個更大更貴的 LLM</button>
+      <button class="quiz-opt" data-a="0">把整個知識庫全文塞進 prompt，跳過檢索</button>
+      <button class="quiz-opt" data-a="1">把檢索撈回來的段落印出來看——先確認翻書手翻對了頁，再往下查</button>
+      <button class="quiz-opt" data-a="0">在 prompt 裡加一句「請認真回答，拜託」</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      垃圾進、垃圾出：檢索撈錯，再強的模型也只能對著錯資料流暢地錯下去。
+      八成的 RAG 問題出在檢索端（切塊方式、資料缺漏），先驗翻書手，最後才怪寫手。
+    </div>
+  </div>
+
+  <h3>🎓 帶走這 5 句話（其他都可以忘）</h3>
+  <div class="card">
+    <ol style="margin-left: 20px; font-weight: 700;">
+      <li>RAG = <strong>先翻書、再作答</strong>：檢索找出相關段落，生成把段落寫成人話。</li>
+      <li>embedding 是<strong>意義地圖上的座標</strong>：意思越近、釘得越近，所以換句話說也找得到。</li>
+      <li>檢索的輸出就是生成的輸入，<strong>交棒方式就是夾進 prompt</strong>——模型本身一毫米都沒被改動。</li>
+      <li>純資料庫比對<strong>字面</strong>、交付<strong>原文</strong>；RAG 比對<strong>意思</strong>、交付<strong>答案</strong>。</li>
+      <li>RAG 出包，<strong>先驗翻書手</strong>（檢索結果），最後才怪寫手（模型）。</li>
+    </ol>
+  </div>
+
+  <div class="big-quote">
+    下次有人問你「RAG 是什麼」，<br>
+    你可以微笑著說：<br>
+    <span class="hl">「就是幫一個很會寫但畢業後就沒讀書的學霸，<br>
+    請了一位考前整理小抄、考中秒翻重點的神隊友。」</span>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  RAG 101 · 為 Vibe Coding / AI Agent 新手打造的一小時基礎課<br>
+  課程中的相似度數字與檢索結果皆為教學示意 · 純靜態頁面，無任何追蹤與後端
+</footer>
+
+<script>
+/* ================================================================
+   主題切換（記憶到 localStorage）
+================================================================ */
+const themeBtn = document.getElementById('theme-toggle');
+const THEME_KEY = 'rag101-theme';
+function applyTheme(light) {
+  document.documentElement.classList.toggle('light', light);
+  themeBtn.textContent = light ? '🌙 深色' : '☀️ 淺色';
+}
+applyTheme(localStorage.getItem(THEME_KEY) === 'light');
+themeBtn.addEventListener('click', () => {
+  const isLight = !document.documentElement.classList.contains('light');
+  applyTheme(isLight);
+  localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+});
+
+/* ================================================================
+   捲動進度條 + 章節導覽高亮
+================================================================ */
+const scrollbar = document.getElementById('scrollbar');
+const navSteps = [...document.querySelectorAll('.nav-step')];
+const sections = navSteps.map(a => document.getElementById(a.dataset.sec));
+
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+  scrollbar.style.width = pct + '%';
+
+  let activeIdx = -1;
+  sections.forEach((sec, i) => {
+    if (sec.getBoundingClientRect().top < window.innerHeight * 0.45) activeIdx = i;
+  });
+  navSteps.forEach((a, i) => {
+    a.classList.toggle('active', i === activeIdx);
+    a.classList.toggle('done', i < activeIdx);
+  });
+}, { passive: true });
+
+/* ================================================================
+   RAG 生產線步進器
+================================================================ */
+const PIPE_STAGES = [
+  {
+    phase: 'build',
+    name: 'STEP 0 · 收集資料',
+    title: '📦 把《滷味秘笈》搬進廚房',
+    visual: `<div style="font-size:22px; font-weight:900; text-align:center; padding: 20px 0;">📕《滷味秘笈》 · 200 頁<br><span style="font-size:14px; font-weight:400; color:var(--text-dim);">配方 / SOP / 客訴處理 / 供應商名單…</span></div>`,
+    note: '一切從你的文件開始：PDF、筆記、網頁、聊天紀錄都行。這是「考前準備期」的起點——以下 1～3 步只需要做一次（文件更新時再補做），之後每次提問都吃這份成果。'
+  },
+  {
+    phase: 'build',
+    name: 'STEP 1 · CHUNKING 切塊',
+    title: '✂️ 把 200 頁剪成一張張小抄卡片',
+    visual: `
+      <div style="text-align:center; padding: 8px 0; line-height:2.4;">
+        <span class="chunk">鹹度過高之補救措施…</span>
+        <span class="chunk">豆干滷製 45 分鐘…</span>
+        <span class="chunk">客訴處理三原則…</span><br>
+        <span class="chunk">滷汁過濾與冷藏…</span>
+        <span class="chunk">新品上架流程…</span>
+        <span style="color:var(--text-faint); font-size:14px;">…共幾百張</span>
+      </div>`,
+    note: '為什麼要剪？因為之後回答問題時，我們只想抽「相關的那幾段」，不是整本書。卡片大小是門手藝：剪太碎，一張卡片的意思殘缺不全；剪太大，一張卡片混了三個主題、檢索容易誤傷。常見做法是幾百字一張、段落之間稍微重疊。'
+  },
+  {
+    phase: 'build',
+    name: 'STEP 2 · EMBEDDING 標座標',
+    title: '📍 每張卡片釘上「意義地圖」',
+    visual: `
+      <div style="text-align:center;">
+        <div style="margin-bottom:6px;"><span class="chunk">鹹度過高之補救措施…</span></div>
+        <div style="font-size:20px; color:var(--text-faint);">⬇ embedding 模型</div>
+        <span class="vec">[0.31, -0.77, 0.52, 0.08, …共上千個數字]</span>
+        <p class="pipe-note" style="margin-top:10px;">這串數字 = 這張卡片在意義地圖上的座標</p>
+      </div>`,
+    note: '每張卡片交給 embedding 模型，換到一組「意義座標」。規則只有一條：意思越接近的文字，座標離得越近——「鹹度過高」跟「太鹹怎麼救」是鄰居，跟「營業額報表」隔十萬八千里。不用管那串數字怎麼算的，你這輩子都不需要手算它。'
+  },
+  {
+    phase: 'build',
+    name: 'STEP 3 · 存入向量資料庫',
+    title: '🗄️ 卡片＋座標，整齊上架',
+    visual: `
+      <div style="text-align:center; padding:8px 0; line-height:2.2;">
+        <div>🗄️ <strong>向量資料庫</strong></div>
+        <div style="font-size:14px; color:var(--text-dim);">卡片原文 ➕ 意義座標，成對存放</div>
+        <div style="margin-top:8px;"><span class="vec">卡片A · [0.31, -0.77, …]</span><span class="vec">卡片B · [0.90, 0.12, …]</span><span class="vec">卡片C · [-0.44, 0.66, …]</span></div>
+      </div>`,
+    note: '向量資料庫的專長只有一個：給它一組座標，它能在幾百萬張卡片裡「毫秒級找出座標最近的鄰居」。到這裡，考前準備完成——翻書手的小抄系統就緒，開店營業。'
+  },
+  {
+    phase: 'query',
+    name: 'STEP 4 · 使用者提問',
+    title: '❓ 小美：「客人說太鹹怎麼辦？」',
+    visual: `<div style="font-size:24px; font-weight:900; text-align:center; padding: 20px 0;">💬「客人說太鹹怎麼辦？」<br><span style="font-size:13.5px; font-weight:400; color:var(--text-dim);">注意：秘笈裡從頭到尾沒出現過「太鹹」兩個字</span></div>`,
+    note: '進入「考試當下」——以下每一步，在每次提問時都會即時跑一遍，全程通常不到一兩秒。留意這個經典陷阱：使用者的用詞（太鹹）跟文件的用詞（鹹度過高）對不上，關鍵字搜尋在這裡已經出局了。'
+  },
+  {
+    phase: 'query',
+    name: 'STEP 5 · 問題也標座標',
+    title: '🧭 把問題釘上同一張意義地圖',
+    visual: `
+      <div style="text-align:center;">
+        <div style="margin-bottom:6px;"><span class="chunk hot">客人說太鹹怎麼辦？</span></div>
+        <div style="font-size:20px; color:var(--text-faint);">⬇ 同一個 embedding 模型</div>
+        <span class="vec">[0.29, -0.81, 0.49, 0.11, …]</span>
+      </div>`,
+    note: '問題走同一台 embedding 模型、釘上同一張地圖。看它的座標——跟 STEP 2 那張「鹹度過高」卡片的座標像不像？意思相近，座標就相近。這就是等一下能找到它的原因。'
+  },
+  {
+    phase: 'query',
+    name: 'STEP 6 · 相似度搜尋',
+    title: '🔍 在地圖上找最近的鄰居（top-k）',
+    visual: `
+      <div id="stage6-bars">
+        <div class="prob-row"><span class="prob-label">鹹度過高補救</span><div class="prob-track"><div class="prob-fill winner" data-w="92"></div></div><span class="prob-pct">92%</span></div>
+        <div class="prob-row"><span class="prob-label">客訴處理原則</span><div class="prob-track"><div class="prob-fill" data-w="61"></div></div><span class="prob-pct">61%</span></div>
+        <div class="prob-row"><span class="prob-label">滷汁過濾冷藏</span><div class="prob-track"><div class="prob-fill" data-w="34"></div></div><span class="prob-pct">34%</span></div>
+        <div class="prob-row"><span class="prob-label">新品上架流程</span><div class="prob-track"><div class="prob-fill" data-w="9"></div></div><span class="prob-pct">9%</span></div>
+      </div>`,
+    note: '向量資料庫比較「問題座標」和每張卡片座標的距離，排出相似度排行榜，抽出前幾名（術語叫 top-k，例如取前 3 張）。「太鹹」跟「鹹度過高」字面零重疊，照樣拿下 92%——這就是語意檢索的殺手鐧。（數字為教學示意。）',
+    onEnter: () => {
+      document.querySelectorAll('#stage6-bars .prob-fill').forEach(f => {
+        setTimeout(() => f.style.width = f.dataset.w + '%', 100);
+      });
+    }
+  },
+  {
+    phase: 'query',
+    name: 'STEP 7 · 組裝 PROMPT',
+    title: '📎 卡片＋規則＋原問題，夾成一份考卷',
+    visual: `
+      <div style="font-size:14px; line-height:2;">
+        <div><span class="chunk" style="font-size:13px;">📜 指示：只根據參考資料回答，沒有就說不知道</span></div>
+        <div><span class="chunk new" style="font-size:13px;">📇 卡片 A：鹹度過高之補救措施…</span> <span class="chunk new" style="font-size:13px;">📇 卡片 C：客訴處理原則…</span></div>
+        <div><span class="chunk hot" style="font-size:13px;">💬 問題：客人說太鹹怎麼辦？</span></div>
+      </div>`,
+    note: '交棒時刻！檢索階段到此結束，它的產出（幾張卡片的原文）被當成普通文字，跟系統指示、原始問題組裝成一份完整 prompt。沒有任何神秘接口——兩個階段的銜接，就是「把字串拼在一起」。'
+  },
+  {
+    phase: 'query',
+    name: 'STEP 8 · GENERATION 生成',
+    title: '✍️ 學霸看著小抄，寫出人話答案',
+    visual: `
+      <div style="text-align:center; padding: 12px 0;">
+        <div style="font-size:15px; color:var(--text-dim); margin-bottom:8px;">LLM 讀完考卷，生成：</div>
+        <div style="font-size:17px; font-weight:700; max-width:560px; margin:0 auto;">「先跟客人道歉並補一份小菜（記得寫交接本），那鍋滷汁加等量清水和少許冰糖回滷十分鐘就能救回來。」</div>
+        <div style="margin-top:12px; font-size:30px;">🎉</div>
+      </div>`,
+    note: '生成階段：LLM 綜合兩張卡片、過濾無關內容、用回答問題的口吻輸出。回答完就忘得一乾二淨——下一個問題來，STEP 4～8 整套重跑。這就是 RAG 完整的一圈：考前備料一次，考中每題翻書。'
+  }
+];
+
+const pipeStepsEl = document.getElementById('pipe-steps');
+PIPE_STAGES.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'pstep';
+  d.textContent = i;
+  d.addEventListener('click', () => renderPipe(i));
+  pipeStepsEl.appendChild(d);
+});
+
+let pipeIdx = 0;
+function renderPipe(i) {
+  pipeIdx = Math.max(0, Math.min(PIPE_STAGES.length - 1, i));
+  const st = PIPE_STAGES[pipeIdx];
+  document.getElementById('pipe-phase').innerHTML = st.phase === 'build'
+    ? '<span class="pipe-phase build">🛠 考前準備期（只做一次）</span>'
+    : '<span class="pipe-phase query">⚡ 考試當下（每次提問即時跑）</span>';
+  document.getElementById('pipe-name').textContent = st.name;
+  document.getElementById('pipe-title').textContent = st.title;
+  document.getElementById('pipe-visual').innerHTML = st.visual;
+  document.getElementById('pipe-note').textContent = st.note;
+  document.getElementById('pipe-count').textContent = `${pipeIdx + 1} / ${PIPE_STAGES.length}`;
+  document.getElementById('pipe-prev').disabled = pipeIdx === 0;
+  const nextBtn = document.getElementById('pipe-next');
+  nextBtn.disabled = pipeIdx === PIPE_STAGES.length - 1;
+  nextBtn.textContent = pipeIdx === PIPE_STAGES.length - 1 ? '🏁 完成！' : '下一步 →';
+  [...pipeStepsEl.children].forEach((el, j) => {
+    el.classList.toggle('on', j === pipeIdx);
+    el.classList.toggle('past', j < pipeIdx);
+  });
+  if (st.onEnter) st.onEnter();
+}
+document.getElementById('pipe-prev').addEventListener('click', () => renderPipe(pipeIdx - 1));
+document.getElementById('pipe-next').addEventListener('click', () => renderPipe(pipeIdx + 1));
+renderPipe(0);
+
+/* ================================================================
+   互動實驗：關鍵字警衛 vs 語意雷達
+================================================================ */
+const LAB_CHUNKS = [
+  { id: 'A', text: '鹹度過高之補救措施：加等量清水與少許冰糖回滷十分鐘' },
+  { id: 'B', text: '豆干滷製時間為 45 分鐘，超時口感過硬' },
+  { id: 'C', text: '客訴處理原則：先道歉、再補償小菜、記錄交接本' },
+  { id: 'D', text: '每日打烊前滷汁需過濾並冷藏' },
+  { id: 'E', text: '新品需試賣三天，好評逾八成才轉正式菜單' }
+];
+
+const LAB_QUERIES = [
+  {
+    q: '客人說太鹹怎麼辦？',
+    kwHit: null, kwTried: ['太鹹', '很鹹', '好鹹'],
+    sims: [ { id: 'A', s: 92 }, { id: 'C', s: 61 }, { id: 'D', s: 30 }, { id: 'B', s: 18 }, { id: 'E', s: 7 } ],
+    comment: '💬 經典的「換句話說」慘案：秘笈寫「鹹度過高」，人類講「太鹹」。關鍵字警衛查無此人；語意雷達上兩者是鄰居，92% 輕鬆命中，還順手把客訴處理（61%）也帶上來了——回答時剛好用得到。'
+  },
+  {
+    q: '豆干要滷多久？',
+    kwHit: 'B', kwTried: ['豆干'],
+    sims: [ { id: 'B', s: 95 }, { id: 'A', s: 26 }, { id: 'D', s: 21 }, { id: 'E', s: 10 }, { id: 'C', s: 6 } ],
+    comment: '💬 這題兩邊都贏！問題和卡片都有「豆干」兩個字，關鍵字搜尋又快又準。誠實時刻：字面對得上的時候，關鍵字一點都不輸——所以正經系統常常兩路並用（混合檢索），取兩家之長。'
+  },
+  {
+    q: '奧客一直罵人，我要先做什麼？',
+    kwHit: null, kwTried: ['奧客', '罵人'],
+    sims: [ { id: 'C', s: 89 }, { id: 'A', s: 24 }, { id: 'E', s: 14 }, { id: 'B', s: 8 }, { id: 'D', s: 5 } ],
+    comment: '💬 秘笈裡沒有「奧客」也沒有「罵人」，只有文謅謅的「客訴處理原則」。但在意義地圖上，「奧客發飆」跟「客訴」根本是同一區的住戶——語意雷達 89% 直接鎖定。這種日常口語 vs 文件用語的落差，就是 RAG 每天在幫你擦的屁股。'
+  }
+];
+
+const labChunksEl = document.getElementById('lab-chunks');
+labChunksEl.innerHTML = LAB_CHUNKS.map(c =>
+  `<span class="chunk" data-chunk="${c.id}" style="font-size:13.5px;">📇 ${c.id} · ${c.text}</span>`
+).join(' ');
+
+const labQsEl = document.getElementById('lab-questions');
+LAB_QUERIES.forEach((q, i) => {
+  const b = document.createElement('button');
+  b.className = 'lab-q-btn';
+  b.textContent = '💬 ' + q.q;
+  b.addEventListener('click', () => runLab(i, b));
+  labQsEl.appendChild(b);
+});
+
+function runLab(i, btn) {
+  const q = LAB_QUERIES[i];
+  document.querySelectorAll('.lab-q-btn').forEach(b => b.classList.remove('picked'));
+  btn.classList.add('picked');
+  document.getElementById('lab-output').style.display = 'block';
+
+  // 關鍵字欄
+  const kwEl = document.getElementById('lab-kw');
+  if (q.kwHit) {
+    const hit = LAB_CHUNKS.find(c => c.id === q.kwHit);
+    kwEl.innerHTML = `搜尋「<strong style="color:var(--text)">${q.kwTried[0]}</strong>」→ <span class="lab-hit">✅ 命中卡片 ${hit.id}</span><br><span style="font-size:13.5px;">「${hit.text}」</span><br><span style="font-size:13px; color:var(--text-faint);">（但只會把原文丟給你，不會回答問題）</span>`;
+  } else {
+    kwEl.innerHTML = `嘗試搜尋：${q.kwTried.map(k => `「${k}」`).join('、')}<div class="lab-miss">❌ 查無資料</div><span style="font-size:13px; color:var(--text-faint);">卡片裡沒有這些字，字面比對直接陣亡。</span>`;
+  }
+
+  // 語意欄
+  const vecEl = document.getElementById('lab-vec');
+  vecEl.innerHTML = q.sims.map((s, idx) => {
+    const c = LAB_CHUNKS.find(x => x.id === s.id);
+    return `<div class="prob-row">
+      <span class="prob-label" title="${c.text}">卡片 ${s.id}</span>
+      <div class="prob-track"><div class="prob-fill ${idx === 0 ? 'winner' : ''}" data-w="${s.s}"></div></div>
+      <span class="prob-pct">${s.s}%</span>
+    </div>`;
+  }).join('') + `<p style="font-size:13px; color:var(--text-faint); margin-top:8px;">取前 3 名（top-k=3）交給生成階段。</p>`;
+  requestAnimationFrame(() => {
+    vecEl.querySelectorAll('.prob-fill').forEach(f => {
+      setTimeout(() => f.style.width = f.dataset.w + '%', 60);
+    });
+  });
+
+  // 知識庫卡片高亮
+  document.querySelectorAll('#lab-chunks .chunk').forEach(el => {
+    const top3 = q.sims.slice(0, 3).map(s => s.id);
+    el.classList.toggle('dimmed', !top3.includes(el.dataset.chunk));
+    el.classList.toggle('hot', el.dataset.chunk === q.sims[0].id);
+  });
+
+  document.getElementById('lab-comment').textContent = q.comment;
+}
+
+/* ================================================================
+   測驗（通用：隨堂 + 結業考）
+================================================================ */
+document.querySelectorAll('[data-quiz]').forEach(quiz => {
+  const opts = quiz.querySelectorAll('.quiz-opt');
+  const expl = quiz.querySelector('.quiz-expl');
+  const verdict = expl.querySelector('.verdict');
+  opts.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const correct = btn.dataset.a === '1';
+      opts.forEach(b => {
+        b.disabled = true;
+        if (b.dataset.a === '1') b.classList.add('correct');
+      });
+      if (!correct) {
+        btn.classList.add('wrong');
+        verdict.textContent = '❌ 差一點！正確答案已標綠。';
+        verdict.style.color = 'var(--red)';
+      } else {
+        verdict.textContent = '✅ 答對了！';
+        verdict.style.color = 'var(--green)';
+      }
+      expl.classList.add('show');
+    });
+  });
+});
+</script>
+</body>
+</html>

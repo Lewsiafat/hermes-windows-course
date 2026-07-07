@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent 101 — 一小時搞懂怎麼給 AI 裝上手腳</title>
+<meta name="description" content="給 Vibe Coding 新手的一小時 AI Agent 基礎課：Agent Loop、tool use、模型跟 Agent 到底差在哪，全程人話零公式，看懂你每天在用的 Claude Code 到底是什麼生物。">
+<style>
+/* ============ 主題變數（深色為預設） ============ */
+:root {
+  --bg: #0d1117;
+  --bg-soft: #161b22;
+  --bg-card: #1c2333;
+  --bg-card-hover: #232c40;
+  --border: #2d3748;
+  --text: #e6edf3;
+  --text-dim: #9aa7b8;
+  --text-faint: #6b7688;
+  --accent: #818cf8;       /* 主色：靛藍紫（行動迴圈色） */
+  --accent-soft: rgba(129, 140, 248, 0.13);
+  --accent2: #fb923c;      /* 次色：橘 */
+  --accent2-soft: rgba(251, 146, 60, 0.13);
+  --green: #3fb950;
+  --green-soft: rgba(63, 185, 80, 0.14);
+  --red: #f85149;
+  --red-soft: rgba(248, 81, 73, 0.13);
+  --purple: #bc8cff;
+  --purple-soft: rgba(188, 140, 255, 0.13);
+  --pink: #ff7b9c;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --mono: "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+}
+html.light {
+  --bg: #f6f8fa;
+  --bg-soft: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f3f7;
+  --border: #d7dde5;
+  --text: #1f2733;
+  --text-dim: #4b5768;
+  --text-faint: #7b8798;
+  --accent: #4f46e5;
+  --accent2: #ea580c;
+  --accent-soft: rgba(79, 70, 229, 0.11);
+  --accent2-soft: rgba(234, 88, 12, 0.11);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", -apple-system, sans-serif;
+  line-height: 1.75;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============ 頂部進度導覽 ============ */
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+#scrollbar { height: 3px; background: linear-gradient(90deg, var(--accent), var(--pink)); width: 0%; transition: width 0.1s linear; }
+.nav-inner {
+  max-width: 960px; margin: 0 auto; padding: 8px 16px;
+  display: flex; align-items: center; gap: 6px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-logo { font-weight: 800; color: var(--accent); white-space: nowrap; margin-right: 8px; font-size: 15px; text-decoration: none; }
+.nav-step {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  font-size: 13px; color: var(--text-faint); text-decoration: none;
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.nav-step .dot {
+  width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--bg-card); border: 1px solid var(--border);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+}
+.nav-step:hover { color: var(--text); background: var(--bg-card); }
+.nav-step.active { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.nav-step.active .dot { background: var(--accent); color: #10123f; border-color: var(--accent); }
+.nav-step.done .dot { background: var(--green-soft); color: var(--green); border-color: var(--green); }
+#theme-toggle {
+  margin-left: auto; flex: 0 0 auto; background: var(--bg-card); color: var(--text-dim);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px;
+  cursor: pointer; font-size: 13px; font-family: inherit;
+}
+#theme-toggle:hover { color: var(--text); }
+
+/* ============ 版面 ============ */
+main { max-width: 960px; margin: 0 auto; padding: 90px 20px 60px; }
+section { padding: 44px 0; border-bottom: 1px dashed var(--border); scroll-margin-top: 70px; }
+section:last-of-type { border-bottom: none; }
+
+.time-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent2-soft); color: var(--accent2);
+  font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+  margin-bottom: 12px; letter-spacing: 0.5px;
+}
+h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.25; font-weight: 900; letter-spacing: -0.5px; }
+h2 { font-size: clamp(24px, 4.5vw, 36px); line-height: 1.3; font-weight: 800; margin-bottom: 18px; }
+h3 { font-size: 21px; font-weight: 700; margin: 30px 0 10px; }
+h2 .kicker { display: block; font-size: 14px; color: var(--accent); letter-spacing: 2px; font-weight: 700; margin-bottom: 6px; }
+p { margin: 14px 0; color: var(--text); }
+p.dim, li.dim { color: var(--text-dim); }
+strong { color: var(--accent); font-weight: 700; }
+em { color: var(--pink); font-style: normal; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 8px 0; }
+code { font-family: var(--mono); background: var(--bg-card); border: 1px solid var(--border); padding: 1px 7px; border-radius: 6px; font-size: 0.88em; color: var(--accent2); }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px; margin: 20px 0;
+}
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 20px 0; }
+.callout.orange { border-left-color: var(--accent2); background: var(--accent2-soft); }
+.callout.red { border-left-color: var(--red); background: var(--red-soft); }
+.callout.green { border-left-color: var(--green); background: var(--green-soft); }
+.callout.purple { border-left-color: var(--purple); background: var(--purple-soft); }
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-title { font-weight: 800; font-size: 15px; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+
+button.primary {
+  background: var(--accent); color: #10123f; border: none; font-family: inherit;
+  font-size: 16px; font-weight: 800; padding: 11px 26px; border-radius: 999px;
+  cursor: pointer; transition: transform 0.12s, filter 0.2s;
+}
+button.primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+button.primary:active { transform: translateY(1px); }
+button.primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+button.ghost {
+  background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+  font-family: inherit; font-size: 15px; padding: 10px 20px; border-radius: 999px; cursor: pointer;
+}
+button.ghost:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* ============ Hero ============ */
+#hero { padding-top: 30px; border-bottom: 1px dashed var(--border); }
+.hero-tag { color: var(--accent2); font-weight: 700; letter-spacing: 3px; font-size: 14px; margin-bottom: 14px; }
+.hero-sub { font-size: 19px; color: var(--text-dim); margin-top: 18px; max-width: 720px; }
+.hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 30px; }
+.hero-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; text-align: center; }
+.hero-stat .num { font-size: 26px; font-weight: 900; color: var(--accent); }
+.hero-stat .lbl { font-size: 13px; color: var(--text-faint); }
+.agenda { margin-top: 26px; }
+.agenda-row { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 15.5px; }
+.agenda-row:last-child { border-bottom: none; }
+.agenda-row .t { flex: 0 0 62px; color: var(--accent2); font-weight: 700; font-family: var(--mono); font-size: 13.5px; }
+.agenda-row a { color: var(--text); text-decoration: none; }
+.agenda-row a:hover { color: var(--accent); }
+
+/* ============ 標籤晶片（工具、狀態） ============ */
+.chunk {
+  display: inline-block; padding: 3px 10px; margin: 3px; border-radius: 8px;
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  color: var(--accent); font-weight: 700; font-size: 15px;
+}
+.chunk.hot { background: var(--accent2-soft); border-color: var(--accent2); color: var(--accent2); }
+.chunk.new { background: var(--green-soft); border-color: var(--green); color: var(--green); animation: pop 0.4s; }
+.chunk.bad { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+.chunk.dimmed { opacity: 0.35; }
+@keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+.vec { font-family: var(--mono); font-size: 12.5px; color: var(--purple); background: var(--purple-soft); border: 1px solid var(--purple); border-radius: 8px; padding: 4px 8px; display: inline-block; margin: 3px; }
+
+/* ============ Agent Loop 步進器 ============ */
+#agentloop { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 24px 0; }
+.pipe-head { background: var(--bg-soft); padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pipe-head .title { font-weight: 800; font-size: 16px; }
+.pipe-steps { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+.pipe-steps .pstep {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 800; background: var(--bg-card); color: var(--text-faint);
+  border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+}
+.pipe-steps .pstep.on { background: var(--accent); color: #10123f; border-color: var(--accent); }
+.pipe-steps .pstep.past { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.pipe-body { padding: 24px; min-height: 330px; }
+.pipe-phase { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; border-radius: 999px; padding: 2px 12px; margin-bottom: 8px; margin-right: 6px; }
+.pipe-phase.task { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.pipe-phase.think { background: var(--purple-soft); color: var(--purple); border: 1px solid var(--purple); }
+.pipe-phase.act { background: var(--accent2-soft); color: var(--accent2); border: 1px solid var(--accent2); }
+.pipe-phase.obs { background: var(--green-soft); color: var(--green); border: 1px solid var(--green); }
+.pipe-stage-name { color: var(--accent); font-weight: 800; font-size: 14px; letter-spacing: 2px; margin-bottom: 4px; }
+.pipe-stage-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+.pipe-visual { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px; margin: 14px 0; min-height: 110px; }
+.pipe-note { color: var(--text-dim); font-size: 15.5px; }
+.pipe-foot { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--bg-soft); display: flex; gap: 10px; align-items: center; }
+.pipe-foot .count { margin-left: auto; color: var(--text-faint); font-size: 13.5px; font-family: var(--mono); }
+
+/* ============ 紙條往返（tool call 示意） ============ */
+.prompt-sheet { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; font-size: 14.5px; margin: 16px 0; }
+.prompt-sheet .seg { border-left: 3px solid var(--border); padding: 6px 12px; margin: 8px 0; border-radius: 0 8px 8px 0; }
+.prompt-sheet .seg.sys { border-left-color: var(--purple); background: var(--purple-soft); }
+.prompt-sheet .seg.model { border-left-color: var(--accent); background: var(--accent-soft); }
+.prompt-sheet .seg.exec { border-left-color: var(--accent2); background: var(--accent2-soft); }
+.prompt-sheet .seg.result { border-left-color: var(--green); background: var(--green-soft); }
+.prompt-sheet .seg-tag { font-size: 11.5px; font-weight: 800; letter-spacing: 1.5px; font-family: var(--mono); display: block; margin-bottom: 2px; color: var(--text-faint); }
+.prompt-sheet .mono { font-family: var(--mono); font-size: 13px; }
+
+/* ============ 換身體實驗（同一顆大腦） ============ */
+.lab-questions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 18px 0; }
+.lab-q-btn {
+  background: var(--bg-soft); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 15.5px; font-weight: 700; padding: 10px 20px;
+  border-radius: 12px; cursor: pointer; transition: all 0.15s;
+}
+.lab-q-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.lab-q-btn.picked { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.body-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
+.body-cell { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
+.body-cell h4 { font-size: 14px; margin-bottom: 8px; color: var(--text-dim); letter-spacing: 1px; }
+.body-cell .val { font-size: 14.5px; }
+.body-outcome { margin-top: 14px; border: 1px solid var(--accent); background: var(--accent-soft); border-radius: var(--radius-sm); padding: 14px 16px; font-size: 15.5px; animation: pop 0.3s; }
+@media (max-width: 640px) { .body-grid { grid-template-columns: 1fr; } }
+
+/* ============ 測驗 ============ */
+.quiz { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 20px 0; background: var(--bg-card); }
+.quiz-q { font-weight: 800; font-size: 17.5px; margin-bottom: 14px; }
+.quiz-q .qnum { color: var(--accent); margin-right: 6px; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.quiz-opt {
+  text-align: left; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: 15.5px; padding: 11px 16px; border-radius: 10px; cursor: pointer;
+  transition: all 0.15s; line-height: 1.5;
+}
+.quiz-opt:hover:not(:disabled) { border-color: var(--accent2); }
+.quiz-opt:disabled { cursor: default; }
+.quiz-opt.correct { border-color: var(--green); background: var(--green-soft); color: var(--green); font-weight: 700; }
+.quiz-opt.wrong { border-color: var(--red); background: var(--red-soft); color: var(--red); }
+.quiz-expl { margin-top: 12px; font-size: 15px; color: var(--text-dim); display: none; border-top: 1px dashed var(--border); padding-top: 12px; }
+.quiz-expl.show { display: block; animation: pop 0.3s; }
+.quiz-expl .verdict { font-weight: 900; }
+
+/* ============ 對照表 ============ */
+table.cmp { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 15px; }
+table.cmp th, table.cmp td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; vertical-align: top; }
+table.cmp th { background: var(--bg-soft); font-size: 14px; letter-spacing: 1px; }
+table.cmp td:first-child { font-weight: 700; white-space: nowrap; }
+
+.big-quote { font-size: clamp(20px, 3.6vw, 28px); font-weight: 900; text-align: center; padding: 30px 18px; line-height: 1.5; }
+.big-quote .hl { color: var(--accent); }
+
+footer { text-align: center; color: var(--text-faint); font-size: 13.5px; padding: 30px 16px 50px; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .pipe-body { padding: 16px; }
+  .nav-step span.nm { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <div id="scrollbar"></div>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#hero">AGENT&nbsp;101</a>
+    <a class="nav-step" href="#s1" data-sec="s1"><span class="dot">1</span><span class="nm">密室天才</span></a>
+    <a class="nav-step" href="#s2" data-sec="s2"><span class="dot">2</span><span class="nm">出嘴做事</span></a>
+    <a class="nav-step" href="#s3" data-sec="s3"><span class="dot">3</span><span class="nm">Agent 迴圈</span></a>
+    <a class="nav-step" href="#s4" data-sec="s4"><span class="dot">4</span><span class="nm">大腦≠Agent</span></a>
+    <a class="nav-step" href="#s5" data-sec="s5"><span class="dot">5</span><span class="nm">好用的秘密</span></a>
+    <a class="nav-step" href="#s6" data-sec="s6"><span class="dot">6</span><span class="nm">學以致用</span></a>
+    <a class="nav-step" href="#s7" data-sec="s7"><span class="dot">7</span><span class="nm">結業考</span></a>
+    <button id="theme-toggle" title="切換深淺色">☀️ 淺色</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================================================================ -->
+<!-- HERO -->
+<!-- ================================================================ -->
+<section id="hero">
+  <div class="hero-tag">VIBE CODING 新手村 · 第 3 課</div>
+  <h1>Agent：給只會出一張嘴的天才<br><span style="color:var(--accent)">裝上手腳</span>的技術</h1>
+  <p class="hero-sub">
+    一小時，搞懂 AI Agent 到底是什麼生物。上完這堂課，「Agent Loop」「tool use」「function calling」
+    這些名詞會從咒語變成常識——而且你會終於看懂：你每天使喚的 Claude Code，
+    跟聊天視窗裡的 ChatGPT，根本不是同一種東西。
+  </p>
+  <div class="hero-grid">
+    <div class="hero-stat"><div class="num">60 分鐘</div><div class="lbl">課程總長</div></div>
+    <div class="hero-stat"><div class="num">1 個迴圈</div><div class="lbl">貫穿全場</div></div>
+    <div class="hero-stat"><div class="num">3 大誤解</div><div class="lbl">現場拆除</div></div>
+    <div class="hero-stat"><div class="num">0 行程式</div><div class="lbl">保證看得懂</div></div>
+  </div>
+
+  <div class="card agenda">
+    <strong style="color:var(--text)">📋 課程時間表（帶課或自學都照這個節奏走）</strong>
+    <div class="agenda-row"><span class="t">8 min</span><a href="#s1">第 1 章 · 開場破題：密室裡的天才顧問</a></div>
+    <div class="agenda-row"><span class="t">9 min</span><a href="#s2">第 2 章 · Tool Use：只出一張嘴，也能做事的方法</a></div>
+    <div class="agenda-row"><span class="t">12 min</span><a href="#s3">第 3 章 · Agent Loop：轉起來！跟拍一場修 bug 實錄（互動）</a></div>
+    <div class="agenda-row"><span class="t">10 min</span><a href="#s4">第 4 章 · 破除誤解：ChatGPT 是大腦，不是 Agent（互動）</a></div>
+    <div class="agenda-row"><span class="t">9 min</span><a href="#s5">第 5 章 · 為什麼有些 Agent 特別好用——關鍵不（只）是模型</a></div>
+    <div class="agenda-row"><span class="t">7 min</span><a href="#s6">第 6 章 · 學以致用：你每天都在使喚 Agent</a></div>
+    <div class="agenda-row"><span class="t">5 min</span><a href="#s7">第 7 章 · 結業考 + 帶走的 5 句話</a></div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 1 章：密室裡的天才顧問 -->
+<!-- ================================================================ -->
+<section id="s1">
+  <span class="time-badge">⏱ 8 分鐘</span>
+  <h2><span class="kicker">第 1 章 · 開場破題</span>密室裡的天才顧問</h2>
+
+  <p>先想像一個場景：</p>
+  <p>
+    有一位地表最聰明的顧問，法律、醫學、程式、滷味配方樣樣精通。
+    但他被關在一間<strong>密室</strong>裡——沒有窗、沒有網路、沒有電話，
+    門上只有一道窄窄的縫，紙條進、紙條出。
+    他沒有手可以幫你按按鈕，沒有腳可以幫你跑腿，沒有眼睛可以看外面的世界。
+    他的全部能力，就是<strong>讀你遞進去的紙條，然後寫一張紙條遞出來</strong>。
+  </p>
+  <p>這位顧問，就是 LLM（大型語言模型）。文字進、文字出，<em>就這樣，沒有別的了</em>。</p>
+
+  <div class="big-quote">
+    你遞紙條：「幫我訂一張明天飛東京的機票。」<br>
+    他回紙條：「好的！訂機票的步驟如下：<br>
+    第一步，打開訂票網站……」<br>
+    <span class="hl">然後機票並不會出現。</span>
+  </div>
+
+  <p>
+    注意，他不是不聰明——他寫的攻略可能專業到讓旅行社失業。
+    問題是他<strong>只能用嘴巴回答，不能動手做事</strong>：
+  </p>
+  <ul>
+    <li><strong>他碰不到真實世界。</strong>查不了即時航班、讀不了你的檔案、按不了任何一個按鈕。</li>
+    <li><strong>他看不到結果。</strong>你照他的攻略去訂票，訂成功還是失敗，他毫不知情。</li>
+    <li><strong>他一次只答一回合。</strong>紙條出去，工作結束。他不會追蹤後續、不會主動修正。</li>
+  </ul>
+
+  <p>
+    那怎麼辦？很多人以為答案是「等一個更聰明的模型」。錯——
+    再聰明一百倍的顧問，關在密室裡還是只能寫攻略。
+    真正的解法方向完全不同：
+  </p>
+
+  <div class="callout">
+    <span class="callout-title">💡 Agent 的解法：不是換腦袋，是裝上手腳</span>
+    <p>
+      給這位顧問<strong>裝上手腳</strong>（可以動手操作的「工具」）、
+      <strong>裝上眼睛</strong>（可以觀察操作的結果）、
+      <strong>配上記事本</strong>（記得剛剛做到哪一步），
+      然後允許他<strong>反覆行動</strong>：查一下 → 看結果 → 決定下一步 → 再做一下……
+      直到任務完成。這一整套「顧問＋手腳＋眼睛＋記事本＋反覆行動」組成的<em>系統</em>，
+      才叫 <strong>AI Agent</strong>。
+    </p>
+  </div>
+
+  <p class="dim">
+    整堂課抓住這一句就夠了：<strong>「Agent = LLM + 工具 + 迴圈」</strong>。
+    工具讓它能做事（第 2 章），迴圈讓它能把事做完（第 3 章）。
+    我們一章一章拆。
+  </p>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 2 章：Tool Use -->
+<!-- ================================================================ -->
+<section id="s2">
+  <span class="time-badge">⏱ 9 分鐘</span>
+  <h2><span class="kicker">第 2 章 · TOOL USE</span>只出一張嘴，也能做事的方法</h2>
+
+  <p>
+    等等——剛剛不是說 LLM 只能文字進文字出嗎？那「裝上手腳」是怎麼裝的？
+    難道工程師真的改造了模型，讓它長出 USB 接口？
+  </p>
+  <p>
+    沒有。這裡藏著全課最漂亮的一個把戲：
+    <strong>模型從頭到尾還是只會輸出文字——但我們在門外雇了一位助理，照著紙條上的指令做事。</strong>
+  </p>
+
+  <h3>密室 2.0：服務型錄 + 門外助理</h3>
+  <div class="card">
+    <p style="margin-top:0;">我們對密室做兩個升級：</p>
+    <ul style="margin-left:20px;">
+      <li>📖 <strong>給顧問一本「服務型錄」</strong>——裡面列著他可以點的服務：
+        「查航班（日期、目的地）」「讀檔案（路徑）」「執行程式（指令）」……
+        每項服務都寫清楚名稱和需要填的欄位。</li>
+      <li>🧍 <strong>門外站一位不聰明但超可靠的助理</strong>——顧問只要在紙條上
+        <em>按照約定格式</em>寫下「我要點哪個服務、參數填什麼」，
+        助理就真的去做，做完把結果寫成紙條遞回密室。</li>
+    </ul>
+  </div>
+
+  <p>於是「訂機票」這件事，變成一場紙條接力賽：</p>
+
+  <div class="prompt-sheet">
+    <div class="seg sys">
+      <span class="seg-tag">SYSTEM · 給顧問的服務型錄</span>
+      你可以使用以下工具：<span class="mono">search_flights(date, to)</span>、<span class="mono">book_flight(flight_no)</span>。
+      需要使用時，請用約定的格式寫出來。
+    </div>
+    <div class="seg model">
+      <span class="seg-tag">MODEL · 顧問的紙條（還是文字！只是格式特殊）</span>
+      <span class="mono">{ "tool": "search_flights", "args": { "date": "2026-07-08", "to": "TYO" } }</span>
+    </div>
+    <div class="seg exec">
+      <span class="seg-tag">SYSTEM · 門外助理動起來</span>
+      系統認出這是工具呼叫 → 真的去打航空公司的 API → 拿到查詢結果。<em>模型本人全程坐在密室裡沒動。</em>
+    </div>
+    <div class="seg result">
+      <span class="seg-tag">TOOL RESULT · 結果寫成紙條遞回去</span>
+      <span class="mono">[ { "flight": "BR198", "dep": "09:20", "price": 8900 }, { "flight": "JX800", "dep": "14:35", "price": 7600 } ]</span>
+    </div>
+    <div class="seg model">
+      <span class="seg-tag">MODEL · 顧問讀完結果，繼續輸出</span>
+      「查到兩班：早上 9:20 的 BR198（8,900 元）和下午 2:35 的 JX800（7,600 元）。要幫你訂哪一班？」
+    </div>
+  </div>
+
+  <p>
+    這就是 <strong>tool use / function calling</strong> 的全部真相：
+  </p>
+  <ul>
+    <li><strong>模型「說」它想做什麼</strong>——輸出一段格式化文字（工具名＋參數），這叫工具呼叫。</li>
+    <li><strong>系統「做」那件事</strong>——外面的程式碼才是真正碰檔案、打 API、跑指令的人。</li>
+    <li><strong>結果「餵」回給模型</strong>——執行結果變成文字塞回對話，模型看著結果決定下一步。</li>
+  </ul>
+
+  <div class="callout orange">
+    <span class="callout-title">🔧 所以「工具」到底是誰給的？</span>
+    <p>
+      是<strong>開發者</strong>。型錄上有什麼服務，是寫 Agent 的人決定的——
+      給它「讀檔案」工具它才能讀檔案，給它「發推文」工具它才能發推文（求你三思）。
+      模型再聰明，也點不了型錄上沒有的菜。
+      這也是為什麼安全邊界清楚：Agent 能闖的禍，上限就是你給它的工具清單。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 1 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>Agent「呼叫工具讀檔案」的時候，實際上發生了什麼事？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">模型透過內建的檔案系統接口，直接打開了那個檔案</button>
+      <button class="quiz-opt" data-a="1">模型輸出一段「我要用讀檔工具、路徑是 X」的格式化文字，外部系統照做後，把檔案內容當成文字回傳給模型</button>
+      <button class="quiz-opt" data-a="0">模型在訓練時就背下了所有檔案的內容，假裝去讀了一次</button>
+      <button class="quiz-opt" data-a="0">工程師遠端手動幫模型複製貼上檔案內容</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      模型永遠只會輸出文字。「做事」的是門外的系統；模型負責「說要做什麼」和「讀做完的結果」。
+      這個分工是理解 Agent 的第一塊地基。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 3 章：Agent Loop -->
+<!-- ================================================================ -->
+<section id="s3">
+  <span class="time-badge">⏱ 12 分鐘</span>
+  <h2><span class="kicker">第 3 章 · AGENT LOOP</span>轉起來！跟拍一場修 bug 實錄</h2>
+
+  <p>
+    有了工具，還缺最後一塊拼圖。想想看：訂機票要「查航班 → 看結果 → 選一班 → 訂位 → 確認訂單」，
+    修 bug 要「讀 code → 找病因 → 改 code → 跑測試 → 看過不過」——
+    真實任務從來不是一步完成的，而是<strong>一連串「做了才知道下一步」的決策</strong>。
+  </p>
+  <p>所以 Agent 的心臟是一個迴圈，術語叫 <strong>Agent Loop</strong>：</p>
+
+  <div class="big-quote">
+    👀 觀察 → 🧠 思考 → 🔧 行動 → 👀 觀察結果 → 🧠 再思考……<br>
+    <span class="hl">一直轉，直到任務完成（或達到終止條件）。</span>
+  </div>
+
+  <p>
+    口說無憑，直播一場。任務：「<em>使用者回報結帳按鈕壞了，幫我修好這個 bug。</em>」
+    按「下一步」，全程跟拍一隻編碼 Agent 怎麼轉這個迴圈——注意看它總共轉了<strong>三圈</strong>。
+  </p>
+
+  <!-- 互動 Agent Loop 步進器 -->
+  <div id="agentloop">
+    <div class="pipe-head">
+      <span class="title">🎬 Agent Loop 直播：修 bug 實錄</span>
+      <div class="pipe-steps" id="loop-steps"></div>
+    </div>
+    <div class="pipe-body">
+      <div id="loop-phase"></div>
+      <div class="pipe-stage-name" id="loop-name"></div>
+      <div class="pipe-stage-title" id="loop-title"></div>
+      <div class="pipe-visual" id="loop-visual"></div>
+      <div class="pipe-note" id="loop-note"></div>
+    </div>
+    <div class="pipe-foot">
+      <button class="ghost" id="loop-prev">← 上一步</button>
+      <button class="primary" id="loop-next">下一步 →</button>
+      <span class="count" id="loop-count"></span>
+    </div>
+  </div>
+
+  <h3>這跟 Chatbot 差在哪？差在誰負責「跑完全程」</h3>
+  <p>
+    同一個任務丟給純聊天機器人：「結帳按鈕壞了怎麼辦？」它會回你一篇
+    〈按鈕失效的十大常見原因與除錯建議〉——寫得非常好，然後<em>換你去做全部的事</em>：
+    你自己開檔案、自己對照、自己改、自己測、有問題再回來問。
+    <strong>迴圈還是存在，只是轉迴圈的人是你。</strong>
+  </p>
+  <table class="cmp">
+    <tr><th>比較</th><th>💬 Chatbot（一問一答）</th><th>🤖 Agent（迴圈）</th></tr>
+    <tr><td>一回合做多少事</td><td>回答一次就結束</td><td>自主連續執行多步，直到完成</td></tr>
+    <tr><td>能不能碰真實世界</td><td>不能，只能給建議</td><td>能，透過工具讀檔、跑指令、打 API</td></tr>
+    <tr><td>看得到結果嗎</td><td>看不到你照做之後怎樣</td><td>每次行動後觀察結果，發現錯誤能自我修正</td></tr>
+    <tr><td>轉迴圈的人</td><td>你（人肉 Agent）</td><td>它自己</td></tr>
+  </table>
+
+  <div class="callout red">
+    <span class="callout-title">🛑 終止條件：沒有煞車的迴圈是災難</span>
+    <p>
+      迴圈什麼時候該停？三種情況：<strong>任務完成</strong>（測試全過、機票訂到）、
+      <strong>達到上限</strong>（轉了 50 圈還沒修好？先停下來，別把 API 額度燒成灰）、
+      <strong>卡關求助</strong>（需要刷卡密碼？該回頭問人類了）。
+      設計得好的 Agent 知道什麼時候該停、什麼時候該問；
+      設計得差的會在原地鬼打牆，一邊燒你的錢一邊充滿自信。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 2 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>Agent Loop 一圈的正確順序是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">行動 → 思考 → 觀察（先做了再說，做完想一下，最後看看發生什麼）</button>
+      <button class="quiz-opt" data-a="1">觀察 → 思考 → 行動 → 觀察結果，然後重複到任務完成或觸發終止條件</button>
+      <button class="quiz-opt" data-a="0">思考 → 思考 → 思考 → 一次性輸出完整答案</button>
+      <button class="quiz-opt" data-a="0">觀察 → 行動 → 完成，迴圈最多只轉一圈</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      關鍵有二：順序是「先看清楚、再想、再動手、再看結果」；
+      而且它會<strong>重複</strong>——每一次的觀察結果都是下一圈思考的輸入。
+      修 bug 實錄裡跑測試發現另一處錯字，就是「觀察結果驅動下一步」的活教材。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 4 章：破除誤解 -->
+<!-- ================================================================ -->
+<section id="s4">
+  <span class="time-badge">⏱ 10 分鐘</span>
+  <h2><span class="kicker">第 4 章 · 破除誤解</span>ChatGPT 是大腦，不是 Agent</h2>
+
+  <p>
+    課上到這裡，該來拆除市面上流傳最廣的幾顆地雷了。
+    第一顆，也是最大顆的：<em>「我有在用 ChatGPT，所以我在用 AI Agent。」</em>
+  </p>
+
+  <div class="callout red">
+    <span class="callout-title">💣 誤解一：「ChatGPT / Gemini / Claude 就是 Agent」</span>
+    <p>
+      不是。ChatGPT、Gemini、Claude 這些名字指的是<strong>模型</strong>——那顆關在密室裡的大腦。
+      Agent 是「大腦＋工具＋記憶＋迴圈」組裝出來的<strong>系統</strong>。
+      你在聊天視窗裡跟模型講話，就像隔著門縫跟顧問傳紙條：很聰明，但那不是 Agent，
+      是<em>裸體的大腦</em>。（現在的聊天 App 常會偷偷掛幾個工具，例如聯網搜尋——
+      掛了工具和迴圈的那部分功能，才開始有 Agent 的成分。）
+    </p>
+  </div>
+
+  <h3>廚師比喻：手藝 vs 餐廳</h3>
+  <p>
+    <strong>模型是廚師的手藝，Agent 框架是整間餐廳。</strong>
+    一位主廚手藝再神，空有手藝變不出一頓飯——
+    要有廚房設備（工具）、有食材動線和出餐 SOP（工作流程）、有訂位簿記得每桌客人點了什麼（記憶／上下文管理）。
+    同一位主廚，放進不同的餐廳，端出來的體驗天差地遠：
+    夜市攤位、五星飯店、外送雲端廚房——<em>手藝一樣，系統不同，成品完全是三回事</em>。
+  </p>
+  <p>
+    Claude Code、OpenClaw、Hermes Agent 這類東西，就是「餐廳」——
+    <strong>Agent 框架／產品</strong>。它們不是新的大腦，而是在模型之上組裝出來的整套系統：
+    決定給模型哪些工具、怎麼管理它的記憶、迴圈怎麼轉、什麼時候停。
+  </p>
+
+  <h3>🎮 動手實驗：同一顆大腦，三種身體</h3>
+  <p>
+    下面永遠是<strong>同一個模型</strong>。點一個「身體」，看它被裝進不同的工具＋記憶＋迴圈之後，
+    變成什麼生物——
+  </p>
+  <div class="card" id="bodylab">
+    <p style="font-weight:800; margin-top:0; text-align:center;">🧠 同一顆大腦，裝進：</p>
+    <div class="lab-questions" id="body-buttons"></div>
+    <div id="body-output" style="display:none;">
+      <div class="body-grid">
+        <div class="body-cell"><h4>🔧 工具（手腳）</h4><div class="val" id="body-tools"></div></div>
+        <div class="body-cell"><h4>🗂️ 記憶（記事本）</h4><div class="val" id="body-memory"></div></div>
+        <div class="body-cell"><h4>🔁 迴圈（工作方式）</h4><div class="val" id="body-loop"></div></div>
+      </div>
+      <div class="body-outcome" id="body-outcome"></div>
+    </div>
+  </div>
+
+  <div class="callout purple">
+    <span class="callout-title">💣 誤解二 & 三，順手一起拆</span>
+    <p>
+      <strong>「Agent 是一種新的、更強的模型」</strong>——不是，Agent 是<em>架構</em>不是模型。
+      裡面那顆大腦可能就是你天天在聊的那顆。<br>
+      <strong>「換更聰明的模型，Agent 就會變強」</strong>——只對一半。
+      大腦是天花板沒錯，但工具爛、記憶亂、迴圈設計差，再聰明的大腦也發揮不出來——
+      米其林主廚進了沒瓦斯的廚房，照樣端不出菜。這題嚴重到值得專開一章，就是下一章。
+    </p>
+  </div>
+
+  <table class="cmp">
+    <tr><th></th><th>🧠 模型（Model）</th><th>🤖 Agent</th></tr>
+    <tr><td>本質</td><td>會讀字、寫字的大腦</td><td>大腦＋工具＋記憶＋迴圈的系統</td></tr>
+    <tr><td>例子</td><td>GPT、Gemini、Claude（模型本體）</td><td>Claude Code、OpenClaw、Hermes Agent</td></tr>
+    <tr><td>能做什麼</td><td>文字進、文字出</td><td>多步驟自主完成任務、與環境互動</td></tr>
+    <tr><td>誰打造的</td><td>模型公司訓練出來的</td><td>開發者（可能是你！）組裝出來的</td></tr>
+  </table>
+
+  <!-- 隨堂測驗 3 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>「模型」和「Agent」的關係，下列哪個說法最正確？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">Agent 是模型公司推出的下一代模型，比舊模型聰明</button>
+      <button class="quiz-opt" data-a="0">模型和 Agent 是同一個東西的兩種叫法</button>
+      <button class="quiz-opt" data-a="1">模型是大腦；Agent 是把大腦接上工具、記憶、迴圈之後組成的系統——同一顆大腦可以被裝進很多不同的 Agent</button>
+      <button class="quiz-opt" data-a="0">Agent 是模型的縮小版，跑得比較快但比較笨</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      手藝 vs 餐廳：同一位主廚（模型）可以在無數間餐廳（Agent 框架）掌勺。
+      所以「Claude」是模型名，「Claude Code」是拿這顆模型組出來的編碼 Agent——一字之差，物種不同。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 5 章：好用的秘密 -->
+<!-- ================================================================ -->
+<section id="s5">
+  <span class="time-badge">⏱ 9 分鐘</span>
+  <h2><span class="kicker">第 5 章 · 好用的秘密</span>為什麼有些 Agent 特別好用——關鍵不（只）是模型</h2>
+
+  <p>
+    你一定有這種經驗：兩個產品號稱用同一顆模型，一個順到起飛，另一個蠢到你想砸電腦。
+    大腦一樣，差在哪？差在「餐廳」的五個地方——這五項，才是 Agent 好不好用的勝負手。
+  </p>
+
+  <h3>① 工具設計的品質——手腳好不好使</h3>
+  <p>
+    工具不是越多越好，是<strong>越好用越好</strong>。好的工具像合手的菜刀：
+    名字一看就懂、參數簡單明確、回傳的結果乾淨好讀、失敗時的錯誤訊息講人話。
+    給模型一把「參數有十七個、錯誤訊息只回 <code>Error: -1</code>」的工具，
+    等於給主廚一把生鏽的雕花刀——大腦再聰明也只能猜。
+  </p>
+
+  <h3>② 上下文管理與記憶——記事本亂了，全亂</h3>
+  <p>
+    模型一次能「看在眼裡」的內容有限（context window）。
+    一場長任務下來，讀過的檔案、跑過的指令、犯過的錯堆積如山，
+    <strong>塞什麼、丟什麼、摘要什麼</strong>，是框架每一秒都在做的取捨。
+    管得好，Agent 轉到第 40 圈還記得最初的目標；管得差，第 10 圈就忘記自己為什麼站在這裡——
+    像你走進廚房卻想不起來要拿什麼的那種感覺，但發生在每一步。
+  </p>
+
+  <h3>③ 錯誤重試與自我修正——跌倒了爬不爬得起來</h3>
+  <p>
+    真實世界充滿失敗：指令打錯、測試爆紅、API 超時。
+    好的 Agent 把失敗當成<strong>觀察結果</strong>，讀錯誤訊息、換個方法再來；
+    差的 Agent 要嘛當場放棄，要嘛用一模一樣的方式再撞五次牆。
+    「跌倒之後的第二步」，是 Agent 之間拉開差距最兇的地方。
+  </p>
+
+  <h3>④ 多步驟規劃能力——先拆解，再動手</h3>
+  <p>
+    大任務直接硬上必死。好的框架會引導模型<strong>先把任務拆成步驟</strong>、
+    邊做邊核對進度、發現方向錯了敢回頭重排計畫。
+    這一部分靠模型本身的聰明，一部分靠框架的流程設計——就像再強的主廚，也需要出餐順序表。
+  </p>
+
+  <h3>⑤ 與環境互動的深度——手腳伸得多深</h3>
+  <p>
+    能讀檔案，跟能「讀檔案＋跑測試＋開瀏覽器實際點點看＋部署上線」是兩個世界。
+    Agent 對環境（檔案系統、終端機、瀏覽器、各種 API）的觸角越深，
+    能<strong>閉環驗證</strong>的事就越多——不用事事回頭找你，它自己就能確認「做完了、而且是對的」。
+  </p>
+
+  <div class="callout green">
+    <span class="callout-title">🏎️ 一句話總結本章</span>
+    <p>
+      換更聰明的模型像換更大的引擎，但<strong>輪胎（工具）、油量表（上下文）、防滑系統（重試）、導航（規劃）、路權（環境權限）</strong>沒跟上，
+      引擎再猛也只是原地燒胎。評估一個 Agent 產品好不好，別只問它用哪顆模型——
+      問它這五項做得怎麼樣。
+    </p>
+  </div>
+
+  <!-- 隨堂測驗 4 -->
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">✋ 隨堂快問</span>兩個 Agent 產品用同一顆模型，但 A 明顯比 B 好用。最可能的原因是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">A 偷偷用了未公開的秘密模型，不然不可能有差</button>
+      <button class="quiz-opt" data-a="1">A 的工具設計、上下文管理、錯誤重試、規劃流程、環境互動做得更好——系統層的工程品質不同</button>
+      <button class="quiz-opt" data-a="0">純粹是使用者的心理作用，同模型必然同表現</button>
+      <button class="quiz-opt" data-a="0">A 的介面比較好看，模型被漂亮的介面激勵所以表現更好</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      同一位主廚，在動線流暢的廚房和在雜物間裡，出的菜不會一樣。
+      模型決定上限，<strong>系統工程決定你實際體驗到的高度</strong>——這就是 Agent 框架的價值所在。
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 6 章：學以致用 -->
+<!-- ================================================================ -->
+<section id="s6">
+  <span class="time-badge">⏱ 7 分鐘</span>
+  <h2><span class="kicker">第 6 章 · 學以致用</span>你每天都在使喚 Agent（現在終於看得懂它）</h2>
+
+  <p>
+    這堂課不是通識課。你是 Vibe Coding 的人——你每天打開的 Claude Code 這類編碼 Agent，
+    就是本課所有概念的集大成。現在用新眼睛看一次它在幹嘛：
+  </p>
+
+  <div class="card">
+    <p style="margin-top:0; font-weight:800;">你說：「這個專案跑不起來，幫我修。」接下來發生的事——</p>
+    <ul style="margin-left:20px;">
+      <li>它先<strong>讀你的 repo</strong>（觀察：用搜尋和讀檔工具摸清專案長相）</li>
+      <li>跑一次程式<strong>重現錯誤</strong>（行動＋觀察：拿到真實的錯誤訊息，不是用猜的）</li>
+      <li><strong>定位問題、動手改 code</strong>（思考＋行動：編輯檔案工具上場）</li>
+      <li><strong>跑測試驗證</strong>（觀察：紅的就回去再修，綠的才敢說完成——迴圈在轉）</li>
+      <li>最後回報結果，甚至幫你 commit、部署（工具伸進 git 和終端機的深度互動）</li>
+    </ul>
+    <p class="dim" style="margin-bottom:0;">
+      每一步你現在都叫得出名字：工具呼叫、觀察結果、自我修正、終止條件。魔法褪下，剩下工程。
+    </p>
+  </div>
+
+  <h3>懂原理之後，你使喚 Agent 的姿勢會直接升級</h3>
+  <ul>
+    <li><strong>下任務要給「可驗證的終點」。</strong>「幫我修到 <code>npm test</code> 全過」遠勝「幫我看看」——
+      你在幫它定義終止條件，迴圈才知道何時該停。</li>
+    <li><strong>出錯時看它的行動軌跡，不是只看結論。</strong>它讀了哪些檔？跑了什麼指令？在哪一圈開始鬼打牆？
+      八成的問題出在某次工具結果被誤讀——會看軌跡，你就會 debug 你的 Agent。</li>
+    <li><strong>餵對上下文。</strong>它不是全知的——repo 裡有 README、有慣例文件，主動叫它先讀；
+      關鍵背景直接講清楚，別讓它把額度花在盲目探索上。</li>
+    <li><strong>別迷信換模型。</strong>覺得 Agent 笨，先檢查：任務給得夠不夠清楚？工具夠不夠？上下文塞對了嗎？
+      （第 5 章的五個關鍵，就是你的檢查清單。）</li>
+  </ul>
+
+  <div class="callout green">
+    <span class="callout-title">🗺️ 一張表總結：情境 → 你該想到什麼</span>
+    <p style="margin-bottom:0;">
+      「它怎麼會自己去讀檔案？」→ tool use：模型說要做，系統照做，結果餵回去。<br>
+      「它怎麼知道自己修對了？」→ 迴圈裡的觀察步驟：跑測試、看結果、不對再來。<br>
+      「同一顆模型為什麼這家的好用？」→ 系統層五關鍵：工具、上下文、重試、規劃、環境。<br>
+      「任務下了它做不完／停不下來」→ 檢查你有沒有給清楚的終止條件。<br>
+      「這產品到底算不算 Agent？」→ 看有沒有「工具＋迴圈＋自主多步驟」，不是看名字。
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<!-- 第 7 章：結業考 -->
+<!-- ================================================================ -->
+<section id="s7">
+  <span class="time-badge">⏱ 5 分鐘</span>
+  <h2><span class="kicker">第 7 章 · 結業考</span>畢業前，五題定生死</h2>
+  <p class="dim">全對的人，從此聽到「Agentic」不再肅然起敬。答錯也沒關係，解釋就在下面。</p>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q1.</span>Agent Loop 的標準一圈，順序是？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">規劃 → 輸出完整答案 → 結束，一次到位不重複</button>
+      <button class="quiz-opt" data-a="1">觀察 → 思考／規劃 → 行動（呼叫工具）→ 觀察結果 → 重複，直到完成或觸發終止條件</button>
+      <button class="quiz-opt" data-a="0">行動 → 行動 → 行動 → 最後統一觀察一次結果</button>
+      <button class="quiz-opt" data-a="0">思考 → 觀察 → 結束迴圈 → 行動</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      心法是「先看、再想、再動、再看」，而且<strong>會轉很多圈</strong>——
+      每圈的觀察結果餵進下一圈的思考。單向一次到位的，那叫問答，不叫 Agent。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q2.</span>關於 tool use（工具呼叫），哪個描述是對的？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">模型經過特訓後，長出了直接操作電腦的能力，可以親手改檔案</button>
+      <button class="quiz-opt" data-a="1">模型只能輸出文字；它輸出「格式化的工具呼叫」，由外部系統實際執行，再把結果以文字餵回給模型</button>
+      <button class="quiz-opt" data-a="0">工具呼叫是模型之間互相傳話的加密協定</button>
+      <button class="quiz-opt" data-a="0">只要模型夠聰明，不需要任何工具也能直接發 API、讀硬碟</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      密室鐵則：顧問（模型）永遠出不了密室，能做的只有「寫紙條點服務」。
+      動手的是門外助理（執行工具的系統），模型負責決策和讀結果。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q3.</span>「Claude 是 Agent，Claude Code 是模型」——這句話哪裡有問題？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="1">說反了：Claude 是模型（大腦），Claude Code 是把這顆模型接上工具、記憶、迴圈組成的 Agent（系統）</button>
+      <button class="quiz-opt" data-a="0">沒有問題，這句話完全正確</button>
+      <button class="quiz-opt" data-a="0">兩個都是模型，只是版本號不同</button>
+      <button class="quiz-opt" data-a="0">兩個都是 Agent，只是一個免費一個收費</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      模型 = 廚師手藝，Agent 框架 = 整間餐廳。
+      同一顆 Claude 可以被裝進聊天視窗、編碼 Agent、客服系統——身體不同，物種就不同。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q4.</span>下列哪個情境，才算「用了 Agent」？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">問聊天機器人「義大利麵怎麼煮」，照著它的食譜自己下廚</button>
+      <button class="quiz-opt" data-a="0">請模型幫你把一段報錯訊息翻譯成中文</button>
+      <button class="quiz-opt" data-a="1">交代編碼助手「把測試修到全過」，它自己反覆讀檔、改 code、跑測試、看結果，最後回報完成</button>
+      <button class="quiz-opt" data-a="0">把同一個問題分別丟給三個聊天機器人，比較誰答得好</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      判斷公式：有沒有<strong>工具（真的做事）＋迴圈（自主多步驟、根據結果修正）</strong>？
+      前三個選項裡動手和轉迴圈的都是你——你才是那個 Agent。只有選項三，迴圈是機器自己轉完的。
+    </div>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <div class="quiz-q"><span class="qnum">Q5.</span>你的 Agent 表現很笨。根據本課心法，「換一顆更聰明的模型」之前該先檢查什麼？</div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" data-a="0">不用檢查，模型越貴 Agent 一定越強，直接刷下去</button>
+      <button class="quiz-opt" data-a="0">檢查產品的 logo 設計，品牌形象影響模型自信心</button>
+      <button class="quiz-opt" data-a="1">任務有沒有可驗證的終點、工具好不好用、上下文餵對了沒、它的行動軌跡卡在哪——系統層先排查，換模型是最後一招</button>
+      <button class="quiz-opt" data-a="0">對它說「請認真一點」，誠意是關鍵</button>
+    </div>
+    <div class="quiz-expl">
+      <span class="verdict"></span>
+      模型是引擎，但多數「Agent 很笨」的案發現場在系統層：任務目標模糊、工具回傳垃圾、上下文塞錯東西。
+      引擎沒壞之前，先看輪胎和導航——這是第 5 章五關鍵的實戰版。
+    </div>
+  </div>
+
+  <h3>🎓 帶走這 5 句話（其他都可以忘）</h3>
+  <div class="card">
+    <ol style="margin-left: 20px; font-weight: 700;">
+      <li><strong>Agent = LLM + 工具 + 迴圈</strong>：大腦負責想，工具負責做，迴圈負責做到完。</li>
+      <li>模型永遠只輸出文字；<strong>tool use = 模型說要做什麼，系統真的去做，結果餵回來</strong>。</li>
+      <li>Agent Loop：<strong>觀察 → 思考 → 行動 → 觀察結果 → 重複</strong>，直到完成或觸發終止條件。</li>
+      <li>ChatGPT／Claude 是<strong>模型（大腦）</strong>；Claude Code 這類是<strong>Agent（系統）</strong>——同一顆大腦能裝進很多身體。</li>
+      <li>Agent 好不好用，看<strong>工具、上下文、重試、規劃、環境互動</strong>五件事，不是只看那顆腦。</li>
+    </ol>
+  </div>
+
+  <div class="big-quote">
+    下次有人問你「AI Agent 是什麼」，<br>
+    你可以微笑著說：<br>
+    <span class="hl">「就是給一個被關在密室裡、只會出一張嘴的天才，<br>
+    裝上手腳和眼睛，再教他做完一件事之前不准下班。」</span>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  AI Agent 101 · 為 Vibe Coding 新手打造的一小時基礎課<br>
+  課程中的工具呼叫與執行結果皆為教學示意 · 純靜態頁面，無任何追蹤與後端
+</footer>
+
+<script>
+/* ================================================================
+   主題切換（記憶到 localStorage）
+================================================================ */
+const themeBtn = document.getElementById('theme-toggle');
+const THEME_KEY = 'agent101-theme';
+function applyTheme(light) {
+  document.documentElement.classList.toggle('light', light);
+  themeBtn.textContent = light ? '🌙 深色' : '☀️ 淺色';
+}
+applyTheme(localStorage.getItem(THEME_KEY) === 'light');
+themeBtn.addEventListener('click', () => {
+  const isLight = !document.documentElement.classList.contains('light');
+  applyTheme(isLight);
+  localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+});
+
+/* ================================================================
+   捲動進度條 + 章節導覽高亮
+================================================================ */
+const scrollbar = document.getElementById('scrollbar');
+const navSteps = [...document.querySelectorAll('.nav-step')];
+const sections = navSteps.map(a => document.getElementById(a.dataset.sec));
+
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+  scrollbar.style.width = pct + '%';
+
+  let activeIdx = -1;
+  sections.forEach((sec, i) => {
+    if (sec.getBoundingClientRect().top < window.innerHeight * 0.45) activeIdx = i;
+  });
+  navSteps.forEach((a, i) => {
+    a.classList.toggle('active', i === activeIdx);
+    a.classList.toggle('done', i < activeIdx);
+  });
+}, { passive: true });
+
+/* ================================================================
+   Agent Loop 步進器：修 bug 實錄
+================================================================ */
+const LOOP_STAGES = [
+  {
+    phase: 'task', lap: '',
+    name: 'STEP 0 · 任務進來',
+    title: '📥 「結帳按鈕壞了，幫我修好。」',
+    visual: `<div style="font-size:22px; font-weight:900; text-align:center; padding: 20px 0;">💬「使用者回報結帳按鈕壞了，<br>幫我修好這個 bug。」<br><span style="font-size:14px; font-weight:400; color:var(--text-dim);">Agent 拿到的還有：整個專案 repo 的存取權 + 一組工具（讀檔、搜尋、編輯、跑測試）</span></div>`,
+    note: '任務 + 環境 + 工具箱，Agent 三件套到齊。如果丟給純聊天機器人，故事到下一步就結束了（回你一篇除錯建議文）。但 Agent 的故事才正要開始——它要自己跑完全程。'
+  },
+  {
+    phase: 'think', lap: '第 1 圈',
+    name: 'STEP 1 · 思考／規劃',
+    title: '🧠 「先別急著改，搞清楚案發現場」',
+    visual: `<div style="padding:10px 6px; font-size:15.5px;"><em style="color:var(--purple); font-style:normal;">（模型的內心獨白）</em><br>「結帳按鈕壞了……範圍太模糊。合理的第一步：找到結帳相關的程式碼讀一讀，看有沒有明顯的病灶。先搜尋 checkout。」</div>`,
+    note: '注意：思考本身就是模型在「輸出文字」——只是這段文字是計畫，不是答案。好的 Agent 會先拆解問題、決定偵查路線，而不是憑空瞎改。'
+  },
+  {
+    phase: 'act', lap: '第 1 圈',
+    name: 'STEP 2 · 行動：呼叫工具',
+    title: '🔧 出手！搜尋 + 讀檔',
+    visual: `<div style="text-align:center; padding:8px 0; line-height:2.4;"><span class="chunk hot">search_code("checkout")</span><br><span style="font-size:20px; color:var(--text-faint);">⬇ 找到 src/checkout.js</span><br><span class="chunk hot">read_file("src/checkout.js")</span></div>`,
+    note: '這就是第 2 章的紙條把戲：模型輸出兩張格式化紙條，門外的系統真的去搜尋、真的去讀檔。模型本人還坐在密室裡，一根手指都沒動過。'
+  },
+  {
+    phase: 'obs', lap: '第 1 圈',
+    name: 'STEP 3 · 觀察結果',
+    title: '👀 檔案內容回來了——抓到一個嫌疑犯',
+    visual: `<div style="font-family:var(--mono); font-size:13.5px; padding:10px; line-height:2;">41&nbsp;&nbsp;const subtotal = cart.sum();<br>42&nbsp;&nbsp;<span class="chunk bad" style="font-size:13px;">const total = subtotal + shiping;</span> <span style="color:var(--red);">← shipping 拼成 shiping！</span><br>43&nbsp;&nbsp;btn.enabled = total &gt; 0;</div>`,
+    note: '工具結果變成文字回到模型眼前。第 42 行：shipping 拼錯成 shiping，變數不存在 → total 炸掉 → 按鈕永遠不會啟用。像不像兇手？像。但專業的 Agent 不會「看起來像」就結案——要驗證。'
+  },
+  {
+    phase: 'think', lap: '第 2 圈',
+    name: 'STEP 4 · 再思考',
+    title: '🧠 「改掉錯字，然後用測試講話」',
+    visual: `<div style="padding:10px 6px; font-size:15.5px;"><em style="color:var(--purple); font-style:normal;">（內心獨白第二回）</em><br>「計畫：① 把 shiping 改成 shipping；② 跑整包測試確認修好了、而且沒弄壞別的東西。測試全綠才算數。」</div>`,
+    note: '迴圈開始轉第 2 圈——上一圈的觀察結果（拼字錯誤），直接變成這一圈計畫的輸入。這就是 Agent 和一次性問答的本質差異：它的每一步都踩在上一步的真實結果上。'
+  },
+  {
+    phase: 'act', lap: '第 2 圈',
+    name: 'STEP 5 · 行動：修改 + 驗證',
+    title: '🔧 改 code，跑測試',
+    visual: `<div style="text-align:center; padding:8px 0; line-height:2.4;"><span class="chunk new">edit_file("src/checkout.js", "shiping" → "shipping")</span><br><span class="chunk hot">run_tests()</span></div>`,
+    note: '兩個工具連發：先動手術，再驗傷。「改完就宣布勝利」是新手行為；「改完跑測試」才是 Agent 值得信任的原因——它會自己驗收自己。'
+  },
+  {
+    phase: 'obs', lap: '第 2 圈',
+    name: 'STEP 6 · 觀察結果',
+    title: '👀 測試回報：12 過、1 敗……劇情反轉！',
+    visual: `<div style="text-align:center; padding:10px 0;"><div style="font-size:18px; font-weight:800;"><span style="color:var(--green);">✅ 12 passed</span>&nbsp;&nbsp;<span style="color:var(--red);">❌ 1 failed</span></div><div style="font-family:var(--mono); font-size:13px; color:var(--red); margin-top:10px;">coupon.test.js › 折價券金額計算<br>ReferenceError: shiping is not defined (coupon.js:17)</div></div>`,
+    note: '沒有這一步，剛剛就翻車了——原來 coupon.js 裡還有第二處同樣的錯字！這就是「觀察」的價值：真實世界的回饋（測試結果）揪出了模型沒料到的事。跌倒不可怕，重點是它看得到自己跌倒。'
+  },
+  {
+    phase: 'think', lap: '第 3 圈',
+    name: 'STEP 7 · 又一圈：修正計畫',
+    title: '🧠 「還有一處漏網之魚，追殺到底」',
+    visual: `<div style="padding:10px 6px; font-size:15.5px;"><em style="color:var(--purple); font-style:normal;">（內心獨白第三回）</em><br>「錯誤訊息指名 coupon.js 第 17 行、同一個錯字。修掉它，再跑一次測試。順便警惕：可能還有第三處？跑完測試見真章。」</div>`,
+    note: '第 3 圈。注意 Agent 沒有慌、沒有重來，而是把失敗訊息當成新線索、微調計畫。「錯誤重試與自我修正」——記住這個能力，第 5 章它會是主角之一。'
+  },
+  {
+    phase: 'act', lap: '第 3 圈',
+    name: 'STEP 8 · 行動：二度出手',
+    title: '🔧 修 coupon.js，再驗一次',
+    visual: `<div style="text-align:center; padding:8px 0; line-height:2.4;"><span class="chunk new">edit_file("src/coupon.js", "shiping" → "shipping")</span><br><span class="chunk hot">run_tests()</span></div>`,
+    note: '同樣的套路，第二次執行。對 Agent 來說每一圈的成本很低——這正是它適合幹髒活累活的原因：反覆「改一點、驗一次」，人類會膩，它不會。'
+  },
+  {
+    phase: 'obs', lap: '第 3 圈',
+    name: 'STEP 9 · 觀察 → 終止條件成立！',
+    title: '🏁 13/13 全綠，收工回報',
+    visual: `<div style="text-align:center; padding: 12px 0;"><div style="font-size:20px; font-weight:900; color:var(--green);">✅ 13 passed, 0 failed</div><div style="font-size:15.5px; font-weight:700; max-width:560px; margin:10px auto 0;">「修好了！病因是 shipping 拼錯成 shiping，共兩處（checkout.js、coupon.js）。已全部修正，13 項測試全數通過。」</div><div style="margin-top:12px; font-size:30px;">🎉</div></div>`,
+    note: '「測試全過」= 任務完成的客觀證據 → 終止條件成立 → 迴圈停止、回報人類。復盤一下：三圈迴圈、六次工具呼叫、一次計畫外的反轉——全程沒有人類插手。這，就是 Agent。'
+  }
+];
+
+const loopStepsEl = document.getElementById('loop-steps');
+LOOP_STAGES.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'pstep';
+  d.textContent = i;
+  d.addEventListener('click', () => renderLoop(i));
+  loopStepsEl.appendChild(d);
+});
+
+const PHASE_LABEL = {
+  task: '<span class="pipe-phase task">📥 任務</span>',
+  think: '<span class="pipe-phase think">🧠 思考／規劃</span>',
+  act: '<span class="pipe-phase act">🔧 行動：呼叫工具</span>',
+  obs: '<span class="pipe-phase obs">👀 觀察結果</span>'
+};
+
+let loopIdx = 0;
+function renderLoop(i) {
+  loopIdx = Math.max(0, Math.min(LOOP_STAGES.length - 1, i));
+  const st = LOOP_STAGES[loopIdx];
+  const lapBadge = st.lap ? `<span class="pipe-phase task" style="opacity:0.85;">🔁 ${st.lap}</span>` : '';
+  document.getElementById('loop-phase').innerHTML = PHASE_LABEL[st.phase] + lapBadge;
+  document.getElementById('loop-name').textContent = st.name;
+  document.getElementById('loop-title').textContent = st.title;
+  document.getElementById('loop-visual').innerHTML = st.visual;
+  document.getElementById('loop-note').textContent = st.note;
+  document.getElementById('loop-count').textContent = `${loopIdx + 1} / ${LOOP_STAGES.length}`;
+  document.getElementById('loop-prev').disabled = loopIdx === 0;
+  const nextBtn = document.getElementById('loop-next');
+  nextBtn.disabled = loopIdx === LOOP_STAGES.length - 1;
+  nextBtn.textContent = loopIdx === LOOP_STAGES.length - 1 ? '🏁 完成！' : '下一步 →';
+  [...loopStepsEl.children].forEach((el, j) => {
+    el.classList.toggle('on', j === loopIdx);
+    el.classList.toggle('past', j < loopIdx);
+  });
+}
+document.getElementById('loop-prev').addEventListener('click', () => renderLoop(loopIdx - 1));
+document.getElementById('loop-next').addEventListener('click', () => renderLoop(loopIdx + 1));
+renderLoop(0);
+
+/* ================================================================
+   互動實驗：同一顆大腦，三種身體
+================================================================ */
+const BODIES = [
+  {
+    label: '💬 純聊天視窗',
+    tools: '（幾乎）沒有。只能讀你打的字、回你一段字。',
+    memory: '這一場對話的內容，關掉就掰。',
+    loop: '沒有迴圈：你問一句、它答一句，工作就結束。',
+    outcome: '🧠➡️💬 變成：<strong>有問必答的萬事通</strong>。聰明、健談、什麼都懂——但只能出一張嘴。要動手的部分，全部是你的事。這是「裸體的大腦」，不是 Agent。'
+  },
+  {
+    label: '⌨️ 編碼 Agent（如 Claude Code）',
+    tools: '讀寫檔案、搜尋 repo、執行終端機指令、跑測試、操作 git。',
+    memory: '對話 + 專案結構 + 慣例文件（如 CLAUDE.md）+ 這次任務做到哪了。',
+    loop: '改 code → 跑測試 → 看結果 → 再改，轉到測試全綠才停。',
+    outcome: '🧠➡️🛠️ 變成：<strong>會自己讀 repo、改 code、驗證結果的工程師</strong>。同一顆大腦，因為手腳伸進了檔案系統和終端機，能把「修好這個 bug」從建議變成事實。'
+  },
+  {
+    label: '🎧 客服 Agent',
+    tools: '查訂單 API、查物流 API、退款 API、轉接真人。',
+    memory: '這位客戶的資料、歷史訂單、之前的客訴紀錄。',
+    loop: '搞清楚問題 → 查系統 → 處理 → 跟客人確認滿意才結案。',
+    outcome: '🧠➡️🎧 變成：<strong>真的能幫你退款的客服</strong>。不只會說「非常抱歉」，還能當場查到你的訂單、執行退款、確認入帳。同一顆大腦，第三種人生。'
+  }
+];
+
+const bodyBtnsEl = document.getElementById('body-buttons');
+BODIES.forEach((b, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'lab-q-btn';
+  btn.textContent = b.label;
+  btn.addEventListener('click', () => showBody(i, btn));
+  bodyBtnsEl.appendChild(btn);
+});
+
+function showBody(i, btn) {
+  const b = BODIES[i];
+  document.querySelectorAll('#body-buttons .lab-q-btn').forEach(x => x.classList.remove('picked'));
+  btn.classList.add('picked');
+  document.getElementById('body-output').style.display = 'block';
+  document.getElementById('body-tools').textContent = b.tools;
+  document.getElementById('body-memory').textContent = b.memory;
+  document.getElementById('body-loop').textContent = b.loop;
+  const outcome = document.getElementById('body-outcome');
+  outcome.innerHTML = b.outcome;
+  outcome.style.animation = 'none';
+  requestAnimationFrame(() => { outcome.style.animation = ''; });
+}
+
+/* ================================================================
+   測驗（通用：隨堂 + 結業考）
+================================================================ */
+document.querySelectorAll('[data-quiz]').forEach(quiz => {
+  const opts = quiz.querySelectorAll('.quiz-opt');
+  const expl = quiz.querySelector('.quiz-expl');
+  const verdict = expl.querySelector('.verdict');
+  opts.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const correct = btn.dataset.a === '1';
+      opts.forEach(b => {
+        b.disabled = true;
+        if (b.dataset.a === '1') b.classList.add('correct');
+      });
+      if (!correct) {
+        btn.classList.add('wrong');
+        verdict.textContent = '❌ 差一點！正確答案已標綠。';
+        verdict.style.color = 'var(--red)';
+      } else {
+        verdict.textContent = '✅ 答對了！';
+        verdict.style.color = 'var(--green)';
+      }
+      expl.classList.add('show');
+    });
+  });
+});
+</script>
+</body>
+</html>

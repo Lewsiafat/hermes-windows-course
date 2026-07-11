@@ -57,6 +57,57 @@
   --pico-h3-color: #e9e2cc;
 }
 
+/* 淺色版 Colophon —— 由 #theme-toggle 切換 `<html data-theme="light">` 觸發。
+   selector 需用 `:root[data-theme=light]`（specificity 需match Pico 內建
+   `:root:not([data-theme=dark])`），純 `[data-theme=light]` specificity 不夠會被蓋掉 */
+:root[data-theme=light] {
+  color-scheme: light;
+
+  --pico-background-color: #ece8de;
+  --pico-color: #2a2416;
+  --pico-muted-color: #7a6f57;
+  --pico-muted-border-color: #d9d2bd;
+
+  --pico-card-background-color: #f5f1e2;
+  --pico-card-sectioning-background-color: #f5f1e2;
+  --pico-card-border-color: #d9d2bd;
+
+  --pico-primary: #936f33;
+  --pico-primary-background: #936f33;
+  --pico-primary-border: #936f33;
+  --pico-primary-underline: #936f33;
+  --pico-primary-hover: #7a5c29;
+  --pico-primary-hover-background: #7a5c29;
+  --pico-primary-hover-border: #7a5c29;
+  --pico-primary-hover-underline: #7a5c29;
+  --pico-primary-focus: rgba(147, 111, 51, 0.25);
+  --pico-primary-inverse: #fbf8ef;
+
+  --pico-secondary: #6b5f45;
+  --pico-secondary-background: #e4dcc4;
+  --pico-secondary-border: #cfc4a3;
+  --pico-secondary-underline: #6b5f45;
+  --pico-secondary-hover: #544a35;
+  --pico-secondary-hover-background: #d8cead;
+  --pico-secondary-hover-border: #bfb188;
+  --pico-secondary-focus: rgba(107, 95, 69, 0.18);
+  --pico-secondary-inverse: #2a2416;
+
+  --pico-code-background-color: #f0ead6;
+  --pico-code-color: #7a5c29;
+
+  --pico-form-element-background-color: #f5f1e2;
+  --pico-form-element-border-color: #d9d2bd;
+  --pico-form-element-color: #2a2416;
+  --pico-form-element-placeholder-color: #7a6f57;
+  --pico-form-element-active-border-color: #936f33;
+  --pico-form-element-focus-color: rgba(147, 111, 51, 0.25);
+
+  --pico-h1-color: #2a2416;
+  --pico-h2-color: #2a2416;
+  --pico-h3-color: #2a2416;
+}
+
 body {
   font-family: "Literata", "Noto Serif TC", serif;
 }
@@ -109,6 +160,12 @@ body > header {
   gap: 1rem;
   padding-block: 1rem;
   border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+/* specificity 需高於 Pico 的 `.container{padding-right:0}`，
+   否則 #theme-toggle 固定按鈕會蓋住 header 右側內容（如 #progress） */
+body > header.container {
+  padding-inline-end: 3.5rem;
 }
 
 body > header hgroup {
@@ -184,6 +241,27 @@ body > footer {
   font-size: 0.85rem;
 }
 
+#theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  border: 1px solid var(--pico-muted-border-color);
+  background: var(--pico-card-background-color);
+  color: var(--pico-color);
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
   body > header {
     flex-direction: column;
@@ -191,5 +269,9 @@ body > footer {
   }
   #step-nav button {
     max-width: none;
+  }
+  #theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
   }
 }

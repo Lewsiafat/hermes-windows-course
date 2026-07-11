@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-07-11
+
+新增 Colophon 主題的淺色版本 + 深淺色切換開關，套用於 landing + 8 個 wizard 課程頁（共 9 個載入 `style.css` 的 Pico 頁面）。
+
+### Added
+
+- **`style.css`**：新增 `:root[data-theme=light]` 淺色色票（背景 `#ece8de`、卡片 `#f5f1e2`、赭金主色 `#936f33`、深棕文字 `#2a2416`），新增 `#theme-toggle` 圓形浮動按鈕樣式（右上角固定定位）。淺色規則同樣需處理 Pico 內建 `:root:not([data-theme=dark])` 的 specificity（比純屬性選擇器高），改用 `:root[data-theme=light]` 才能真正覆蓋。另外發現 Pico `.container{padding-right:0}`（class selector）specificity 高於原本 `body > header` 的 element-combinator 選擇器，導致新增的按鈕預留空間被蓋掉、與 `#progress` 進度文字重疊，改用 `body > header.container` 才修正。
+- **`theme-toggle.js`**（新檔案）：切換按鈕邏輯，點擊切換 `<html data-theme="light"|"dark">` 並存 localStorage（key `hermes-course-theme`）；每頁 `<head>` 另有一段小型 inline script 在 CSS 套用前預先讀取 localStorage 設定屬性，避免翻頁/整理時閃爍（FOUC）。
+- **9 個頁面**（`index.html`、`git.html`、`hermes-vibe-coding.html`、`lesson-1~5.html`、`mac.html`）：`<head>` 加入 FOUC 防閃 inline script + `theme-toggle.js` 載入，`<body>` 開頭加入 `#theme-toggle` 按鈕。**範圍說明**：4 支「觀念四部曲」article 頁（`llm-basics.html`／`agent-basics.html`／`rag-basics.html`／`ai-agent-usage.html`）與 2 支 skill 比較頁（`skill-comparison.html`／`agent-skill-series.html`）有各自獨立的內嵌樣式系統、未載入 `style.css`，本次未套用 Colophon 主題與切換開關（v1.6.0 的「全站」描述其實也不含這 6 頁，屬既有誤差，此處一併澄清）。
+
 ## [1.6.0] - 2026-07-11
 
 全站套用「Colophon」深色暖編輯風主題（取代 Pico CSS 預設藍色配色），透過共用 `style.css` 一次覆寫，15 個頁面（landing + 14 課程頁）全部套用，無需逐頁改 HTML。

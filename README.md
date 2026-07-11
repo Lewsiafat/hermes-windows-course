@@ -3,7 +3,7 @@
 從「什麼是 LLM / Agent / RAG」到裝好並每天實際用 [hermes-agent](https://github.com/NousResearch/hermes-agent) 的完整教材。純靜態 GitHub Pages 站，零 build step。
 
 🔗 **教學頁**：https://lewsiafat.github.io/hermes-windows-course/
-📦 **目前版本**：[v1.6.0](CHANGELOG.md)（2026-07-11）
+📦 **目前版本**：[v1.7.0](CHANGELOG.md)（2026-07-11）
 🗺️ **課程地圖 SSOT**：[`course.json`](course.json) — 新增或調整任何課程頁，第一步永遠是先改這份 manifest
 
 ## 課程地圖
@@ -28,7 +28,8 @@
 - `*.html`（root-level，kebab-case）— 各課程頁；分兩種類型：
   - **wizard 頁**（10 支）：載入 `wizard.js`，用 `<body data-total-steps data-storage-key>` + `<section data-step="N">` 做步驟切換，進度存在 localStorage
   - **article 頁**（4 支，觀念四部曲）：純 HTML，無 wizard 機制
-- `style.css` / `wizard.js` — 共用樣式（v1.6.0 起改為 Colophon 深色暖編輯風主題：Instrument Serif 標題 / Literata 內文 / IBM Plex Mono UI，金色 `#c9a85f` 主色）與導覽邏輯
+- `style.css` / `wizard.js` — 共用樣式（v1.6.0 起改為 Colophon 深色暖編輯風主題：Instrument Serif 標題 / Literata 內文 / IBM Plex Mono UI，金色 `#c9a85f` 主色；v1.7.0 新增淺色版 `data-theme="light"` + 切換開關）與導覽邏輯
+- `theme-toggle.js` — 淺色/深色主題切換按鈕邏輯（`#theme-toggle`），存 localStorage（key `hermes-course-theme`），套用於載入 `style.css` 的 9 個 Pico 頁面（landing + wizard 頁；4 支 article 頁與 2 支 skill 比較頁有自己獨立的樣式系統，不在此範圍）
 - `pre-class-checklist.md` — 每次教學前必跑的 smoke test（人類版）
 - `ai-runbook.md` — AI 工具版 runbook（Full Capture Run + Quick Smoke Test）
 - `docs/superpowers/specs/`、`docs/superpowers/plans/` — 課程設計文件（另有其他零散設計文件並存，兩套皆保留、不整併，詳見 CLAUDE.md）

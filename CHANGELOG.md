@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-07-11
+
+新增「觀念四部曲」第 4 支 article 課程頁：AI Agent 使用（Context 管理 / MCP / Skill / 常見 AI Agent 選擇），並將「觀念三部曲」stage 全面改稱「觀念四部曲」。
+
+### Added
+
+- **`ai-agent-usage.html`**：新 article 課程頁，內容為既有獨立站 [ai-agent-usage-course](https://lewsi.ddns.net/ai-agent-usage-course/) 的逐字複製（沿用 agent-basics.html / rag-basics.html 的先例：article 頁是對應獨立站 `index.html` 的原樣拷貝，不加修改）。6 章：Context 管理／上下文管理／MCP 介紹／Skill 介紹／常見 AI Agent 的選擇／結業考，第 1 章內嵌互動「Context 儀表板」lab。
+- **`course.json`**：`concepts` stage 新增第 4 筆頁面 entry（`ai-agent-usage.html`），stage 標題由「觀念三部曲」改為「觀念四部曲」。
+
+### Changed
+
+- **index.html**：hero-stats 課程數由 13 堂改為 14 堂；「先懂再上手」區塊標題與文案由「三部曲／這三堂」改為「四部曲／這四堂」；新增第 ④ 張課程卡片連到 `ai-agent-usage.html`；footer 版號更新為 `v1.4.0`。
+- **README.md**、**CLAUDE.md**：課程頁總數 13 → 14，「觀念三部曲」→「觀念四部曲」，article 頁數 3 → 4。
+
 ## [1.3.0] - 2026-07-07
 
 重構文件與課程資訊架構：新增 `course.json` 作為課程地圖的單一事實來源（SSOT），補齊自 v1.2.0 以來未記錄的內容（AI Agent 101 / RAG 101 / Git 基礎 / Hermes Vibe Coding / Skill 比較系列等），並修正 README.md、CLAUDE.md 中過時或錯誤的資訊。**未變動任何課程 HTML 頁面內容**，僅同步 `index.html` footer 版號。

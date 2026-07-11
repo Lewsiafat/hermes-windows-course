@@ -2,7 +2,7 @@
   "site": {
     "name": "AgentVibe — AI Agent 養成課",
     "url": "https://lewsiafat.github.io/hermes-windows-course/",
-    "version": "1.3.0"
+    "version": "1.4.0"
   },
   "conventions": {
     "stepsTotal": "Highest data-step value on the page, equal to <body data-total-steps>. Every wizard page also has a Step 0 (前言) which is NOT counted in stepsTotal.",
@@ -12,11 +12,12 @@
     {
       "id": "concepts",
       "order": 1,
-      "title": "觀念三部曲",
+      "title": "觀念四部曲",
       "pages": [
         { "file": "llm-basics.html", "title": "LLM 101", "type": "article", "added": "2026-07-07" },
         { "file": "agent-basics.html", "title": "AI Agent 101", "type": "article", "added": "2026-07-07" },
-        { "file": "rag-basics.html", "title": "RAG 101", "type": "article", "added": "2026-07-07" }
+        { "file": "rag-basics.html", "title": "RAG 101", "type": "article", "added": "2026-07-07" },
+        { "file": "ai-agent-usage.html", "title": "AI Agent 使用", "type": "article", "added": "2026-07-11" }
       ]
     },
     {

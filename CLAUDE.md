@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 純靜態 GitHub Pages 教學站，**已上線於 https://lewsiafat.github.io/hermes-windows-course/**（品牌名 AgentVibe — AI Agent 養成課）。教材語言為繁體中文 (zh-Hant)。
 
-**沒有 build step、沒有 framework、沒有測試套件、沒有 package.json。** 目前共 13 個課程頁 + 1 個 landing `index.html`，分兩種類型：**wizard 頁**（10 支，載入 `wizard.js`，有步驟切換機制）與 **article 頁**（3 支「觀念三部曲」，純 HTML 無 wizard 機制）。另有共用的 `style.css` / `wizard.js` 與兩份 markdown runbook。
+**沒有 build step、沒有 framework、沒有測試套件、沒有 package.json。** 目前共 14 個課程頁 + 1 個 landing `index.html`，分兩種類型：**wizard 頁**（10 支，載入 `wizard.js`，有步驟切換機制）與 **article 頁**（4 支「觀念四部曲」，純 HTML 無 wizard 機制）。另有共用的 `style.css` / `wizard.js` 與兩份 markdown runbook。
 
 ### 由來與走向
 

@@ -3,20 +3,20 @@
 從「什麼是 LLM / Agent / RAG」到裝好並每天實際用 [hermes-agent](https://github.com/NousResearch/hermes-agent) 的完整教材。純靜態 GitHub Pages 站，零 build step。
 
 🔗 **教學頁**：https://lewsiafat.github.io/hermes-windows-course/
-📦 **目前版本**：[v1.3.0](CHANGELOG.md)（2026-07-07）
+📦 **目前版本**：[v1.4.0](CHANGELOG.md)（2026-07-11）
 🗺️ **課程地圖 SSOT**：[`course.json`](course.json) — 新增或調整任何課程頁，第一步永遠是先改這份 manifest
 
 ## 課程地圖
 
 | 階段 | 內容 | 頁數 |
 |------|------|------|
-| 1. 觀念三部曲 | LLM 101 / AI Agent 101 / RAG 101（article，無 wizard 機制） | 3 |
+| 1. 觀念四部曲 | LLM 101 / AI Agent 101 / RAG 101 / AI Agent 使用（article，無 wizard 機制） | 4 |
 | 2. 安裝 Hermes 路線 | Windows + WSL2（`lesson-1.html`）/ macOS（`mac.html`） | 2 |
 | 3. 基礎工具 | Git 基礎（`git.html`） | 1 |
 | 4. 進階整合與日常使用 | Telegram / 日常使用 / LINE / 晨報自動化（`lesson-2~5.html`） | 4 |
 | 5. 實戰工作坊 | Vibe Coding / Skill 比較系列（3 頁） | 3 |
 
-共 13 個課程頁 + 1 個 landing（`index.html`）。每頁的詳細 file / type / storageKey / stepsTotal 以 [`course.json`](course.json) 為準——這份 README 只給人看的總覽，不重複維護逐頁清單。
+共 14 個課程頁 + 1 個 landing（`index.html`）。每頁的詳細 file / type / storageKey / stepsTotal 以 [`course.json`](course.json) 為準——這份 README 只給人看的總覽，不重複維護逐頁清單。
 
 ## 結構
 
@@ -25,7 +25,7 @@
 - `scripts/check-course-map.mjs` — 檢查 `course.json` 與實際頁面／`index.html`／footer 版號是否一致：`node scripts/check-course-map.mjs`
 - `*.html`（root-level，kebab-case）— 各課程頁；分兩種類型：
   - **wizard 頁**（10 支）：載入 `wizard.js`，用 `<body data-total-steps data-storage-key>` + `<section data-step="N">` 做步驟切換，進度存在 localStorage
-  - **article 頁**（3 支，觀念三部曲）：純 HTML，無 wizard 機制
+  - **article 頁**（4 支，觀念四部曲）：純 HTML，無 wizard 機制
 - `style.css` / `wizard.js` — 共用樣式與導覽邏輯
 - `pre-class-checklist.md` — 每次教學前必跑的 smoke test（人類版）
 - `ai-runbook.md` — AI 工具版 runbook（Full Capture Run + Quick Smoke Test）

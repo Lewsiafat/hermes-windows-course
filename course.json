@@ -2,7 +2,7 @@
   "site": {
     "name": "AgentVibe — AI Agent 養成課",
     "url": "https://lewsiafat.github.io/hermes-windows-course/",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   "conventions": {
     "stepsTotal": "Highest data-step value on the page, equal to <body data-total-steps>. Every wizard page also has a Step 0 (前言) which is NOT counted in stepsTotal.",

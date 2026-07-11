@@ -1,6 +1,98 @@
+/* ===== Colophon theme — 深色暖編輯風，取代 Pico 預設色票 ===== */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Literata:ital,wght@0,400;0,500;0,600;1,400&display=swap");
+
 :root {
+  color-scheme: dark;
+
   --pico-spacing: 1rem;
   --pico-typography-spacing-vertical: 1.25rem;
+  --pico-border-radius: 3px;
+}
+
+/* 覆寫 specificity 需match Pico 內建 `:root:not([data-theme=dark])` 這條淺色規則，
+   否則沒帶 data-theme 屬性時，Pico 自己的淺色 :root 規則 specificity 更高會贏過我們 */
+:root:not([data-theme=light]) {
+  --pico-background-color: #1c1a16;
+  --pico-color: #e9e2cc;
+  --pico-muted-color: #a89a7c;
+  --pico-muted-border-color: #35301f;
+
+  --pico-card-background-color: #24211b;
+  --pico-card-sectioning-background-color: #24211b;
+  --pico-card-border-color: #35301f;
+
+  --pico-primary: #c9a85f;
+  --pico-primary-background: #c9a85f;
+  --pico-primary-border: #c9a85f;
+  --pico-primary-underline: #c9a85f;
+  --pico-primary-hover: #ddbd77;
+  --pico-primary-hover-background: #ddbd77;
+  --pico-primary-hover-border: #ddbd77;
+  --pico-primary-hover-underline: #ddbd77;
+  --pico-primary-focus: rgba(201, 168, 95, 0.35);
+  --pico-primary-inverse: #1c1a16;
+
+  --pico-secondary: #c9b98a;
+  --pico-secondary-background: #332f26;
+  --pico-secondary-border: #4a4436;
+  --pico-secondary-underline: #c9b98a;
+  --pico-secondary-hover: #ddcfa4;
+  --pico-secondary-hover-background: #443f31;
+  --pico-secondary-hover-border: #5c5544;
+  --pico-secondary-focus: rgba(201, 185, 138, 0.25);
+  --pico-secondary-inverse: #e9e2cc;
+
+  --pico-code-background-color: #24211b;
+  --pico-code-color: #c9a85f;
+
+  --pico-form-element-background-color: #24211b;
+  --pico-form-element-border-color: #35301f;
+  --pico-form-element-color: #e9e2cc;
+  --pico-form-element-placeholder-color: #a89a7c;
+  --pico-form-element-active-border-color: #c9a85f;
+  --pico-form-element-focus-color: rgba(201, 168, 95, 0.35);
+
+  --pico-h1-color: #e9e2cc;
+  --pico-h2-color: #e9e2cc;
+  --pico-h3-color: #e9e2cc;
+}
+
+body {
+  font-family: "Literata", "Noto Serif TC", serif;
+}
+
+h1, h2, h3, h4, h5, h6,
+hgroup h1 {
+  font-family: "Instrument Serif", "Noto Serif TC", serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+nav, button, [role="button"], input, select, textarea,
+small, code, pre, kbd, footer, #progress, .lbl {
+  font-family: "IBM Plex Mono", "Noto Sans TC", monospace;
+}
+
+button, [role="button"] {
+  border-radius: var(--pico-border-radius);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+}
+
+section > hgroup > h2 {
+  position: relative;
+  padding-left: 1rem;
+}
+
+section > hgroup > h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.4em;
+  width: 6px;
+  height: 6px;
+  background: var(--pico-primary);
 }
 
 body > header,

@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-07-11
+
+全站套用「Colophon」深色暖編輯風主題（取代 Pico CSS 預設藍色配色），透過共用 `style.css` 一次覆寫，15 個頁面（landing + 14 課程頁）全部套用，無需逐頁改 HTML。
+
+### Changed
+
+- **`style.css`**：新增 Colophon 主題色票（背景 `#1c1a16`、卡片 `#24211b`、金色主色 `#c9a85f`、米色文字 `#e9e2cc`），字體改用 Google Fonts（標題 Instrument Serif、內文 Literata、UI／按鈕／code IBM Plex Mono，繁中字符自動 fallback 到系統字型），`--pico-border-radius` 改為 3px 呈現俐落直角觀感，`section > hgroup > h2` 前綴加金色方點標記。覆寫時特別處理 Pico CSS 內建 `:root:not([data-theme=dark])` 淺色規則的 specificity（比純 `:root` 高），改用 `:root:not([data-theme=light])` 才能真正覆蓋，否則預設淺色藍主題不會被換掉。
+- 未改動任何頁面 HTML 結構或文案，純樣式層變更；`course.json` 僅同步 `site.version`。
+
 ## [1.5.0] - 2026-07-11
 
 新增「延伸資源」區塊於 `index.html` 最下方，連到外部站台 apply-tutorials（8 平台 Bot / API Key 申請教學）。

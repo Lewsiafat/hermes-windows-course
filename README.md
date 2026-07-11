@@ -3,7 +3,7 @@
 從「什麼是 LLM / Agent / RAG」到裝好並每天實際用 [hermes-agent](https://github.com/NousResearch/hermes-agent) 的完整教材。純靜態 GitHub Pages 站，零 build step。
 
 🔗 **教學頁**：https://lewsiafat.github.io/hermes-windows-course/
-📦 **目前版本**：[v1.4.0](CHANGELOG.md)（2026-07-11）
+📦 **目前版本**：[v1.5.0](CHANGELOG.md)（2026-07-11）
 🗺️ **課程地圖 SSOT**：[`course.json`](course.json) — 新增或調整任何課程頁，第一步永遠是先改這份 manifest
 
 ## 課程地圖
@@ -17,6 +17,8 @@
 | 5. 實戰工作坊 | Vibe Coding / Skill 比較系列（3 頁） | 3 |
 
 共 14 個課程頁 + 1 個 landing（`index.html`）。每頁的詳細 file / type / storageKey / stepsTotal 以 [`course.json`](course.json) 為準——這份 README 只給人看的總覽，不重複維護逐頁清單。
+
+`index.html` 最下方另有「延伸資源」區塊，連到外部站台 [apply-tutorials](https://lewsi.ddns.net/apply-tutorials/)（8 平台 Bot / API Key 申請教學）——這是外部連結卡片，不是本 repo 的課程頁，不列入 `course.json`。
 
 ## 結構
 

@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-07-11
+
+新增「延伸資源」區塊於 `index.html` 最下方，連到外部站台 apply-tutorials（8 平台 Bot / API Key 申請教學）。
+
+### Added
+
+- **index.html「延伸資源 · API / Bot 申請教學」區塊**：landing page 最下方新增一張卡片，連到 https://lewsi.ddns.net/apply-tutorials/ （外部連結，非本 repo 課程頁，故不進 `course.json`）。
+
 ## [1.4.0] - 2026-07-11
 
 新增「觀念四部曲」第 4 支 article 課程頁：AI Agent 使用（Context 管理 / MCP / Skill / 常見 AI Agent 選擇），並將「觀念三部曲」stage 全面改稱「觀念四部曲」。
